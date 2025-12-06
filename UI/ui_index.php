@@ -1,3 +1,38 @@
+<?php
+//http://localhost/moobix/ui/ui_index.php
+$heroMovie = [
+    'title' => 'OPPENHEIMER',
+    'genre' => 'Biography',
+    'duration' => '3h 0min',
+    'rating' => '8.9',
+    'image' => 'https://image.tmdb.org/t/p/original/8RpDCSfKTPA8HOxAsj2vqF8w946.jpg'
+];
+
+// Data untuk Slider (Now Showing)
+$nowShowing = [
+    [
+        'title' => 'Barbie',
+        'image' => 'https://image.tmdb.org/t/p/original/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg',
+        'rating' => '7.5'
+    ],
+    [
+        'title' => 'Dune: Part Two',
+        'image' => 'https://image.tmdb.org/t/p/original/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg',
+        'rating' => '8.8'
+    ],
+    [
+        'title' => 'Interstellar',
+        'image' => 'https://image.tmdb.org/t/p/original/gEU2QniL6E8ahMcafCUyGdjxXAr.jpg',
+        'rating' => '8.7'
+    ],
+    [
+        'title' => 'The Batman',
+        'image' => 'https://image.tmdb.org/t/p/original/74xTEgt7R36Fpooo50r9T25onhq.jpg',
+        'rating' => '7.9'
+    ]
+];
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -12,6 +47,26 @@
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
 
     <link rel="stylesheet" href="ui_style.css">
+    
+    <style>
+        .movie-card {
+            min-width: 200px;
+            margin: 0 10px;
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+        .movie-card:hover { transform: scale(1.05); }
+        .movie-card img {
+            width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .movie-card h3 {
+            margin-top: 10px;
+            font-size: 1.1rem;
+            color: #fff; /* Sesuaikan dengan tema */
+        }
+    </style>
 </head>
 <body>
 
@@ -33,12 +88,13 @@
             
             <div class="hero-text">
                 <span class="tagline">Now Showing &mdash; The Masterpiece</span>
-                <h1 class="hero-title">OPPENHEIMER</h1>
+                
+                <h1 class="hero-title"><?php echo $heroMovie['title']; ?></h1>
                 
                 <div class="hero-details">
-                    <span>Biography</span> &bull; 
-                    <span>3h 0min</span> &bull; 
-                    <span>IMDB 8.9</span>
+                    <span><?php echo $heroMovie['genre']; ?></span> &bull; 
+                    <span><?php echo $heroMovie['duration']; ?></span> &bull; 
+                    <span>IMDB <?php echo $heroMovie['rating']; ?></span>
                 </div>
 
                 <button class="btn-primary">GET TICKET</button>
@@ -46,7 +102,7 @@
 
             <div class="hero-poster">
                 <div class="poster-frame-hero">
-                    <img src="https://image.tmdb.org/t/p/original/8RpDCSfKTPA8HOxAsj2vqF8w946.jpg" alt="Oppenheimer Poster" referrerpolicy="no-referrer">
+                    <img src="<?php echo $heroMovie['image']; ?>" alt="<?php echo $heroMovie['title']; ?> Poster" referrerpolicy="no-referrer">
                 </div>
             </div>
 
@@ -67,7 +123,16 @@
             <button class="nav-btn" onclick="scrollMovies(-350)"><i class="ph ph-caret-left"></i></button>
 
             <div class="cards-container" id="movieList">
-                </div>
+                
+                <?php foreach($nowShowing as $movie): ?>
+                    <div class="movie-card">
+                        <img src="<?php echo $movie['image']; ?>" alt="<?php echo $movie['title']; ?>">
+                        <h3><?php echo $movie['title']; ?></h3>
+                        <small>Rating: <?php echo $movie['rating']; ?></small>
+                    </div>
+                <?php endforeach; ?>
+
+            </div>
 
             <button class="nav-btn" onclick="scrollMovies(350)"><i class="ph ph-caret-right"></i></button>
         </div>
@@ -79,16 +144,16 @@
             
             <div id="login-view">
                 <h2>LOG IN</h2>
-                <form>
+                <form action="login_process.php" method="POST">
                     <div class="input-group">
                         <label>Member ID / Email</label>
-                        <input type="text" placeholder="USER123">
+                        <input type="text" name="username" placeholder="USER123" required>
                     </div>
-                    <div class="input-group">s
+                    <div class="input-group">
                         <label>Password</label>
-                        <input type="password" placeholder="******">
+                        <input type="password" name="password" placeholder="******" required>
                     </div>
-                    <button type="button" class="btn-login-submit">LOGIN</button>
+                    <button type="submit" class="btn-login-submit">LOGIN</button>
                 </form>
                 <p style="margin-top: 15px; font-size: 0.8rem; color:#666;">
                     Don't have an account? 
@@ -98,20 +163,20 @@
 
             <div id="signup-view" style="display: none;">
                 <h2>SIGN UP</h2>
-                <form>
+                <form action="register_process.php" method="POST">
                     <div class="input-group">
                         <label>Full Name</label>
-                        <input type="text" placeholder="John Doe">
+                        <input type="text" name="fullname" placeholder="John Doe" required>
                     </div>
                     <div class="input-group">
                         <label>Email Address</label>
-                        <input type="email" placeholder="john@email.com">
+                        <input type="email" name="email" placeholder="john@email.com" required>
                     </div>
                     <div class="input-group">
                         <label>Create Password</label>
-                        <input type="password" placeholder="******">
+                        <input type="password" name="password" placeholder="******" required>
                     </div>
-                    <button type="button" class="btn-login-submit">REGISTER</button>
+                    <button type="submit" class="btn-login-submit">REGISTER</button>
                 </form>
                 <p style="margin-top: 15px; font-size: 0.8rem; color:#666;">
                     Already a member? 
