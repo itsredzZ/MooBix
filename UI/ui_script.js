@@ -1,58 +1,122 @@
-// --- 1. DATA FILM ---
-const movies = [
-    { title: "Super Mario Bros", img: "https://image.tmdb.org/t/p/w500/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg" },
-    { title: "Fast X", img: "https://image.tmdb.org/t/p/w500/fiVW06jE7z9YnO4trhaMEdclSiC.jpg" },
-    { title: "John Wick 4", img: "https://image.tmdb.org/t/p/w500/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg" },
-    { title: "Avatar: Water", img: "https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg" },
-    { title: "Spider-Man: ATSV", img: "https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg" },
-    { title: "The Flash", img: "https://image.tmdb.org/t/p/w500/rktDFPbfHfUbArZ6OOOKsXcv0Bm.jpg" },
-    { title: "The Nun II", img: "https://image.tmdb.org/t/p/w500/5gzzkR7y3zdL8CSAU2SEh2SnZlW.jpg" },
-];
+/* ui_script.js */
 
-// --- 2. RENDER KARTU FILM ---
-const container = document.getElementById('movieList');
-
-movies.forEach(movie => {
-    container.innerHTML += `
-        <div class="movie-card">
-            <div class="poster-frame">
-                <img src="${movie.img}" alt="${movie.title}" loading="lazy" referrerpolicy="no-referrer">
-            </div>
-            <div class="card-title">${movie.title}</div>
-        </div>
-    `;
-});
-
-// --- 3. LOGIKA SCROLL SLIDER ---
+// =========================================
+// 1. LOGIKA SCROLL SLIDER (Now Showing)
+// =========================================
 function scrollMovies(amount) {
-    container.scrollBy({ left: amount, behavior: 'smooth' });
-}
-
-// --- 4. LOGIKA MODAL (LOGIN & SIGNUP SWITCH) ---
-const modal = document.getElementById('loginModal');
-const loginView = document.getElementById('login-view');
-const signupView = document.getElementById('signup-view');
-
-function toggleModal(show) {
-    if(show) {
-        modal.classList.add('active');
-        switchForm('login'); // Reset ke tampilan login saat dibuka
-    } else {
-        modal.classList.remove('active');
+    const container = document.getElementById('movieList');
+    if (container) {
+        // Scroll horizontal dengan efek smooth
+        container.scrollBy({ left: amount, behavior: 'smooth' });
     }
 }
 
+// =========================================
+// 2. LOGIKA MODAL (Login & Booking)
+// =========================================
+
+// Fungsi Buka/Tutup Modal
+function toggleModal(modalId, show) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        // Flex untuk memusatkan konten, None untuk sembunyi
+        modal.style.display = show ? 'flex' : 'none';
+
+        // Jika membuka modal login, reset tampilan ke form login awal
+        if (show && modalId === 'loginModal') {
+            switchForm('login');
+        }
+    }
+}
+
+// Event Listener: Tutup modal jika user klik area gelap (overlay)
+window.onclick = function(event) {
+    if (event.target.classList.contains('modal-overlay')) {
+        event.target.style.display = "none";
+    }
+}
+
+// =========================================
+// 3. LOGIKA SWITCH FORM (Login <-> Signup)
+// =========================================
 function switchForm(type) {
-    if (type === 'signup') {
-        loginView.style.display = 'none';
-        signupView.style.display = 'block';
-    } else {
-        loginView.style.display = 'block';
-        signupView.style.display = 'none';
+    const loginView = document.getElementById('login-view');
+    const signupView = document.getElementById('signup-view');
+
+    if (loginView && signupView) {
+        if (type === 'signup') {
+            loginView.style.display = 'none';
+            signupView.style.display = 'block';
+        } else {
+            loginView.style.display = 'block';
+            signupView.style.display = 'none';
+        }
     }
 }
 
-// Tutup modal jika klik di luar kotak
-modal.addEventListener('click', (e) => {
-    if (e.target === modal) toggleModal(false);
-});
+// =========================================
+// 4. LOGIKA VISUAL SEAT SELECTION
+// =========================================
+const seatContainer = document.querySelector('.seat-container');
+const countSpan = document.getElementById('count');
+const totalSpan = document.getElementById('total');
+const TICKET_PRICE = 50000; // Harga Tiket (Bisa dinamis via PHP jika perlu)
+
+if (seatContainer) {
+    seatContainer.addEventListener('click', (e) => {
+        // Cek 1: Apakah yang diklik adalah kursi?
+        // Cek 2: Apakah kursi tersebut TIDAK terisi (not occupied)?
+        if (e.target.classList.contains('seat') && !e.target.classList.contains('occupied')) {
+            
+            // Toggle class 'selected' (Hijau <-> Abu)
+            e.target.classList.toggle('selected');
+            
+            // Update hitungan harga
+            updateBookingInfo();
+        }
+    });
+}
+
+function updateBookingInfo() {
+    // Cari semua kursi yang punya class 'seat' DAN 'selected' di dalam row
+    const selectedSeats = document.querySelectorAll('.row .seat.selected');
+    
+    // Hitung jumlah array elemen yang ditemukan
+    const count = selectedSeats.length;
+
+    // Update tampilan HTML
+    if (countSpan) countSpan.innerText = count;
+    if (totalSpan) totalSpan.innerText = (count * TICKET_PRICE).toLocaleString('id-ID');
+}
+
+// =========================================
+// 5. LOGIKA LIVE SEARCH (Filter Film)
+// =========================================
+const searchInput = document.getElementById('searchInput');
+// Mengambil semua elemen kartu film
+const movieCards = document.querySelectorAll('.movie-card');
+
+if (searchInput) {
+    searchInput.addEventListener('keyup', (e) => {
+        // Ambil text input user & ubah ke huruf kecil (lowercase)
+        const term = e.target.value.toLowerCase();
+
+        movieCards.forEach(card => {
+            // Ambil judul film dari tag <h3> di dalam kartu
+            const titleElement = card.querySelector('h3');
+            
+            if (titleElement) {
+                const title = titleElement.textContent.toLowerCase();
+
+                // Logic pencarian (Partial Match)
+                if (title.includes(term)) {
+                    // Jika cocok, reset display ke default CSS (agar layout flex/grid tetap rapi)
+                    card.style.display = ''; 
+                } else {
+                    // Jika tidak cocok, sembunyikan
+                    card.style.display = 'none';
+                }
+            }
+        });
+    });
+}

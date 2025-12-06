@@ -1,36 +1,46 @@
 <?php
-//http://localhost/moobix/ui/ui_index.php
-$heroMovie = [
-    'title' => 'OPPENHEIMER',
-    'genre' => 'Biography',
-    'duration' => '3h 0min',
-    'rating' => '8.9',
-    'image' => 'https://image.tmdb.org/t/p/original/8RpDCSfKTPA8HOxAsj2vqF8w946.jpg'
-];
+// --- BAGIAN 1: BACKEND & KONEKSI DATABASE ---
+session_start();
 
-// Data untuk Slider (Now Showing)
-$nowShowing = [
-    [
-        'title' => 'Barbie',
-        'image' => 'https://image.tmdb.org/t/p/original/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg',
-        'rating' => '7.5'
-    ],
-    [
-        'title' => 'Dune: Part Two',
-        'image' => 'https://image.tmdb.org/t/p/original/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg',
-        'rating' => '8.8'
-    ],
-    [
-        'title' => 'Interstellar',
-        'image' => 'https://image.tmdb.org/t/p/original/gEU2QniL6E8ahMcafCUyGdjxXAr.jpg',
-        'rating' => '8.7'
-    ],
-    [
-        'title' => 'The Batman',
-        'image' => 'https://image.tmdb.org/t/p/original/74xTEgt7R36Fpooo50r9T25onhq.jpg',
-        'rating' => '7.9'
-    ]
-];
+// Konfigurasi Database
+$host = 'localhost';
+$dbname = 'cinetix_db';
+$user = 'root';
+$pass = ''; // Default XAMPP biasanya kosong
+
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $user, $pass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Koneksi Gagal: " . $e->getMessage());
+}
+
+// Mengambil Data Hero Movie (Film Terbaru/Unggulan)
+$stmtHero = $pdo->query("SELECT * FROM movies ORDER BY id DESC LIMIT 1");
+$heroMovie = $stmtHero->fetch(PDO::FETCH_ASSOC);
+
+// Fallback jika database kosong (Data Dummy)
+if (!$heroMovie) {
+    $heroMovie = [
+        'title' => 'OPPENHEIMER',
+        'genre' => 'Biography',
+        'duration' => '3h 0min',
+        'rating' => '8.9',
+        'image_url' => 'https://image.tmdb.org/t/p/original/8RpDCSfKTPA8HOxAsj2vqF8w946.jpg'
+    ];
+}
+
+// Mengambil Data 'Now Showing'
+$stmtList = $pdo->query("SELECT * FROM movies WHERE status = 'now_showing'");
+$nowShowing = $stmtList->fetchAll(PDO::FETCH_ASSOC);
+
+// Fallback dummy
+if (empty($nowShowing)) {
+    $nowShowing = [
+        ['title' => 'Barbie', 'rating' => '7.5', 'image_url' => 'https://image.tmdb.org/t/p/original/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg'],
+        ['title' => 'Dune 2', 'rating' => '8.8', 'image_url' => 'https://image.tmdb.org/t/p/original/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg']
+    ];
+}
 ?>
 
 <!DOCTYPE html>
@@ -38,40 +48,19 @@ $nowShowing = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CineVintage Premium Dashboard</title>
+    <title>CineTix - MooBix</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dancing+Script:wght@700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
-    <link rel="stylesheet" href="ui_style.css">
     
-    <style>
-        .movie-card {
-            min-width: 200px;
-            margin: 0 10px;
-            transition: transform 0.3s;
-            cursor: pointer;
-        }
-        .movie-card:hover { transform: scale(1.05); }
-        .movie-card img {
-            width: 100%;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        .movie-card h3 {
-            margin-top: 10px;
-            font-size: 1.1rem;
-            color: #fff; /* Sesuaikan dengan tema */
-        }
-    </style>
+    <link rel="stylesheet" href="ui_style.css">
 </head>
 <body>
 
     <header id="navbar">
-        <div class="logo">THE OLD THEATER</div>
+        <div class="logo">CINETIX THEATER</div>
         
         <nav class="main-nav">
             <a href="#hero-section">NEWEST HIT</a>
@@ -79,39 +68,38 @@ $nowShowing = [
         </nav>
 
         <div class="login-area">
-            <button class="login-btn" onclick="toggleModal(true)">LOGIN / SIGN UP</button>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search film...">
+            </div>
+
+            <button class="login-btn" onclick="toggleModal('loginModal', true)">LOGIN</button>
         </div>
     </header>
 
     <section class="hero" id="hero-section">
         <div class="hero-container">
-            
             <div class="hero-text">
                 <span class="tagline">Now Showing &mdash; The Masterpiece</span>
-                
-                <h1 class="hero-title"><?php echo $heroMovie['title']; ?></h1>
+                <h1 class="hero-title"><?php echo htmlspecialchars($heroMovie['title']); ?></h1>
                 
                 <div class="hero-details">
-                    <span><?php echo $heroMovie['genre']; ?></span> &bull; 
-                    <span><?php echo $heroMovie['duration']; ?></span> &bull; 
-                    <span>IMDB <?php echo $heroMovie['rating']; ?></span>
+                    <span><?php echo htmlspecialchars($heroMovie['genre']); ?></span> &bull; 
+                    <span><?php echo htmlspecialchars($heroMovie['duration']); ?></span> &bull; 
+                    <span>IMDB <?php echo htmlspecialchars($heroMovie['rating']); ?></span>
                 </div>
 
-                <button class="btn-primary">GET TICKET</button>
+                <button class="btn-primary" onclick="toggleModal('bookingModal', true)">GET TICKET</button>
             </div>
 
             <div class="hero-poster">
                 <div class="poster-frame-hero">
-                    <img src="<?php echo $heroMovie['image']; ?>" alt="<?php echo $heroMovie['title']; ?> Poster" referrerpolicy="no-referrer">
+                    <img src="<?php echo htmlspecialchars($heroMovie['image_url']); ?>" alt="Poster" referrerpolicy="no-referrer">
                 </div>
             </div>
-
         </div>
     </section>
 
-    <div class="divider">
-        <span>MORE TO EXPLORE</span>
-    </div>
+    <div class="divider"><span>MORE TO EXPLORE</span></div>
 
     <section class="now-showing" id="schedule-section">
         <div class="section-header">
@@ -120,70 +108,85 @@ $nowShowing = [
         </div>
         
         <div class="slider-wrapper">
-            <button class="nav-btn" onclick="scrollMovies(-350)"><i class="ph ph-caret-left"></i></button>
+            <button class="nav-btn" onclick="scrollMovies(-300)"><i class="ph ph-caret-left"></i></button>
 
             <div class="cards-container" id="movieList">
-                
                 <?php foreach($nowShowing as $movie): ?>
                     <div class="movie-card">
-                        <img src="<?php echo $movie['image']; ?>" alt="<?php echo $movie['title']; ?>">
-                        <h3><?php echo $movie['title']; ?></h3>
-                        <small>Rating: <?php echo $movie['rating']; ?></small>
+                        <div class="poster-frame">
+                            <img src="<?php echo htmlspecialchars($movie['image_url']); ?>" alt="Poster">
+                        </div>
+                        <h3><?php echo htmlspecialchars($movie['title']); ?></h3>
+                        <small>Rating: <?php echo htmlspecialchars($movie['rating']); ?></small>
+                        <br>
+                        <button class="btn-primary" style="padding: 5px 15px; font-size: 0.9rem; margin-top:10px; width:100%;" onclick="toggleModal('bookingModal', true)">Book Now</button>
                     </div>
                 <?php endforeach; ?>
-
             </div>
 
-            <button class="nav-btn" onclick="scrollMovies(350)"><i class="ph ph-caret-right"></i></button>
+            <button class="nav-btn" onclick="scrollMovies(300)"><i class="ph ph-caret-right"></i></button>
         </div>
     </section>
 
     <div class="modal-overlay" id="loginModal">
         <div class="ticket-modal">
-            <span class="close-modal" onclick="toggleModal(false)">&times;</span>
+            <span class="close-modal" onclick="toggleModal('loginModal', false)">&times;</span>
             
             <div id="login-view">
                 <h2>LOG IN</h2>
                 <form action="login_process.php" method="POST">
                     <div class="input-group">
-                        <label>Member ID / Email</label>
-                        <input type="text" name="username" placeholder="USER123" required>
+                        <label>Email / ID</label>
+                        <input type="text" name="username" required>
                     </div>
                     <div class="input-group">
                         <label>Password</label>
-                        <input type="password" name="password" placeholder="******" required>
+                        <input type="password" name="password" required>
                     </div>
-                    <button type="submit" class="btn-login-submit">LOGIN</button>
+                    <button type="submit" class="btn-login-submit">ENTER</button>
                 </form>
-                <p style="margin-top: 15px; font-size: 0.8rem; color:#666;">
-                    Don't have an account? 
-                    <b onclick="switchForm('signup')" style="cursor:pointer; color:#1a1a1a; text-decoration:underline;">Sign up!</b>
-                </p>
+                <p class="text" style="cursor:pointer; text-decoration:underline;" onclick="switchForm('signup')">Create an Account</p>
             </div>
 
-            <div id="signup-view" style="display: none;">
+            <div id="signup-view" style="display:none;">
                 <h2>SIGN UP</h2>
                 <form action="register_process.php" method="POST">
-                    <div class="input-group">
-                        <label>Full Name</label>
-                        <input type="text" name="fullname" placeholder="John Doe" required>
-                    </div>
-                    <div class="input-group">
-                        <label>Email Address</label>
-                        <input type="email" name="email" placeholder="john@email.com" required>
-                    </div>
-                    <div class="input-group">
-                        <label>Create Password</label>
-                        <input type="password" name="password" placeholder="******" required>
-                    </div>
+                    <div class="input-group"><label>Name</label><input type="text" name="fullname"></div>
+                    <div class="input-group"><label>Email</label><input type="email" name="email"></div>
+                    <div class="input-group"><label>Password</label><input type="password" name="password"></div>
                     <button type="submit" class="btn-login-submit">REGISTER</button>
                 </form>
-                <p style="margin-top: 15px; font-size: 0.8rem; color:#666;">
-                    Already a member? 
-                    <b onclick="switchForm('login')" style="cursor:pointer; color:#1a1a1a; text-decoration:underline;">Log in</b>
-                </p>
+                <p class="text" style="cursor:pointer; text-decoration:underline;" onclick="switchForm('login')">Back to Login</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="bookingModal">
+        <div class="ticket-modal" style="width: 500px;">
+            <span class="close-modal" onclick="toggleModal('bookingModal', false)">&times;</span>
+            <h2>SELECT SEATS</h2>
+            
+            <div class="seat-container">
+                <div class="screen">SCREEN</div>
+                <div class="row">
+                    <div class="seat"></div><div class="seat"></div><div class="seat occupied"></div><div class="seat"></div>
+                    <div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div>
+                </div>
+                <div class="row">
+                    <div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div>
+                    <div class="seat occupied"></div><div class="seat occupied"></div><div class="seat"></div><div class="seat"></div>
+                </div>
+                 <div class="row">
+                    <div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div>
+                    <div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div>
+                </div>
             </div>
 
+            <p class="text">
+                Selected: <b id="count" style="color:#aa2b2b;">0</b> seats <br>
+                Total Price: <b>Rp <span id="total">0</span></b>
+            </p>
+            <button class="btn-primary" style="width:100%; margin-top:15px;">CONFIRM & PAY</button>
         </div>
     </div>
 
