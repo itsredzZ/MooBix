@@ -4,7 +4,7 @@ session_start();
 
 // Konfigurasi Database
 $host = 'localhost';
-$dbname = 'cinetix_db';
+$dbname = 'db_moobix';
 $user = 'root';
 $pass = ''; // Default XAMPP biasanya kosong
 
@@ -26,22 +26,34 @@ if (!$heroMovie) {
         'genre' => 'Biography',
         'duration' => '3h 0min',
         'rating' => '8.9',
-        'image_url' => 'https://image.tmdb.org/t/p/original/8RpDCSfKTPA8HOxAsj2vqF8w946.jpg'
+        'airing_date' => '14:00', // Tambah ini biar tidak error
+        'price' => 50000,         // Tambah ini biar tidak error
+        'poster' => 'https://image.tmdb.org/t/p/original/8RpDCSfKTPA8HOxAsj2vqF8w946.jpg' // GANTI JADI POSTER
     ];
 }
 
 // Mengambil Data 'Now Showing'
-$stmtList = $pdo->query("SELECT * FROM movies WHERE status = 'now_showing'");
+$stmtList = $pdo->query("SELECT * FROM movies");
 $nowShowing = $stmtList->fetchAll(PDO::FETCH_ASSOC);
 
 // Fallback dummy
 if (empty($nowShowing)) {
     $nowShowing = [
-        ['title' => 'Barbie', 'rating' => '7.5', 'image_url' => 'https://image.tmdb.org/t/p/original/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg'],
-        ['title' => 'Dune 2', 'rating' => '8.8', 'image_url' => 'https://image.tmdb.org/t/p/original/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg']
+        [
+            'title' => 'Barbie', 
+            'rating' => '7.5', 
+            'genre' => 'Comedy', 
+            'poster' => 'https://image.tmdb.org/t/p/original/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg' // GANTI JADI POSTER
+        ],
+        [
+            'title' => 'Dune 2', 
+            'rating' => '8.8', 
+            'genre' => 'Sci-Fi', 
+            'poster' => 'https://image.tmdb.org/t/p/original/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' // GANTI JADI POSTER
+        ]
     ];
 }
-?>
+// ?>
 
 <!DOCTYPE html>
 <html lang="id">
@@ -84,8 +96,8 @@ if (empty($nowShowing)) {
                 
                 <div class="hero-details">
                     <span><?php echo htmlspecialchars($heroMovie['genre']); ?></span> &bull; 
-                    <span><?php echo htmlspecialchars($heroMovie['duration']); ?></span> &bull; 
-                    <span>IMDB <?php echo htmlspecialchars($heroMovie['rating']); ?></span>
+                    <span>Jam: <?php echo htmlspecialchars($heroMovie['airing_date']); ?></span> &bull; 
+                    <span>Tiket: Rp <?php echo number_format($heroMovie['price']); ?></span>
                 </div>
 
                 <button class="btn-primary" onclick="toggleModal('bookingModal', true)">GET TICKET</button>
@@ -93,7 +105,7 @@ if (empty($nowShowing)) {
 
             <div class="hero-poster">
                 <div class="poster-frame-hero">
-                    <img src="<?php echo htmlspecialchars($heroMovie['image_url']); ?>" alt="Poster" referrerpolicy="no-referrer">
+                    <img src="uploads/<?php echo htmlspecialchars($heroMovie['poster']); ?>" alt="Poster" referrerpolicy="no-referrer">
                 </div>
             </div>
         </div>
@@ -114,11 +126,12 @@ if (empty($nowShowing)) {
                 <?php foreach($nowShowing as $movie): ?>
                     <div class="movie-card">
                         <div class="poster-frame">
-                            <img src="<?php echo htmlspecialchars($movie['image_url']); ?>" alt="Poster">
+                            <img src="uploads/<?php echo htmlspecialchars($movie['poster']); ?>" alt="Poster">
                         </div>
                         <h3><?php echo htmlspecialchars($movie['title']); ?></h3>
-                        <small>Rating: <?php echo htmlspecialchars($movie['rating']); ?></small>
-                        <br>
+            
+                        <small>Genre: <?php echo htmlspecialchars($movie['genre']); ?></small>
+            
                         <button class="btn-primary" style="padding: 5px 15px; font-size: 0.9rem; margin-top:10px; width:100%;" onclick="toggleModal('bookingModal', true)">Book Now</button>
                     </div>
                 <?php endforeach; ?>
