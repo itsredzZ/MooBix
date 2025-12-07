@@ -84,8 +84,19 @@ if (empty($nowShowing)) {
                 <input type="text" id="searchInput" placeholder="Search film...">
             </div>
 
-            <button class="login-btn" onclick="toggleModal('loginModal', true)">LOGIN</button>
-        </div>
+            <?php if(isset($_SESSION['user_name'])): ?>
+                
+                <div style="color: white; margin-right: 15px; font-family: sans-serif; font-size: 0.9rem;">
+                    Hi, <b><?php echo htmlspecialchars($_SESSION['user_name']); ?></b>
+                </div>
+                <a href="logout.php" class="login-btn" style="text-decoration:none; display:inline-block; text-align:center; line-height: normal;">LOGOUT</a>
+
+            <?php else: ?>
+
+                <button class="login-btn" onclick="toggleModal('loginModal', true)">LOGIN</button>
+
+            <?php endif; ?>
+            </div>
     </header>
 
     <section class="hero" id="hero-section">
@@ -164,7 +175,7 @@ if (empty($nowShowing)) {
             <div id="signup-view" style="display:none;">
                 <h2>SIGN UP</h2>
                 <form action="register_process.php" method="POST">
-                    <div class="input-group"><label>Name</label><input type="text" name="fullname"></div>
+                    <div class="input-group"><label>Name</label><input type="text" name="name"></div>
                     <div class="input-group"><label>Email</label><input type="email" name="email"></div>
                     <div class="input-group"><label>Password</label><input type="password" name="password"></div>
                     <button type="submit" class="btn-login-submit">REGISTER</button>
