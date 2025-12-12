@@ -1,20 +1,159 @@
-/* =========================================
-   1. CONFIGURATION & VARIABLES
-   ========================================= */
+/* ================= CONFIGURATION & VARIABLES ================= */
 :root {
     --bg-dark: #1F1514;
     --bg-card: #2C1E1C;
     --accent-salmon: #E48F6F;
     --text-cream: #F3EFE0;
     --header-bg: #000000;
-    
     --font-head: 'Bebas Neue', sans-serif;
     --font-script: 'Dancing Script', cursive;
     --font-body: 'Playfair Display', serif;
+    --success-green: #4CAF50;
+    --success-dark: #2E7D32;
+    --warning-red: #F44336;
+    --warning-dark: #C62828;
+    --primary-orange: #FF9800;
+    --primary-dark: #F57C00;
+}
+/* ================= PROFILE DROPDOWN ENHANCEMENT ================= */
+
+/* Profile Header di Dropdown */
+.profile-header {
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: linear-gradient(135deg, #2C1E1C, #1F1514);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 5px;
+}
+
+.profile-avatar-large {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--accent-salmon), #FF9800);
+    color: var(--bg-dark);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-family: var(--font-head);
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-info h4 {
+    margin: 0 0 5px 0;
+    color: var(--text-cream);
+    font-family: var(--font-head);
+    font-size: 1.2rem;
+    letter-spacing: 0.5px;
+}
+
+.profile-info p {
+    margin: 0 0 8px 0;
+    color: rgba(243, 239, 224, 0.7);
+    font-size: 0.8rem;
+    font-family: var(--font-body);
+}
+
+.user-role-badge {
+    background: rgba(228, 143, 111, 0.2);
+    color: var(--accent-salmon);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    display: inline-block;
+    border: 1px solid rgba(228, 143, 111, 0.3);
+}
+
+/* Dropdown Menu Items Enhancement */
+.dropdown-menu a {
+    color: var(--text-cream);
+    padding: 12px 20px;
+    text-decoration: none;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-left: 3px solid transparent;
+}
+
+.dropdown-menu a:hover {
+    background: rgba(228, 143, 111, 0.1);
+    color: var(--accent-salmon);
+    border-left-color: var(--accent-salmon);
+    padding-left: 25px;
+}
+
+.dropdown-menu a.active {
+    background: rgba(228, 143, 111, 0.15);
+    color: var(--accent-salmon);
+    border-left-color: var(--accent-salmon);
+    font-weight: bold;
+}
+
+.dropdown-menu a.active i {
+    color: var(--accent-salmon);
+}
+
+/* Logout Button Styling */
+.logout-btn {
+    color: #ff6b6b !important;
+    border-top: 1px solid rgba(255,255,255,0.1) !important;
+    margin-top: 5px;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 107, 107, 0.1) !important;
+    color: #ff5252 !important;
+}
+
+/* Icons Styling in Dropdown */
+.dropdown-menu a i {
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+    color: rgba(243, 239, 224, 0.7);
+}
+
+.dropdown-menu a:hover i {
+    color: var(--accent-salmon);
+}
+
+/* Divider Enhancement */
+.divider-mini {
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+    margin: 8px 0;
+}
+
+/* Profile Trigger Enhancement */
+.profile-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-cream);
+    transition: transform 0.3s;
+    padding: 5px 10px;
+    border-radius: 30px;
+    background: rgba(255,255,255,0.05);
+}
+
+.profile-trigger:hover {
+    transform: translateY(-2px);
+    background: rgba(255,255,255,0.1);
 }
 
 html { scroll-behavior: smooth; }
-
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -24,7 +163,7 @@ body {
     overflow-x: hidden;
 }
 
-/* Noise Texture Overlay (Efek Film Grain) */
+/* Noise Texture Overlay */
 body::before {
     content: "";
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -32,9 +171,7 @@ body::before {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
 }
 
-/* =========================================
-   2. HEADER & NAVIGATION
-   ========================================= */
+/* ================= HEADER & NAV ================= */
 header {
     position: fixed; top: 0; width: 100%; padding: 15px 50px;
     display: flex; justify-content: space-between; align-items: center;
@@ -63,41 +200,21 @@ header {
 }
 .main-nav a:hover::after { width: 100%; }
 
-/* --- LOGIN AREA & SEARCH BAR LAYOUT --- */
 .login-area {
-    flex: 1; 
-    display: flex; 
-    justify-content: flex-end; /* Rata Kanan */
-    align-items: center;       /* Sejajar Vertikal */
-    gap: 15px;                 /* Jarak antar elemen */
+    flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 15px;
 }
 
-/* Style Search Box */
+/* SEARCH BOX */
 .search-box input {
     background: transparent;
     border: 1px solid rgba(243, 239, 224, 0.3);
-    color: var(--text-cream);
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-family: var(--font-body);
-    font-size: 0.9rem;
-    outline: none;
-    width: 160px;      /* Lebar awal */
-    transition: 0.3s;
-    text-align: right; /* Teks mulai dari kanan agar rapi */
+    color: var(--text-cream); padding: 8px 15px; border-radius: 20px;
+    font-family: var(--font-body); font-size: 0.9rem; outline: none;
+    width: 160px; transition: 0.3s; text-align: right;
 }
-
 .search-box input:focus {
-    border-color: var(--accent-salmon);
-    width: 220px;      /* Melebar saat aktif */
-    text-align: left;  /* Teks kembali ke kiri saat mengetik */
-    box-shadow: 0 0 10px rgba(228, 143, 111, 0.2);
+    border-color: var(--accent-salmon); width: 220px; text-align: left;
 }
-
-.search-box input::placeholder {
-    color: rgba(243, 239, 224, 0.5); font-style: italic; text-align: right;
-}
-.search-box input:focus::placeholder { text-align: left; }
 
 .login-btn {
     background: transparent; color: var(--text-cream); border: 1px solid var(--text-cream);
@@ -108,121 +225,1333 @@ header {
     background: var(--accent-salmon); border-color: var(--accent-salmon); color: var(--bg-dark);
 }
 
-/* =========================================
-   3. HERO SECTION
-   ========================================= */
-.hero {
-    min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    padding: 100px 8% 50px 8%; position: relative;
-    background: linear-gradient(to right, rgba(31, 21, 20, 0.95) 20%, rgba(44, 30, 28, 0.7) 100%),
-                url('https://image.tmdb.org/t/p/original/8RpDCSfKTPA8HOxAsj2vqF8w946.jpg'); 
-    background-size: cover; background-position: center; background-attachment: fixed;
+/* DROPDOWN MENU */
+.profile-dropdown { 
+    position: relative; 
+    cursor: pointer; 
+    margin-right: 15px; 
 }
-.hero-container { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 1400px; gap: 50px; }
+.profile-trigger { 
+    display: flex; 
+    align-items: center; 
+    gap: 10px; 
+    color: var(--text-cream); 
+    transition: transform 0.3s;
+}
+.profile-trigger:hover { 
+    transform: translateY(-2px); 
+}
+.avatar { 
+    width: 35px; 
+    height: 35px; 
+    background: var(--accent-salmon); 
+    color: var(--bg-dark); 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: bold; 
+    font-family: var(--font-head); 
+    font-size: 1.2rem;
+}
+.username { 
+    font-family: var(--font-head); 
+    letter-spacing: 1px; 
+    font-size: 1.1rem;
+}
 
-.hero-text { flex: 1; z-index: 2; }
-.tagline { font-family: var(--font-script); font-size: 3rem; color: var(--accent-salmon); transform: rotate(-3deg); margin-bottom: 5px; display: block; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); }
-.hero-title { font-family: var(--font-head); font-size: 7.5rem; line-height: 0.9; text-transform: uppercase; color: var(--text-cream); text-shadow: 5px 5px 15px rgba(0,0,0,0.8); margin-bottom: 20px; }
-.hero-details { display: flex; gap: 20px; font-size: 1rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 30px; border-left: 4px solid var(--accent-salmon); padding-left: 20px; color: rgba(243, 239, 224, 0.8); }
+.dropdown-menu {
+    position: absolute; 
+    top: 50px; 
+    right: 0; 
+    width: 220px;
+    background: #2C1E1C; 
+    border: 1px solid var(--accent-salmon);
+    display: none; 
+    flex-direction: column; 
+    padding: 10px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8); 
+    z-index: 1001;
+    border-radius: 5px;
+}
+.profile-dropdown:hover .dropdown-menu { 
+    display: flex; 
+    animation: slideDown 0.3s ease;
+}
+.dropdown-menu a {
+    color: var(--text-cream); 
+    padding: 12px 20px; 
+    text-decoration: none;
+    font-family: var(--font-body); 
+    font-size: 0.9rem; 
+    transition: 0.2s;
+    display: flex; 
+    align-items: center; 
+    gap: 10px;
+}
+.dropdown-menu a:hover { 
+    background: var(--accent-salmon); 
+    color: var(--bg-dark); 
+}
+.divider-mini { 
+    height: 1px; 
+    background: rgba(255,255,255,0.1); 
+    margin: 5px 0; 
+}
+
+/* ================= HERO SECTION ================= */
+.hero {
+    min-height: 100vh; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center;
+    padding: 100px 8% 50px 8%; 
+    position: relative;
+    background-size: cover; 
+    background-position: center; 
+    background-attachment: fixed;
+}
+.hero-container { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; 
+    width: 100%; 
+    max-width: 1400px; 
+    gap: 50px; 
+}
+.hero-text { 
+    flex: 1; 
+    z-index: 2; 
+}
+.tagline { 
+    font-family: var(--font-script); 
+    font-size: 3rem; 
+    color: var(--accent-salmon); 
+    transform: rotate(-3deg); 
+    margin-bottom: 5px; 
+    display: block; 
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8); 
+}
+.hero-title { 
+    font-family: var(--font-head); 
+    font-size: 7.5rem; 
+    line-height: 0.9; 
+    text-transform: uppercase; 
+    color: var(--text-cream); 
+    text-shadow: 5px 5px 15px rgba(0,0,0,0.8); 
+    margin-bottom: 20px; 
+}
+.hero-details { 
+    display: flex; 
+    gap: 20px; 
+    font-size: 1rem; 
+    text-transform: uppercase; 
+    letter-spacing: 2px; 
+    margin-bottom: 30px; 
+    border-left: 4px solid var(--accent-salmon); 
+    padding-left: 20px; 
+    color: rgba(243, 239, 224, 0.8); 
+}
 
 .btn-primary {
-    background: var(--accent-salmon); color: var(--bg-dark); padding: 15px 40px;
-    font-family: var(--font-head); font-size: 1.5rem; border: none; cursor: pointer;
+    background: var(--accent-salmon); 
+    color: var(--bg-dark); 
+    padding: 15px 40px;
+    font-family: var(--font-head); 
+    font-size: 1.5rem; 
+    border: none; 
+    cursor: pointer;
     clip-path: polygon(0% 0%, 100% 0%, 95% 50%, 100% 100%, 0% 100%, 5% 50%);
-    transition: transform 0.2s;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
-.btn-primary:hover { transform: scale(1.05); }
+.btn-primary:hover { 
+    transform: scale(1.05); 
+    box-shadow: 0 0 20px rgba(228, 143, 111, 0.4);
+}
+.btn-primary:active {
+    transform: scale(0.98);
+}
 
-.hero-poster { flex: 0 0 350px; position: relative; z-index: 2; transform: rotate(3deg); transition: 0.3s; }
-.hero-poster:hover { transform: rotate(0deg) scale(1.02); }
-.poster-frame-hero { background: #fff; padding: 10px; padding-bottom: 50px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
-.poster-frame-hero img { width: 100%; display: block; filter: sepia(15%); }
+.hero-poster { 
+    flex: 0 0 350px; 
+    position: relative; 
+    z-index: 2; 
+    transform: rotate(3deg); 
+    transition: 0.3s; 
+}
+.hero-poster:hover {
+    transform: rotate(3deg) scale(1.02);
+}
+.poster-frame-hero { 
+    background: #fff; 
+    padding: 10px; 
+    padding-bottom: 50px; 
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8); 
+    transition: transform 0.3s;
+}
+.poster-frame-hero img { 
+    width: 100%; 
+    display: block; 
+    filter: sepia(15%); 
+    transition: filter 0.3s;
+}
+.hero-poster:hover .poster-frame-hero img {
+    filter: sepia(0%);
+}
 
-/* Divider */
-.divider { height: 80px; background: var(--bg-card); display: flex; align-items: center; justify-content: center; position: relative; border-top: 2px dashed rgba(255,255,255,0.1); border-bottom: 2px dashed rgba(255,255,255,0.1); }
-.divider span { background: var(--bg-card); padding: 0 20px; font-family: var(--font-head); font-size: 1.5rem; letter-spacing: 3px; color: var(--accent-salmon); position: relative; z-index: 10; }
-.divider::after { content: ''; position: absolute; width: 100%; height: 1px; background: rgba(255,255,255,0.1); top: 50%; left: 0; }
+/* DIVIDER & SLIDER */
+.divider { 
+    height: 80px; 
+    background: var(--bg-card); 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    position: relative; 
+    border-top: 2px dashed rgba(255,255,255,0.1); 
+    border-bottom: 2px dashed rgba(255,255,255,0.1); 
+}
+.divider span { 
+    background: var(--bg-card); 
+    padding: 0 20px; 
+    font-family: var(--font-head); 
+    font-size: 1.5rem; 
+    letter-spacing: 3px; 
+    color: var(--accent-salmon); 
+    position: relative; 
+    z-index: 10; 
+}
 
-/* =========================================
-   4. SLIDER & CARDS
-   ========================================= */
-.now-showing { padding: 60px 50px; background: var(--bg-dark); position: relative; }
-.section-header { text-align: center; margin-bottom: 40px; }
-.section-header h2 { font-family: var(--font-head); font-size: 3rem; letter-spacing: 2px; }
-.section-header span { font-family: var(--font-script); font-size: 2rem; color: var(--accent-salmon); }
+.now-showing { 
+    padding: 60px 50px; 
+    background: var(--bg-dark); 
+    position: relative; 
+}
+.section-header { 
+    text-align: center; 
+    margin-bottom: 40px; 
+}
+.section-header h2 { 
+    font-family: var(--font-head); 
+    font-size: 3rem; 
+    letter-spacing: 2px; 
+}
+.section-header span { 
+    font-family: var(--font-script); 
+    font-size: 2rem; 
+    color: var(--accent-salmon); 
+}
 
-.slider-wrapper { display: flex; align-items: center; justify-content: center; gap: 20px; }
-.nav-btn { background: transparent; border: 2px solid var(--accent-salmon); color: var(--accent-salmon); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2rem; cursor: pointer; transition: 0.3s; flex-shrink: 0; }
-.nav-btn:hover { background: var(--accent-salmon); color: var(--bg-dark); transform: scale(1.1); }
+.slider-wrapper { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 20px; 
+}
+.nav-btn { 
+    background: transparent; 
+    border: 2px solid var(--accent-salmon); 
+    color: var(--accent-salmon); 
+    width: 60px; 
+    height: 60px; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 2rem; 
+    cursor: pointer; 
+    transition: all 0.3s ease; 
+    flex-shrink: 0; 
+}
+.nav-btn:hover { 
+    background: var(--accent-salmon); 
+    color: var(--bg-dark); 
+    transform: scale(1.1); 
+}
+.cards-container { 
+    display: flex; 
+    gap: 30px; 
+    overflow-x: auto; 
+    scroll-behavior: smooth; 
+    padding: 30px 10px; 
+    width: 100%; 
+    scrollbar-width: none; 
+}
+.movie-card { 
+    min-width: 220px; 
+    cursor: pointer; 
+    transition: all 0.3s ease; 
+}
+.movie-card:hover { 
+    transform: translateY(-10px); 
+}
+.poster-frame { 
+    border: 5px solid #fff; 
+    border-bottom: 25px solid #fff; 
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5); 
+    overflow: hidden; 
+    position: relative;
+}
+.movie-card img { 
+    width: 100%; 
+    height: 320px; 
+    object-fit: cover; 
+    display: block; 
+    filter: grayscale(30%); 
+    transition: all 0.5s ease; 
+}
+.movie-card:hover img { 
+    filter: grayscale(0%); 
+    transform: scale(1.05); 
+}
+.movie-card h3 { 
+    text-align: center; 
+    font-family: var(--font-head); 
+    font-size: 1.2rem; 
+    margin-top: 15px; 
+    letter-spacing: 1px; 
+    color: var(--text-cream); 
+}
+.movie-card small { 
+    display: block; 
+    text-align: center; 
+    color: var(--accent-salmon); 
+    font-family: var(--font-body); 
+    font-size: 0.9rem; 
+}
 
-.cards-container { display: flex; gap: 30px; overflow-x: auto; scroll-behavior: smooth; padding: 30px 10px; width: 100%; scrollbar-width: none; }
-.cards-container::-webkit-scrollbar { display: none; }
+/* ============================================================
+   ADMIN DASHBOARD THEME (DARK BROWN & ELEGANT)
+   Tambahkan ini di bagian paling bawah ui_style.css
+   ============================================================ */
 
-.movie-card { min-width: 220px; cursor: pointer; transition: 0.3s; }
-.movie-card:hover { transform: translateY(-10px); }
+/* 1. Background Utama Dashboard Admin */
+#admin-dashboard {
+    background-color: #1a1210; /* Dark Espresso */
+    background-image: 
+        linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(26, 18, 16, 0.95)),
+        url('https://www.transparenttextures.com/patterns/wood-pattern.png'); /* Tekstur Kayu Halus */
+    min-height: 100vh;
+    color: #e0d0c0; /* Cream Text */
+}
 
-.poster-frame { border: 5px solid #fff; border-bottom: 25px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.5); overflow: hidden; }
-.movie-card img, .poster-frame img { width: 100%; height: 320px; object-fit: cover; display: block; filter: grayscale(30%); transition: 0.5s; }
-.movie-card:hover img { filter: grayscale(0%); transform: scale(1.05); }
+/* 2. Header Section Admin */
+#admin-dashboard .section-header h2 {
+    color: #d4a373; /* Gold/Bronze */
+    text-shadow: 2px 2px 0px #000;
+}
+#admin-dashboard .section-header span {
+    color: #a67b5b; /* Muted Brown */
+}
 
-.movie-card h3, .card-title { text-align: center; font-family: var(--font-head); font-size: 1.2rem; margin-top: 15px; letter-spacing: 1px; color: var(--text-cream); }
-.movie-card small { display: block; text-align: center; color: var(--accent-salmon); font-family: var(--font-body); }
+/* 3. Kartu-Kartu (Profile, Stats, Quick Actions) */
+/* Menimpa background putih default dengan style Dark Leather */
+#admin-dashboard div[style*="background: white"],
+#admin-dashboard div[style*="background: #fff"],
+#admin-dashboard .admin-card {
+    background: #2d2420 !important; /* Dark Walnut */
+    border: 1px solid #4a3b32;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6) !important;
+    color: #e0d0c0 !important;
+}
 
-/* =========================================
-   5. MODAL & SEAT MAP VISUALS
-   ========================================= */
+/* 4. Profile Header di Admin */
+#admin-dashboard h3, 
+#admin-dashboard h4, 
+#admin-dashboard p {
+    color: #e0d0c0 !important;
+}
+#admin-dashboard p span[style*="background"] {
+    background: #5c4033 !important; /* Dark Leather Badge */
+    border: 1px solid #d4a373;
+    color: #d4a373 !important;
+}
+
+/* 5. Statistik Cards (Override Gradient Warna-warni menjadi Nuansa Coklat) */
+/* Kita gunakan selector nth-of-type untuk memberi variasi warna coklat */
+
+/* Card 1 (Total Movies) - Deep Bronze */
+#admin-dashboard div[style*="grid-template-columns"] > div:nth-child(1) {
+    background: linear-gradient(135deg, #5D4037, #3E2723) !important;
+    border: 1px solid #8D6E63;
+}
+/* Card 2 (Bookings) - Metallic Copper */
+#admin-dashboard div[style*="grid-template-columns"] > div:nth-child(2) {
+    background: linear-gradient(135deg, #8D6E63, #5D4037) !important;
+    border: 1px solid #A1887F;
+}
+/* Card 3 (Revenue) - Gold Brown (Money) */
+#admin-dashboard div[style*="grid-template-columns"] > div:nth-child(3) {
+    background: linear-gradient(135deg, #6D4C41, #4E342E) !important;
+    border: 1px solid #8D6E63;
+}
+/* Card 4 (Users) - Dark Coffee */
+#admin-dashboard div[style*="grid-template-columns"] > div:nth-child(4) {
+    background: linear-gradient(135deg, #4E342E, #3E2723) !important;
+    border: 1px solid #6D4C41;
+}
+
+/* Ikon di dalam Stats Card */
+#admin-dashboard div[style*="grid-template-columns"] > div .ph {
+    color: #fff !important;
+    opacity: 0.9;
+}
+#admin-dashboard div[style*="background: rgba(255,255,255,0.2)"] {
+    background: rgba(0,0,0,0.2) !important; /* Gelapkan background icon */
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+/* 6. Quick Action Buttons */
+#admin-dashboard .btn-primary {
+    background: #3e2723 !important;
+    border: 1px solid #5d4037 !important;
+    color: #d4a373 !important;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+}
+#admin-dashboard .btn-primary:hover {
+    background: #5d4037 !important;
+    color: #fff !important;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(212, 163, 115, 0.2); /* Gold glow */
+}
+#admin-dashboard .btn-primary i {
+    color: #d4a373 !important;
+}
+
+/* 7. Movie Database Table */
+#admin-dashboard table {
+    border-color: #4a3b32 !important;
+}
+
+/* Header Tabel */
+#admin-dashboard thead tr {
+    background: linear-gradient(135deg, #3E2723, #281A16) !important;
+    border-bottom: 2px solid #d4a373 !important;
+}
+#admin-dashboard th {
+    color: #d4a373 !important;
+    font-family: var(--font-head);
+    letter-spacing: 1px;
+}
+
+/* Isi Tabel */
+#admin-dashboard tbody tr {
+    border-bottom: 1px solid #3e2723 !important;
+    background: transparent !important;
+    transition: background 0.2s;
+}
+#admin-dashboard tbody tr:hover {
+    background: rgba(212, 163, 115, 0.05) !important; /* Slight gold highlight */
+}
+#admin-dashboard td {
+    color: #ccbfae !important;
+}
+#admin-dashboard td span[style*="color: #333"] {
+    color: #fff !important; /* Judul Film */
+}
+#admin-dashboard td strong, 
+#admin-dashboard td b {
+    color: #d4a373 !important; /* Harga */
+}
+
+/* 8. Action Buttons di Tabel (Edit/Delete) */
+#admin-dashboard td button {
+    opacity: 0.9;
+}
+
+/* 9. Upload Area (Dashed Box) */
+#admin-dashboard div[style*="border: 2px dashed"] {
+    border-color: #5d4037 !important;
+    background: rgba(0,0,0,0.2) !important;
+}
+#admin-dashboard div[style*="border: 2px dashed"] i {
+    color: #8d6e63 !important;
+}
+
+/* 10. Footer Admin */
+#admin-dashboard div[style*="text-align: center; padding: 20px"] {
+    background: #231916 !important;
+    border-top: 1px solid #4a3b32;
+}
+
+/* Scrollbar Admin khusus (Chrome/Safari) */
+#admin-dashboard ::-webkit-scrollbar {
+    width: 10px;
+}
+#admin-dashboard ::-webkit-scrollbar-track {
+    background: #1a1210;
+}
+#admin-dashboard ::-webkit-scrollbar-thumb {
+    background: #5d4037;
+    border-radius: 5px;
+}
+#admin-dashboard ::-webkit-scrollbar-thumb:hover {
+    background: #8d6e63;
+}
+
+/* MODAL & BOOKING FLOW */
 .modal-overlay {
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-    background: rgba(0,0,0,0.9); backdrop-filter: blur(5px);
-    display: none; justify-content: center; align-items: center; z-index: 2000;
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: rgba(0,0,0,0.9); 
+    backdrop-filter: blur(5px);
+    display: none; 
+    justify-content: center; 
+    align-items: center; 
+    z-index: 2000;
+    animation: fadeIn 0.3s ease;
 }
-.modal-overlay.active { display: flex; }
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 
 .ticket-modal {
-    background: #F3EFE0; color: #1a1a1a; 
-    width: 500px; /* Lebar optimal untuk Seat Map */
-    padding: 30px; position: relative;
-    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 45%, 3% 50%, 0% 55%);
-    transform: translateY(0); transition: 0.4s;
-    box-shadow: 0 0 50px rgba(228, 143, 111, 0.2); text-align: center;
+    background: #F3EFE0; 
+    color: #1a1a1a; 
+    padding: 30px; 
+    position: relative;
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 45%, 2% 50%, 0% 55%);
+    box-shadow: 0 0 50px rgba(228, 143, 111, 0.2); 
+    width: 400px; /* Default Login */
+    animation: slideUp 0.4s ease;
+}
+@keyframes slideUp {
+    from { 
+        opacity: 0; 
+        transform: translateY(30px); 
+    }
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    }
 }
 
-.close-modal { position: absolute; top: 10px; right: 15px; font-size: 1.5rem; cursor: pointer; color: #888; transition: 0.3s; }
-.close-modal:hover { color: #aa2b2b; }
+/* Modal Wide for Booking */
+.booking-modal-wide { 
+    width: 750px; 
+    max-width: 95%; 
+    height: auto; 
+    max-height: 90vh; 
+    overflow-y: auto; 
+}
+.close-modal { 
+    position: absolute; 
+    top: 10px; 
+    right: 15px; 
+    font-size: 1.5rem; 
+    cursor: pointer; 
+    color: #888; 
+    transition: color 0.3s;
+    z-index: 10;
+}
+.close-modal:hover { 
+    color: var(--accent-salmon); 
+}
 
-.ticket-modal h2 { font-family: var(--font-head); font-size: 2.2rem; margin-bottom: 15px; border-bottom: 2px dashed #ccc; padding-bottom: 10px; }
+.movie-info-layout { 
+    display: flex; 
+    gap: 20px; 
+    text-align: left; 
+}
+.info-poster { 
+    width: 220px; 
+    flex-shrink: 0; 
+}
+.info-poster img { 
+    width: 100%; 
+    border-radius: 5px; 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+}
+.info-text h2 { 
+    font-family: var(--font-head); 
+    font-size: 3.5rem; 
+    line-height: 1; 
+    color: #2C1E1C; 
+    margin-bottom: 5px;
+}
+.synopsis { 
+    font-size: 0.95rem; 
+    line-height: 1.5; 
+    margin: 15px 0 20px 0; 
+    color: #444; 
+}
 
-/* Form Inputs inside Modal */
-.input-group { margin-bottom: 15px; text-align: left; }
-.input-group label { display: block; font-size: 0.8rem; font-weight: bold; margin-bottom: 5px; text-transform: uppercase;}
-.input-group input { width: 100%; padding: 10px; border: 2px solid #333; background: transparent; font-family: var(--font-head); font-size: 1.1rem; }
-.btn-login-submit { width: 100%; background: #2C1E1C; color: #fff; padding: 12px; font-family: var(--font-head); font-size: 1.2rem; border: none; cursor: pointer; margin-top: 10px; transition: 0.3s; }
-.btn-login-submit:hover { background: var(--accent-salmon); color: var(--bg-dark); }
+/* Date & Time Picker */
+.date-picker-wrapper { 
+    display: flex; 
+    gap: 10px; 
+    margin-top: 20px; 
+    overflow-x: auto; 
+    padding-bottom: 5px; 
+}
+.date-item {
+    background: #e0dcd0; 
+    padding: 10px 15px; 
+    border-radius: 8px; 
+    cursor: pointer;
+    text-align: center; 
+    border: 1px solid #ccc; 
+    min-width: 70px;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+.date-item:hover { 
+    transform: translateY(-3px); 
+    box-shadow: 0 5px 10px rgba(0,0,0,0.1); 
+}
+.date-item.selected { 
+    background: #2C1E1C; 
+    color: var(--accent-salmon); 
+    border-color: #2C1E1C; 
+    transform: translateY(-3px); 
+}
 
-/* --- 3D VISUAL SEAT MAP --- */
-.seat-container { perspective: 1000px; margin: 20px 0; display: flex; flex-direction: column; align-items: center; }
+.time-slots-wrapper { 
+    margin-top: 20px; 
+    border-top: 1px dashed #ccc; 
+    padding-top: 15px; 
+    display:none; 
+    animation: slideDown 0.4s ease forwards;
+}
+@keyframes slideDown { 
+    from { 
+        opacity: 0; 
+        transform: translateY(-10px); 
+    } 
+    to { 
+        opacity: 1; 
+        transform: translateY(0); 
+    } 
+}
+.slots { 
+    display: flex; 
+    gap: 10px; 
+    flex-wrap: wrap; 
+    justify-content: center; 
+}
+.time-btn { 
+    padding: 8px 25px; 
+    background: transparent; 
+    border: 1px solid #333; 
+    cursor: pointer; 
+    font-family: var(--font-head); 
+    font-size: 1.2rem; 
+    transition: all 0.3s ease;
+    border-radius: 4px;
+}
+.time-btn:hover, 
+.time-btn.selected { 
+    background: var(--accent-salmon); 
+    color: var(--bg-dark); 
+    border-color: var(--accent-salmon); 
+    transform: translateY(-2px);
+}
 
+/* Seat Map 3D */
+.seat-container { 
+    perspective: 1000px; 
+    margin: 20px 0; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+}
 .screen { 
-    background: #fff; height: 40px; width: 80%; margin-bottom: 20px; 
-    transform: rotateX(-45deg); box-shadow: 0 10px 20px rgba(0,0,0,0.2); 
-    text-align: center; font-size: 0.7rem; line-height: 40px; 
-    letter-spacing: 2px; color: #888; text-transform: uppercase; 
+    background: #fff; 
+    height: 30px; 
+    width: 80%; 
+    margin-bottom: 20px; 
+    transform: rotateX(-45deg); 
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2); 
+    text-align: center; 
+    color: #888; 
+    font-size: 0.8rem; 
+    letter-spacing: 5px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.row { 
+    display: flex; 
+    justify-content: center; 
+    width: 100%; 
+    gap: 5px;
+    margin-bottom: 8px;
 }
 
-.row { display: flex; justify-content: center; width: 100%; }
+/* ================= MOVIE CARD ENHANCEMENT ================= */
 
-.seat { 
-    background-color: #999; height: 22px; width: 28px; margin: 4px; 
-    border-top-left-radius: 8px; border-top-right-radius: 8px; 
-    cursor: pointer; transition: all 0.2s ease; box-shadow: 0 2px 2px rgba(0,0,0,0.2); 
+.movie-card {
+    min-width: 220px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    background: var(--bg-card);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
-.seat:not(.occupied):hover { transform: scale(1.2); background-color: #666; }
 
-/* Status Kursi */
-.seat.selected { background-color: var(--accent-salmon); box-shadow: 0 0 5px var(--accent-salmon); }
-.seat.occupied { background-color: #aa2b2b; cursor: not-allowed; opacity: 0.6; }
+.movie-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+}
 
-/* Lorong Tengah (Memberi jarak pada kursi ke-4) */
-.seat:nth-of-type(4) { margin-right: 20px; }
+.poster-frame {
+    border: 5px solid #fff;
+    border-bottom: 25px solid #fff;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    overflow: hidden;
+    position: relative;
+    height: 320px;
+}
 
-.text { margin-top: 15px; font-family: var(--font-body); font-size: 0.9rem; }
+/* Poster Overlay for Book Now Button */
+.poster-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(31, 21, 20, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    z-index: 2;
+}
+
+.movie-card:hover .poster-overlay {
+    opacity: 1;
+}
+
+/* Book Now Button */
+.btn-book-now {
+    background: linear-gradient(135deg, var(--accent-salmon), #FF9800);
+    color: var(--bg-dark);
+    border: none;
+    padding: 12px 25px;
+    font-family: var(--font-head);
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transform: translateY(20px);
+    opacity: 0;
+}
+
+.movie-card:hover .btn-book-now {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.btn-book-now:hover {
+    background: linear-gradient(135deg, #FF9800, var(--accent-salmon));
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(228, 143, 111, 0.4);
+}
+
+.btn-book-now:active {
+    transform: scale(0.98);
+}
+
+/* Movie Card Footer */
+.movie-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: rgba(44, 30, 28, 0.8);
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.movie-price {
+    color: var(--accent-salmon);
+    font-family: var(--font-head);
+    font-size: 1.1rem;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+}
+
+.movie-duration {
+    color: var(--text-cream);
+    font-size: 0.9rem;
+    font-family: var(--font-body);
+    background: rgba(255,255,255,0.1);
+    padding: 3px 8px;
+    border-radius: 12px;
+}
+
+/* Movie Card Title */
+.movie-card h3 {
+    text-align: center;
+    font-family: var(--font-head);
+    font-size: 1.3rem;
+    margin: 15px 10px 5px 10px;
+    letter-spacing: 1px;
+    color: var(--text-cream);
+    min-height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.movie-card small {
+    display: block;
+    text-align: center;
+    color: var(--accent-salmon);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    padding: 0 10px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .poster-frame {
+        height: 280px;
+    }
+    
+    .btn-book-now {
+        padding: 10px 20px;
+        font-size: 1rem;
+    }
+    
+    .movie-card h3 {
+        font-size: 1.1rem;
+        min-height: 40px;
+    }
+}
+
+@media (max-width: 576px) {
+    .poster-frame {
+        height: 250px;
+    }
+    
+    .movie-card {
+        min-width: 180px;
+    }
+    
+    .movie-card-footer {
+        padding: 8px 10px;
+    }
+    
+    .movie-price {
+        font-size: 1rem;
+    }
+    
+    .movie-duration {
+        font-size: 0.8rem;
+        padding: 2px 6px;
+    }
+}
+
+/* ================= SEAT SELECTION STYLES (SIMPLE VERSION) ================= */
+
+/* Available seats (green) */
+.seat {
+    background: linear-gradient(135deg, var(--success-green), var(--success-dark));
+    color: white;
+    height: 32px;
+    width: 40px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 2px rgba(0,0,0,0.2);
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: sans-serif;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    position: relative;
+}
+
+/* Hover effect for available seats */
+.seat:not(.occupied):not(.selected):hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+/* Selected seats (orange) */
+.seat.selected {
+    background: linear-gradient(135deg, var(--primary-orange), var(--primary-dark));
+    color: white;
+    transform: scale(1.05);
+    box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
+}
+
+/* Occupied seats (red) */
+.seat.occupied {
+    background: linear-gradient(135deg, var(--warning-red), var(--warning-dark));
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.7;
+    transform: none !important;
+}
+
+/* Aisle spacing */
+.seat:nth-of-type(4) {
+    margin-right: 25px;
+}
+
+/* Simple seat instructions */
+.seat-instructions {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    text-align: center;
+    color: #333;
+}
+
+.seat-instructions .seat-example {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 10px;
+}
+
+.seat-example .seat-sample {
+    width: 25px;
+    height: 20px;
+    border-radius: 4px;
+    margin-right: 5px;
+    display: inline-block;
+}
+
+.seat-example .seat-sample.available {
+    background: linear-gradient(135deg, var(--success-green), var(--success-dark));
+}
+
+.seat-example .seat-sample.selected {
+    background: linear-gradient(135deg, var(--primary-orange), var(--primary-dark));
+}
+
+.seat-example .seat-sample.occupied {
+    background: linear-gradient(135deg, var(--warning-red), var(--warning-dark));
+}
+
+/* Qty Control */
+.qty-control { 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    gap: 15px; 
+    margin-bottom: 10px; 
+    font-family: var(--font-head); 
+    font-size: 1.3rem; 
+}
+.qty-btn { 
+    width: 35px; 
+    height: 35px; 
+    background: #2C1E1C; 
+    color: white; 
+    border: none; 
+    cursor: pointer; 
+    border-radius: 4px; 
+    transition: all 0.3s ease;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.qty-btn:hover { 
+    background: var(--accent-salmon); 
+    transform: scale(1.1); 
+}
+
+/* ================= ENHANCED CONFIRMATION STEP ================= */
+#step-confirm {
+    text-align: center;
+    animation: fadeIn 0.5s ease;
+}
+
+#step-confirm h2 {
+    font-family: var(--font-head);
+    font-size: 2.5rem;
+    color: #2C1E1C;
+    margin-bottom: 25px;
+    letter-spacing: 2px;
+    position: relative;
+    padding-bottom: 15px;
+}
+
+#step-confirm h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100px;
+    height: 3px;
+    background: linear-gradient(to right, var(--accent-salmon), var(--primary-orange));
+    border-radius: 2px;
+}
+
+/* Enhanced Confirm Box */
+.confirm-box {
+    background: linear-gradient(135deg, #f9f3e9, #fff5ec);
+    padding: 25px 30px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    text-align: left;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    border: 1px solid rgba(228, 143, 111, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.confirm-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 6px;
+    height: 100%;
+    background: linear-gradient(to bottom, var(--accent-salmon), var(--primary-orange));
+}
+
+/* Movie Title in Confirmation */
+#confMovie {
+    font-family: var(--font-head);
+    font-size: 1.8rem;
+    color: #2C1E1C;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px dashed rgba(44, 30, 28, 0.1);
+    letter-spacing: 1px;
+}
+
+/* Confirmation Details */
+.confirm-box p {
+    margin: 12px 0;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    color: #555;
+    display: flex;
+    align-items: center;
+}
+
+.confirm-box p b {
+    color: #2C1E1C;
+    font-weight: 700;
+    margin-left: 8px;
+    font-family: var(--font-head);
+    letter-spacing: 0.5px;
+}
+
+.confirm-box p:nth-child(2) b {
+    color: var(--accent-salmon);
+}
+
+.confirm-box p:nth-child(3) b {
+    color: var(--primary-orange);
+    background: rgba(255, 152, 0, 0.1);
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.confirm-box p:nth-child(4) b {
+    color: var(--success-green);
+    font-size: 1.3rem;
+    background: rgba(76, 175, 80, 0.1);
+    padding: 5px 15px;
+    border-radius: 8px;
+    margin-left: 10px;
+}
+
+/* Icon styling in confirmation */
+.confirm-box p::before {
+    margin-right: 10px;
+    font-size: 1.1rem;
+    opacity: 0.7;
+}
+
+.confirm-box p:nth-child(2)::before {
+    content: '📅';
+}
+
+.confirm-box p:nth-child(3)::before {
+    content: '🎬';
+}
+
+.confirm-box p:nth-child(4)::before {
+    content: '💰';
+}
+
+/* Confirmation Buttons Container */
+.confirm-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 25px;
+    flex-wrap: wrap;
+}
+
+/* Enhanced Cancel Button */
+.btn-cancel {
+    background: transparent;
+    border: 2px solid #dc3545;
+    color: #dc3545;
+    padding: 15px 30px;
+    font-family: var(--font-head);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 180px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-cancel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(220, 53, 69, 0.1), transparent);
+    transition: 0.5s;
+}
+
+.btn-cancel:hover::before {
+    left: 100%;
+}
+
+.btn-cancel:hover {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+}
+
+.btn-cancel:active {
+    transform: translateY(-1px);
+}
+
+/* Enhanced Pay Now Button */
+.btn-pay-now {
+    background: linear-gradient(135deg, var(--success-green), var(--success-dark));
+    color: white;
+    border: 2px solid var(--success-green);
+    padding: 15px 30px;
+    font-family: var(--font-head);
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 180px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-pay-now::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: 0.5s;
+}
+
+.btn-pay-now:hover::before {
+    left: 100%;
+}
+
+.btn-pay-now:hover {
+    background: linear-gradient(135deg, var(--success-dark), var(--success-green));
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(76, 175, 80, 0.4);
+}
+
+.btn-pay-now:active {
+    transform: translateY(-1px);
+}
+
+/* Button Icons */
+.btn-cancel i, .btn-pay-now i {
+    font-size: 1.3rem;
+}
+
+/* Success Animation */
+@keyframes successPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.payment-success {
+    animation: successPulse 0.5s ease 3;
+}
+
+/* Responsive Confirmation */
+@media (max-width: 768px) {
+    #step-confirm h2 {
+        font-size: 2rem;
+    }
+    
+    .confirm-box {
+        padding: 20px;
+    }
+    
+    #confMovie {
+        font-size: 1.5rem;
+    }
+    
+    .confirm-box p {
+        font-size: 0.9rem;
+    }
+    
+    .confirm-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-cancel, .btn-pay-now {
+        width: 100%;
+        min-width: auto;
+        padding: 12px 20px;
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    #step-confirm h2 {
+        font-size: 1.8rem;
+    }
+    
+    .confirm-box {
+        padding: 15px;
+    }
+    
+    #confMovie {
+        font-size: 1.3rem;
+    }
+    
+    .confirm-box p {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+    
+    .confirm-box p b {
+        margin-left: 0;
+    }
+}
+
+/* Additional utility classes */
+.text-center { text-align: center; }
+.mt-10 { margin-top: 10px; }
+.mt-20 { margin-top: 20px; }
+.mb-10 { margin-bottom: 10px; }
+.mb-20 { margin-bottom: 20px; }
+
+/* Movie duration styling */
+.movie-duration {
+    font-family: var(--font-head);
+    font-size: 1.2rem;
+    color: #666;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.movie-duration::before {
+    content: '⏱️';
+    font-size: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .hero-title { font-size: 6rem; }
+    .hero-poster { flex: 0 0 300px; }
+}
+
+@media (max-width: 992px) {
+    .hero-container { flex-direction: column; text-align: center; }
+    .hero-text, .hero-poster { flex: none; width: 100%; max-width: 500px; }
+    .hero-poster { margin-top: 30px; }
+    .hero-title { font-size: 5rem; }
+    .tagline { font-size: 2.5rem; }
+    
+    .movie-info-layout { flex-direction: column; align-items: center; }
+    .info-poster { width: 100%; max-width: 300px; }
+    .info-text h2 { font-size: 2.5rem; text-align: center; }
+}
+
+@media (max-width: 768px) {
+    header { padding: 15px 20px; }
+    .logo { font-size: 1.5rem; }
+    .main-nav { gap: 15px; }
+    .main-nav a { font-size: 0.9rem; }
+    .hero-title { font-size: 4rem; }
+    .tagline { font-size: 2rem; }
+    .btn-primary { font-size: 1.2rem; padding: 12px 30px; }
+    
+    .ticket-modal { width: 95%; padding: 20px; }
+    .booking-modal-wide { width: 95%; }
+    
+    .seat-container { width: 100%; overflow-x: auto; }
+    .row { justify-content: flex-start; min-width: 400px; }
+    
+    .seat {
+        height: 28px;
+        width: 35px;
+        font-size: 0.7rem;
+    }
+    
+    .seat-instructions {
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+    
+    .seat-example .seat-sample {
+        width: 20px;
+        height: 16px;
+    }
+}
+
+@media (max-width: 576px) {
+    .hero-title { font-size: 3rem; }
+    .hero-details { flex-direction: column; gap: 10px; }
+    .tagline { font-size: 1.5rem; }
+    .section-header h2 { font-size: 2rem; }
+    .section-header span { font-size: 1.5rem; }
+    
+    .nav-btn { width: 50px; height: 50px; font-size: 1.5rem; }
+    .movie-card { min-width: 180px; }
+    .movie-card img { height: 250px; }
+    
+    .dropdown-menu { width: 180px; }
+    
+    .seat-instructions .seat-example {
+        display: block;
+        margin: 5px 0;
+    }
+}

@@ -1,59 +1,174 @@
 <?php
-// --- BAGIAN 1: BACKEND & KONEKSI DATABASE ---
+// ==========================================
+// 1. BACKEND: KONEKSI & LOGIKA GAMBAR LOKAL
+// ==========================================
 session_start();
 
-// Konfigurasi Database
 $host = 'localhost';
-$dbname = 'db_moobix';
+$dbname = 'db_moobix_1';
 $user = 'root';
-$pass = ''; // Default XAMPP biasanya kosong
+$pass = ''; 
+
+// --- FOLDER GAMBAR (SESUAIKAN DENGAN STRUKTUR FOLDER KAMU) ---
+$local_path = 'admin_ui/uploads/'; 
+
+// --- FUNGSI SAFETY ---
+function safe($array, $key, $default = '-') {
+    return isset($array[$key]) ? htmlspecialchars($array[$key]) : $default;
+}
+
+// --- FUNGSI CEK GAMBAR (INTERNET VS LOKAL) ---
+function getPoster($filename) {
+    global $local_path;
+    if (empty($filename)) return 'https://via.placeholder.com/400x600?text=No+Image';
+    
+    if (strpos($filename, 'http') === 0) {
+        return $filename;
+    } else {
+        return $local_path . $filename;
+    }
+}
+
+// ==========================================
+// HARDCODE AKUN TEST CASE
+// ==========================================
+$hardcoded_users = [
+    'user' => [
+        'password' => 'user123',
+        'name' => 'Test User',
+        'role' => 'user',
+        'email' => 'user@example.com'
+    ],
+    'admin' => [
+        'password' => 'admin123',
+        'name' => 'Test Admin',
+        'role' => 'admin',
+        'email' => 'admin@example.com'
+    ],
+    'customer' => [
+        'password' => 'customer123',
+        'name' => 'Regular Customer',
+        'role' => 'user',
+        'email' => 'customer@example.com'
+    ]
+];
+
+// ==========================================
+// SIMPLE LOGIN PROCESS HANDLING
+// ==========================================
+$login_error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_form'])) {
+    $username = $_POST['username'] ?? '';
+    $password = $_POST['password'] ?? '';
+    
+    // Cek hardcoded users
+    if (isset($hardcoded_users[$username]) && $hardcoded_users[$username]['password'] === $password) {
+        $_SESSION['user_name'] = $hardcoded_users[$username]['name'];
+        $_SESSION['user_email'] = $hardcoded_users[$username]['email'];
+        $_SESSION['user_role'] = $hardcoded_users[$username]['role'];
+        $_SESSION['login_time'] = time();
+        
+        // Redirect untuk refresh halaman
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
+    } else {
+        $login_error = "Username atau password salah!";
+    }
+}
+
+// ==========================================
+// SIMPLE REGISTER PROCESS HANDLING
+// ==========================================
+$register_error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_form'])) {
+    $fullname = $_POST['fullname'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $username = $_POST['reg_username'] ?? '';
+    $password = $_POST['reg_password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
+    $phone = $_POST['phone'] ?? '';
+    $terms = isset($_POST['terms']) ? true : false;
+    
+    // Validasi dasar
+    if (empty($fullname) || empty($email) || empty($username) || empty($password) || empty($confirm_password)) {
+        $register_error = "Semua field wajib diisi!";
+    } elseif ($password !== $confirm_password) {
+        $register_error = "Password tidak cocok!";
+    } elseif (!$terms) {
+        $register_error = "Anda harus menyetujui Terms of Service dan Privacy Policy";
+    } elseif (isset($hardcoded_users[$username])) {
+        $register_error = "Username sudah digunakan!";
+    } else {
+        // Simpan user baru ke array hardcoded (dalam produksi, simpan ke database)
+        $hardcoded_users[$username] = [
+            'password' => $password,
+            'name' => $fullname,
+            'role' => 'user',
+            'email' => $email
+        ];
+        
+        // Auto login setelah registrasi
+        $_SESSION['user_name'] = $fullname;
+        $_SESSION['user_email'] = $email;
+        $_SESSION['user_role'] = 'user';
+        $_SESSION['login_time'] = time();
+        
+        // Redirect untuk refresh halaman
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
+    }
+}
+
+// ==========================================
+// LOGOUT HANDLING
+// ==========================================
+if (isset($_GET['logout'])) {
+    session_destroy();
+    header('Location: ' . $_SERVER['PHP_SELF']);
+    exit();
+}
+
+// Data Default
+$heroMovie = [
+    'id' => 0, 'title' => 'DATA TIDAK DITEMUKAN', 'genre' => '-', 
+    'price' => 0, 'poster' => '', 'airing_date' => '-',
+    'synopsis' => 'Sinopsis belum tersedia.', 'duration' => 'Unknown' 
+];
+$nowShowing = [];
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname", $user, $pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e) {
-    die("Koneksi Gagal: " . $e->getMessage());
+
+    // 1. HERO MOVIE
+    $stmtHero = $pdo->query("SELECT * FROM movies ORDER BY id DESC LIMIT 1");
+    $fetchedHero = $stmtHero->fetch(PDO::FETCH_ASSOC);
+
+    if ($fetchedHero) {
+        $heroMovie = $fetchedHero;
+        $heroMovie['synopsis'] = $heroMovie['synopsis'] ?? 'Sinopsis belum tersedia di database.';
+        $heroMovie['duration'] = $heroMovie['duration'] ?? '2h 0min'; 
+    }
+
+    // 2. LIST MOVIE
+    if ($heroMovie['id'] != 0) {
+        $stmtList = $pdo->prepare("SELECT * FROM movies WHERE id != :id ORDER BY id DESC");
+        $stmtList->execute(['id' => $heroMovie['id']]);
+        $nowShowing = $stmtList->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+} catch (PDOException $e) { 
+    // Silent Error untuk development
 }
 
-// Mengambil Data Hero Movie (Film Terbaru/Unggulan)
-$stmtHero = $pdo->query("SELECT * FROM movies ORDER BY id DESC LIMIT 1");
-$heroMovie = $stmtHero->fetch(PDO::FETCH_ASSOC);
-
-// Fallback jika database kosong (Data Dummy)
-if (!$heroMovie) {
-    $heroMovie = [
-        'title' => 'OPPENHEIMER',
-        'genre' => 'Biography',
-        'duration' => '3h 0min',
-        'rating' => '8.9',
-        'airing_date' => '14:00', // Tambah ini biar tidak error
-        'price' => 50000,         // Tambah ini biar tidak error
-        'poster' => 'https://image.tmdb.org/t/p/original/8RpDCSfKTPA8HOxAsj2vqF8w946.jpg' // GANTI JADI POSTER
-    ];
-}
-
-// Mengambil Data 'Now Showing'
-$stmtList = $pdo->query("SELECT * FROM movies");
-$nowShowing = $stmtList->fetchAll(PDO::FETCH_ASSOC);
-
-// Fallback dummy
-if (empty($nowShowing)) {
-    $nowShowing = [
-        [
-            'title' => 'Barbie', 
-            'rating' => '7.5', 
-            'genre' => 'Comedy', 
-            'poster' => 'https://image.tmdb.org/t/p/original/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg' // GANTI JADI POSTER
-        ],
-        [
-            'title' => 'Dune 2', 
-            'rating' => '8.8', 
-            'genre' => 'Sci-Fi', 
-            'poster' => 'https://image.tmdb.org/t/p/original/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg' // GANTI JADI POSTER
-        ]
-    ];
-}
-// ?>
+// Tentukan dashboard mana yang ditampilkan
+$isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
+$isUser = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'user';
+$isLoggedIn = isset($_SESSION['user_name']);
+$userName = $_SESSION['user_name'] ?? '';
+$userRole = $_SESSION['user_role'] ?? '';
+$userEmail = $_SESSION['user_email'] ?? '';
+?>
 
 <!DOCTYPE html>
 <html lang="id">
@@ -64,156 +179,955 @@ if (empty($nowShowing)) {
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dancing+Script:wght@700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dancing+Script:wght@700&family=Oswald:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <link rel="stylesheet" href="ui_style.css">
+
+    <style>
+        /* Modal Styles - DIPERKECIL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #666;
+            z-index: 10;
+            transition: color 0.3s;
+        }
+
+        .close-modal:hover {
+            color: #333;
+        }
+
+        /* Modal Header */
+        .modal-header {
+            padding: 25px 30px 15px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 1.5rem;
+        }
+
+        .modal-login-icon {
+            background: linear-gradient(135deg, var(--accent-salmon), var(--primary-orange));
+            color: white;
+        }
+
+        .modal-register-icon {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+        }
+
+        .modal-header h2 {
+            color: #2C1E1C;
+            margin: 0 0 5px 0;
+            font-family: var(--font-head);
+            font-size: 1.5rem;
+            letter-spacing: 1px;
+        }
+
+        .modal-header p {
+            color: #666;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        /* Modal Body */
+        .modal-body {
+            padding: 20px 30px;
+        }
+
+        /* Form Elements - DIPERKECIL */
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #444;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1.5px solid #ddd;
+            background: white;
+            font-family: 'Oswald', sans-serif;
+            font-size: 0.95rem;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: var(--accent-salmon);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(228, 143, 111, 0.1);
+        }
+
+        .input-group input::placeholder {
+            color: #999;
+            font-weight: 300;
+        }
+
+        /* Password Toggle */
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        /* Buttons - DIPERKECIL */
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: var(--font-head);
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, var(--accent-salmon), var(--primary-orange));
+            color: white;
+        }
+
+        .btn-register {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-alt {
+            background: transparent;
+            border: 1.5px solid #ddd;
+            color: #666;
+            padding: 10px;
+            width: 100%;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-alt:hover {
+            background: #f5f5f5;
+            border-color: #ccc;
+        }
+
+        /* Terms Checkbox */
+        .terms-checkbox {
+            display: flex;
+            align-items: flex-start;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: #666;
+            margin: 12px 0;
+        }
+
+        .terms-checkbox input {
+            margin-right: 8px;
+            margin-top: 2px;
+        }
+
+        .terms-checkbox a {
+            color: var(--accent-salmon);
+            text-decoration: none;
+        }
+
+        .terms-checkbox a:hover {
+            text-decoration: underline;
+        }
+
+        /* Error Messages */
+        .error-message {
+            background: #ffebee;
+            color: #c62828;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 4px solid #c62828;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Divider */
+        .modal-divider {
+            display: flex;
+            align-items: center;
+            margin: 18px 0;
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        .modal-divider::before,
+        .modal-divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #eee;
+        }
+
+        .modal-divider span {
+            padding: 0 12px;
+        }
+
+        /* Switch Form Text */
+        .switch-form {
+            text-align: center;
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 15px;
+        }
+
+        .switch-form a {
+            color: var(--accent-salmon);
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .switch-form a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .modal-content {
+                max-width: 95%;
+                padding: 0;
+            }
+            
+            .modal-header {
+                padding: 20px 20px 12px;
+            }
+            
+            .modal-body {
+                padding: 15px 20px;
+            }
+            
+            .modal-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .input-group input {
+                padding: 9px 11px;
+                font-size: 0.9rem;
+            }
+            
+            .btn-submit {
+                padding: 11px;
+                font-size: 0.95rem;
+            }
+        }
+
+        /* Loading Spinner */
+        .ph-spin {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Success Message */
+        .success-message {
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border-left: 4px solid #4caf50;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
 </head>
 <body>
 
     <header id="navbar">
         <div class="logo">CINETIX THEATER</div>
-        
+        <?php if(!$isAdmin): ?>
         <nav class="main-nav">
             <a href="#hero-section">NEWEST HIT</a>
             <a href="#schedule-section">MORE FILMS</a>
         </nav>
-
+        <?php endif; ?>
         <div class="login-area">
-            <div class="search-box">
-                <input type="text" id="searchInput" placeholder="Search film...">
-            </div>
-
-            <?php if(isset($_SESSION['user_name'])): ?>
-                
-                <div style="color: white; margin-right: 15px; font-family: sans-serif; font-size: 0.9rem;">
-                    Hi, <b><?php echo htmlspecialchars($_SESSION['user_name']); ?></b>
-                </div>
-                <a href="logout.php" class="login-btn" style="text-decoration:none; display:inline-block; text-align:center; line-height: normal;">LOGOUT</a>
-
-            <?php else: ?>
-
-                <button class="login-btn" onclick="toggleModal('loginModal', true)">LOGIN</button>
-
+            <?php if(!$isAdmin): ?>
+            <div class="search-box"><input type="text" id="searchInput" placeholder="Search film..."></div>
             <?php endif; ?>
-            </div>
+            <?php if($isLoggedIn): ?>
+                <div class="profile-dropdown">
+                    <div class="profile-trigger">
+                        <div class="avatar"><?php echo strtoupper(substr($userName, 0, 1)); ?></div>
+                        <span class="username"><?php echo htmlspecialchars($userName); ?></span>
+                        <i class="ph ph-caret-down"></i>
+                    </div>
+                    <div class="dropdown-menu">
+                        <div class="profile-header">
+                            <div class="profile-avatar-large"><?php echo strtoupper(substr($userName, 0, 1)); ?></div>
+                            <div class="profile-info">
+                                <h4><?php echo htmlspecialchars($userName); ?></h4>
+                                <p><?php echo htmlspecialchars($userEmail); ?></p>
+                                <span class="user-role-badge"><?php echo $isAdmin ? 'Administrator' : 'Regular User'; ?></span>
+                            </div>
+                        </div>
+                        
+                        <div class="divider-mini"></div>
+                        
+                        <?php if($isAdmin): ?>
+                            <a href="#"><i class="ph ph-gear"></i> Admin Panel</a>
+                            <a href="#"><i class="ph ph-film-script"></i> Manage Movies</a>
+                            <a href="#"><i class="ph ph-users"></i> Manage Users</a>
+                            <a href="#"><i class="ph ph-chart-bar"></i> Reports</a>
+                            <a href="#"><i class="ph ph-calendar-check"></i> Bookings</a>
+                            
+                            <div class="divider-mini"></div>
+                            
+                            <a href="#"><i class="ph ph-user"></i> My Profile</a>
+                            <a href="#"><i class="ph ph-ticket"></i> My Tickets</a>
+                            <a href="#"><i class="ph ph-clock-counter-clockwise"></i> Riwayat Transaksi</a>
+                            <a href="#"><i class="ph ph-pencil-simple"></i> Edit Profil</a>
+                            
+                        <?php else: ?>
+                            <a href="index.php" class="active"><i class="ph ph-house"></i> Home/Beranda</a>
+                            <a href="#"><i class="ph ph-ticket"></i> Tiket Saya</a>
+                            <a href="#"><i class="ph ph-clock-counter-clockwise"></i> Riwayat Transaksi</a>
+                            <a href="#"><i class="ph ph-pencil-simple"></i> Edit Profil</a>
+                        <?php endif; ?>
+                        
+                        <div class="divider-mini"></div>
+                        <a href="?logout=true" class="logout-btn"><i class="ph ph-sign-out"></i> Logout</a>
+                    </div>
+                </div>
+            <?php else: ?>
+                <button class="login-btn" onclick="showModal('loginModal')">LOGIN</button>
+            <?php endif; ?>
+        </div>
     </header>
 
-    <section class="hero" id="hero-section">
-        <div class="hero-container">
-            <div class="hero-text">
-                <span class="tagline">Now Showing &mdash; The Masterpiece</span>
-                <h1 class="hero-title"><?php echo htmlspecialchars($heroMovie['title']); ?></h1>
-                
-                <div class="hero-details">
-                    <span><?php echo htmlspecialchars($heroMovie['genre']); ?></span> &bull; 
-                    <span>Jam: <?php echo htmlspecialchars($heroMovie['airing_date']); ?></span> &bull; 
-                    <span>Tiket: Rp <?php echo number_format($heroMovie['price']); ?></span>
-                </div>
+    <?php
+    // Load appropriate dashboard based on user role
+    if ($isAdmin) {
+        include 'admin_dashboard.php';
+    } else {
+        include 'user_dashboard.php';
+    }
+    ?>
 
-                <button class="btn-primary" onclick="toggleModal('bookingModal', true)">GET TICKET</button>
-            </div>
-
-            <div class="hero-poster">
-                <div class="poster-frame-hero">
-                    <img src="uploads/<?php echo htmlspecialchars($heroMovie['poster']); ?>" alt="Poster" referrerpolicy="no-referrer">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <div class="divider"><span>MORE TO EXPLORE</span></div>
-
-    <section class="now-showing" id="schedule-section">
-        <div class="section-header">
-            <span>Today's Selection</span>
-            <h2>NOW SHOWING</h2>
-        </div>
-        
-        <div class="slider-wrapper">
-            <button class="nav-btn" onclick="scrollMovies(-300)"><i class="ph ph-caret-left"></i></button>
-
-            <div class="cards-container" id="movieList">
-                <?php foreach($nowShowing as $movie): ?>
-                    <div class="movie-card">
-                        <div class="poster-frame">
-                            <img src="uploads/<?php echo htmlspecialchars($movie['poster']); ?>" alt="Poster">
-                        </div>
-                        <h3><?php echo htmlspecialchars($movie['title']); ?></h3>
-            
-                        <small>Genre: <?php echo htmlspecialchars($movie['genre']); ?></small>
-            
-                        <button class="btn-primary" style="padding: 5px 15px; font-size: 0.9rem; margin-top:10px; width:100%;" onclick="toggleModal('bookingModal', true)">Book Now</button>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-
-            <button class="nav-btn" onclick="scrollMovies(300)"><i class="ph ph-caret-right"></i></button>
-        </div>
-    </section>
-
+    <!-- Login Modal -->
+    <?php if(!$isLoggedIn): ?>
     <div class="modal-overlay" id="loginModal">
-        <div class="ticket-modal">
-            <span class="close-modal" onclick="toggleModal('loginModal', false)">&times;</span>
+        <div class="modal-content">
+            <span class="close-modal" onclick="hideModal('loginModal')">&times;</span>
             
-            <div id="login-view">
-                <h2>LOG IN</h2>
-                <form action="login_process.php" method="POST">
-                    <div class="input-group">
-                        <label>Email / ID</label>
-                        <input type="text" name="username" required>
-                    </div>
-                    <div class="input-group">
-                        <label>Password</label>
-                        <input type="password" name="password" required>
-                    </div>
-                    <button type="submit" class="btn-login-submit">ENTER</button>
-                </form>
-                <p class="text" style="cursor:pointer; text-decoration:underline;" onclick="switchForm('signup')">Create an Account</p>
+            <div class="modal-header">
+                <div class="modal-icon modal-login-icon">
+                    <i class="ph ph-ticket"></i>
+                </div>
+                <h2>WELCOME BACK</h2>
+                <p>Sign in to your CineTix account</p>
             </div>
-
-            <div id="signup-view" style="display:none;">
-                <h2>SIGN UP</h2>
-                <form action="register_process.php" method="POST">
-                    <div class="input-group"><label>Name</label><input type="text" name="name"></div>
-                    <div class="input-group"><label>Email</label><input type="email" name="email"></div>
-                    <div class="input-group"><label>Password</label><input type="password" name="password"></div>
-                    <button type="submit" class="btn-login-submit">REGISTER</button>
+            
+            <div class="modal-body">
+                <?php if($login_error): ?>
+                <div class="error-message">
+                    <i class="ph ph-warning-circle"></i> <?php echo htmlspecialchars($login_error); ?>
+                </div>
+                <?php endif; ?>
+                
+                <form method="POST" id="loginForm">
+                    <input type="hidden" name="login_form" value="1">
+                    
+                    <div class="input-group">
+                        <label for="username">
+                            <i class="ph ph-user" style="margin-right: 5px;"></i> Username
+                        </label>
+                        <input type="text" 
+                               name="username" 
+                               id="username" 
+                               required 
+                               placeholder="Enter your username"
+                               autocomplete="username"
+                               value="<?php echo isset($_POST['username']) ? htmlspecialchars($_POST['username']) : ''; ?>">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="password">
+                            <i class="ph ph-lock" style="margin-right: 5px;"></i> Password
+                        </label>
+                        <div class="password-wrapper">
+                            <input type="password" 
+                                   name="password" 
+                                   id="password" 
+                                   required 
+                                   placeholder="Enter your password"
+                                   autocomplete="current-password">
+                            <button type="button" 
+                                    class="password-toggle" 
+                                    onclick="togglePassword('password', this)">
+                                <i class="ph ph-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-submit btn-login" id="loginSubmitBtn">
+                        <i class="ph ph-sign-in"></i> ENTER & LOGIN
+                    </button>
+                    
+                    <div class="modal-divider">
+                        <span>OR</span>
+                    </div>
+                    
+                    <button type="button" 
+                            class="btn-submit" 
+                            style="background: linear-gradient(135deg, #4CAF50, #2E7D32);"
+                            onclick="hideModal('loginModal'); showModal('registerModal')">
+                        <i class="ph ph-user-plus"></i> CREATE NEW ACCOUNT
+                    </button>
+                    
+                    <div class="switch-form">
+                        Don't have an account? 
+                        <a onclick="hideModal('loginModal'); showModal('registerModal')">Sign up here</a>
+                    </div>
                 </form>
-                <p class="text" style="cursor:pointer; text-decoration:underline;" onclick="switchForm('login')">Back to Login</p>
             </div>
         </div>
     </div>
+    <?php endif; ?>
 
+    <!-- Register Modal -->
+    <?php if(!$isLoggedIn): ?>
+    <div class="modal-overlay" id="registerModal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="hideModal('registerModal')">&times;</span>
+            
+            <div class="modal-header">
+                <div class="modal-icon modal-register-icon">
+                    <i class="ph ph-user-plus"></i>
+                </div>
+                <h2>CREATE ACCOUNT</h2>
+                <p>Join CineTix for exclusive benefits</p>
+            </div>
+            
+            <div class="modal-body">
+                <?php if($register_error): ?>
+                <div class="error-message">
+                    <i class="ph ph-warning-circle"></i> <?php echo htmlspecialchars($register_error); ?>
+                </div>
+                <?php endif; ?>
+                
+                <form method="POST" id="registerForm">
+                    <input type="hidden" name="register_form" value="1">
+                    
+                    <div class="input-group">
+                        <label for="fullname">
+                            <i class="ph ph-user-circle" style="margin-right: 5px;"></i> Full Name
+                        </label>
+                        <input type="text" 
+                               name="fullname" 
+                               id="fullname" 
+                               required 
+                               placeholder="Enter your full name"
+                               autocomplete="name"
+                               value="<?php echo isset($_POST['fullname']) ? htmlspecialchars($_POST['fullname']) : ''; ?>">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="email">
+                            <i class="ph ph-envelope" style="margin-right: 5px;"></i> Email Address
+                        </label>
+                        <input type="email" 
+                               name="email" 
+                               id="email" 
+                               required 
+                               placeholder="your.email@example.com"
+                               autocomplete="email"
+                               value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="reg_username">
+                            <i class="ph ph-user" style="margin-right: 5px;"></i> Username
+                        </label>
+                        <input type="text" 
+                               name="reg_username" 
+                               id="reg_username" 
+                               required 
+                               placeholder="Choose a username"
+                               autocomplete="username"
+                               value="<?php echo isset($_POST['reg_username']) ? htmlspecialchars($_POST['reg_username']) : ''; ?>">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="reg_password">
+                            <i class="ph ph-lock" style="margin-right: 5px;"></i> Password
+                        </label>
+                        <div class="password-wrapper">
+                            <input type="password" 
+                                   name="reg_password" 
+                                   id="reg_password" 
+                                   required 
+                                   placeholder="Create a strong password"
+                                   autocomplete="new-password">
+                            <button type="button" 
+                                    class="password-toggle" 
+                                    onclick="togglePassword('reg_password', this)">
+                                <i class="ph ph-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="confirm_password">
+                            <i class="ph ph-lock-key" style="margin-right: 5px;"></i> Confirm Password
+                        </label>
+                        <input type="password" 
+                               name="confirm_password" 
+                               id="confirm_password" 
+                               required 
+                               placeholder="Confirm your password"
+                               autocomplete="new-password">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="phone">
+                            <i class="ph ph-phone" style="margin-right: 5px;"></i> Phone Number (Optional)
+                        </label>
+                        <input type="tel" 
+                               name="phone" 
+                               id="phone" 
+                               placeholder="+62 812 3456 7890"
+                               autocomplete="tel"
+                               value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>">
+                    </div>
+                    
+                    <div class="terms-checkbox">
+                        <input type="checkbox" name="terms" id="terms" required <?php echo isset($_POST['terms']) ? 'checked' : ''; ?>>
+                        <span>
+                            I agree to the 
+                            <a href="#" style="color: var(--accent-salmon);">Terms of Service</a> 
+                            and 
+                            <a href="#" style="color: var(--accent-salmon);">Privacy Policy</a>
+                        </span>
+                    </div>
+                    
+                    <button type="submit" class="btn-submit btn-register" id="registerSubmitBtn">
+                        <i class="ph ph-user-plus"></i> CREATE ACCOUNT
+                    </button>
+                    
+                    <div class="modal-divider">
+                        <span>OR</span>
+                    </div>
+                    
+                    <button type="button" 
+                            class="btn-alt"
+                            onclick="hideModal('registerModal'); showModal('loginModal')">
+                        <i class="ph ph-sign-in"></i> SIGN IN INSTEAD
+                    </button>
+                    
+                    <div class="switch-form">
+                        Already have an account? 
+                        <a onclick="hideModal('registerModal'); showModal('loginModal')">Sign in here</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <!-- Booking Modal (Common for both dashboards) -->
     <div class="modal-overlay" id="bookingModal">
-        <div class="ticket-modal" style="width: 500px;">
+        <div class="ticket-modal booking-modal-wide">
             <span class="close-modal" onclick="toggleModal('bookingModal', false)">&times;</span>
-            <h2>SELECT SEATS</h2>
-            
-            <div class="seat-container">
-                <div class="screen">SCREEN</div>
-                <div class="row">
-                    <div class="seat"></div><div class="seat"></div><div class="seat occupied"></div><div class="seat"></div>
-                    <div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div>
-                </div>
-                <div class="row">
-                    <div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div>
-                    <div class="seat occupied"></div><div class="seat occupied"></div><div class="seat"></div><div class="seat"></div>
-                </div>
-                 <div class="row">
-                    <div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div>
-                    <div class="seat"></div><div class="seat"></div><div class="seat"></div><div class="seat"></div>
+            <div id="step-info" class="booking-step">
+                <div class="movie-info-layout">
+                    <div class="info-poster"><img id="modalPoster" src="" alt="Movie" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'"></div>
+                    <div class="info-text">
+                        <h2 id="modalTitle">TITLE</h2>
+                        <p class="movie-duration" id="modalDuration"></p>
+                        <p id="modalSynopsis" class="synopsis">Synopsis...</p>
+                        <button class="btn-primary" onclick="proceedToSchedule()">BUY TICKET</button>
+                    </div>
                 </div>
             </div>
-
-            <p class="text">
-                Selected: <b id="count" style="color:#aa2b2b;">0</b> seats <br>
-                Total Price: <b>Rp <span id="total">0</span></b>
-            </p>
-            <button class="btn-primary" style="width:100%; margin-top:15px;">CONFIRM & PAY</button>
+            <div id="step-schedule" class="booking-step" style="display:none;">
+                <h2>SELECT SCHEDULE</h2>
+                <div class="date-picker-wrapper">
+                    <?php
+                    // Generate tanggal untuk 7 hari ke depan
+                    $dates = [];
+                    for ($i = 0; $i < 7; $i++) {
+                        $date = date('Y-m-d', strtotime("+$i days"));
+                        $dayName = date('D', strtotime($date));
+                        $dayNum = date('d', strtotime($date));
+                        $monthName = date('M', strtotime($date));
+                        $dates[] = [
+                            'full' => $date,
+                            'day' => $dayName,
+                            'dayNum' => $dayNum,
+                            'month' => $monthName
+                        ];
+                    }
+                    foreach ($dates as $date): ?>
+                    <div class="date-item" onclick="selectDate(this, '<?php echo $date['full']; ?>')">
+                        <span><?php echo $date['month']; ?></span>
+                        <b><?php echo $date['dayNum']; ?></b>
+                        <small><?php echo $date['day']; ?></small>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <div id="timeSlots" class="time-slots-wrapper" style="display:none;">
+                    <p style="text-align:center;">AVAILABLE TIME:</p>
+                    <div class="slots">
+                        <button class="time-btn" onclick="selectTime(this, '10:00')">10:00</button>
+                        <button class="time-btn" onclick="selectTime(this, '14:00')">14:00</button>
+                        <button class="time-btn" onclick="selectTime(this, '19:30')">19:30</button>
+                    </div>
+                </div>
+                <div id="seatMapArea" style="display:none;">
+                    <div class="divider-mini" style="margin:20px 0;"></div>
+                    <div class="qty-control">
+                        <button class="qty-btn" onclick="updateQty(-1)">-</button>
+                        <span><span id="qtyDisplay">1</span> Tiket</span>
+                        <button class="qty-btn" onclick="updateQty(1)">+</button>
+                    </div>
+                    <div class="seat-container">
+                        <div class="screen">SCREEN</div>
+                        <div class="row"><div class="seat">A1</div><div class="seat">A2</div><div class="seat occupied">A3</div><div class="seat">A4</div><div class="seat">A5</div><div class="seat">A6</div></div>
+                        <div class="row"><div class="seat">B1</div><div class="seat">B2</div><div class="seat">B3</div><div class="seat">B4</div><div class="seat">B5</div><div class="seat">B6</div></div>
+                        <div class="row"><div class="seat">C1</div><div class="seat">C2</div><div class="seat">C3</div><div class="seat">C4</div><div class="seat occupied">C5</div><div class="seat occupied">C6</div></div>
+                        <div class="row"><div class="seat">D1</div><div class="seat">D2</div><div class="seat">D3</div><div class="seat">D4</div><div class="seat">D5</div><div class="seat">D6</div></div>
+                    </div>
+                    <p class="text" style="text-align:center;">Total: <b>Rp <span id="totalPrice">0</span></b></p>
+                    <button class="btn-primary" style="width:100%; margin-top:15px;" onclick="showConfirmation()">CONFIRM</button>
+                </div>
+            </div>
+            <div id="step-confirm" class="booking-step" style="display:none;">
+                <h2>CONFIRMATION</h2>
+                <div class="confirm-box">
+                    <h3 id="confMovie">Movie</h3>
+                    <p>Date: <b id="confDate">-</b> &bull; Time: <b id="confTime">-</b></p>
+                    <p>Seats: <b id="confSeats" style="color:var(--accent-salmon)">-</b></p>
+                    <p>Total: <b>Rp <span id="confTotal">0</span></b></p>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn-cancel" onclick="backToSeats()">CANCEL</button>
+                    <button class="btn-pay-now" onclick="processPayment()">PAY NOW</button>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Admin Modal (Only loaded for admin users) -->
+    <?php if($isAdmin): ?>
+    <div class="modal-overlay" id="adminModal">
+        <div class="ticket-modal" style="width: 600px; max-height: 80vh; overflow-y: auto;">
+            <span class="close-modal" onclick="toggleModal('adminModal', false)">&times;</span>
+            <div id="adminModalContent"></div>
+        </div>
+    </div>
+    <?php endif; ?>
+
+    <script>
+        // Data session dan konfigurasi dari PHP
+        const PHP_DATA = {
+            isLoggedIn: <?php echo $isLoggedIn ? 'true' : 'false'; ?>,
+            userRole: '<?php echo $userRole; ?>',
+            userName: '<?php echo addslashes($userName); ?>',
+            isAdmin: <?php echo $isAdmin ? 'true' : 'false'; ?>,
+            isUser: <?php echo $isUser ? 'true' : 'false'; ?>
+        };
+        
+        // Modal Functions untuk login/register yang DIPERKECIL
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+                
+                // Auto focus pada input pertama
+                setTimeout(() => {
+                    const firstInput = modal.querySelector('input');
+                    if (firstInput) firstInput.focus();
+                }, 300);
+            }
+        }
+        
+        function hideModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        }
+        
+        // Password toggle function
+        function togglePassword(inputId, button) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.innerHTML = '<i class="ph ph-eye-slash"></i>';
+            } else {
+                input.type = 'password';
+                button.innerHTML = '<i class="ph ph-eye"></i>';
+            }
+        }
+        
+        // Form submission handling
+        document.addEventListener('DOMContentLoaded', function() {
+            // Login form submission
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    const submitBtn = document.getElementById('loginSubmitBtn');
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> LOGGING IN...';
+                        submitBtn.disabled = true;
+                    }
+                });
+            }
+            
+            // Register form submission
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.addEventListener('submit', function(e) {
+                    const submitBtn = document.getElementById('registerSubmitBtn');
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> CREATING ACCOUNT...';
+                        submitBtn.disabled = true;
+                    }
+                });
+            }
+            
+            // Close modal when clicking outside
+            const modals = document.querySelectorAll('.modal-overlay');
+            modals.forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        hideModal(this.id);
+                    }
+                });
+            });
+            
+            // Close modal with Escape key
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    modals.forEach(modal => {
+                        if (modal.style.display === 'flex') {
+                            hideModal(modal.id);
+                        }
+                    });
+                }
+            });
+            
+            // Auto open modal jika ada error
+             <?php 
+        // Check if there's an actual error message (not just empty string)
+        $hasLoginError = !empty($login_error);
+        $hasRegisterError = !empty($register_error);
+        
+        if(($hasLoginError || $hasRegisterError) && !$isLoggedIn): 
+        ?>
+        setTimeout(function() {
+            <?php if($hasRegisterError): ?>
+            showModal('registerModal');
+            <?php else: ?>
+            showModal('loginModal');
+            <?php endif; ?>
+        }, 500);
+        <?php endif; ?>
+            
+            // Initialize jika sudah login
+            if(PHP_DATA.isLoggedIn) {
+                console.log('User sudah login sebagai:', PHP_DATA.userName);
+                console.log('Role:', PHP_DATA.userRole);
+            }
+        });
+        
+        <?php if($isAdmin): ?>
+        // Admin Modal Functions (untuk fitur admin)
+        function openAdminModal(type) {
+            let content = '';
+            let title = '';
+            
+            switch(type) {
+                case 'addMovie':
+                    title = 'Add New Movie';
+                    content = `
+                        <h2 style="margin-bottom: 20px;">${title}</h2>
+                        <div class="input-group">
+                            <label>Movie Title</label>
+                            <input type="text" id="movieTitle" placeholder="Enter movie title">
+                        </div>
+                        <div class="input-group">
+                            <label>Genre</label>
+                            <input type="text" id="movieGenre" placeholder="e.g., Action, Drama, Comedy">
+                        </div>
+                        <div class="input-group">
+                            <label>Duration</label>
+                            <input type="text" id="movieDuration" placeholder="e.g., 2h 15min">
+                        </div>
+                        <div class="input-group">
+                            <label>Price</label>
+                            <input type="number" id="moviePrice" placeholder="e.g., 50000">
+                        </div>
+                        <div class="input-group">
+                            <label>Synopsis</label>
+                            <textarea id="movieSynopsis" rows="4" placeholder="Enter movie synopsis"></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label>Poster URL</label>
+                            <input type="text" id="moviePoster" placeholder="https://example.com/poster.jpg">
+                        </div>
+                        <button class="btn-primary" onclick="addNewMovie()" style="width: 100%; margin-top: 20px;">Add Movie</button>
+                    `;
+                    break;
+                    
+                default:
+                    title = 'Admin Panel';
+                    content = `<h2>${title}</h2><p>Modal content for ${type}</p>`;
+            }
+            
+            document.getElementById('adminModalContent').innerHTML = content;
+            showModal('adminModal');
+        }
+        
+        // Admin Actions Functions
+        function editMovie(movieId) {
+            alert(`Editing movie ID: ${movieId}\nThis would open an edit form.`);
+        }
+        
+        function confirmDelete(movieId, movieTitle) {
+            if(confirm(`Are you sure you want to delete "${movieTitle}"?\nThis action cannot be undone.`)) {
+                alert(`Movie "${movieTitle}" deleted (simulation).\nIn production, this would make an AJAX call to delete from database.`);
+            }
+        }
+        
+        function viewDetails(movieId) {
+            alert(`Viewing details for movie ID: ${movieId}`);
+        }
+        
+        function featureMovie(movieId) {
+            if(confirm("Set this movie as featured?\nCurrent featured movie will be replaced.")) {
+                alert("Movie set as featured (simulation)");
+            }
+        }
+        
+        function refreshMovies() {
+            alert("Refreshing movies list...");
+            location.reload();
+        }
+        
+        function addNewMovie() {
+            const title = document.getElementById('movieTitle').value;
+            if(!title) {
+                alert("Please enter a movie title");
+                return;
+            }
+            alert(`Adding new movie: ${title}\nThis would save to database in production.`);
+            hideModal('adminModal');
+        }
+        <?php endif; ?>
+        
+        // Fungsi untuk toggle modal lama (booking modal)
+        function toggleModal(modalId, show) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                if (show) {
+                    modal.style.display = 'flex';
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    modal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            }
+        }
+    </script>
+    
     <script src="ui_script.js"></script>
+
 </body>
 </html>
