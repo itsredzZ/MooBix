@@ -218,19 +218,19 @@
                 </h4>
                 <div style="display: flex; flex-direction: column; gap: 15px;">
                     <div style="display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid #eee;">
-                        <span style="color: #666;">Movie Views</span>
+                        <span style="color: #000000ff;">Movie Views</span>
                         <span style="font-weight: bold; color: #333;">1,245</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid #eee;">
-                        <span style="color: #666;">Booking Rate</span>
+                        <span style="color: #000000ff;">Booking Rate</span>
                         <span style="font-weight: bold; color: #4caf50;">12.5%</span>
                     </div>
                     <div style="display: flex; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid #eee;">
-                        <span style="color: #666;">Avg. Session</span>
+                        <span style="color: #000000ff;">Avg. Session</span>
                         <span style="font-weight: bold; color: #2196f3;">4m 32s</span>
                     </div>
                     <div style="display: flex; justify-content: space-between;">
-                        <span style="color: #666;">System Health</span>
+                        <span style="color: #000000ff;">System Health</span>
                         <span style="font-weight: bold; color: #4caf50;">98% <span style="background: #4caf50; width: 10px; height: 10px; border-radius: 50%; display: inline-block;"></span></span>
                     </div>
                 </div>

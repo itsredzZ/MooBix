@@ -3,14 +3,10 @@
 // 1. BACKEND: KONEKSI & LOGIKA GAMBAR LOKAL
 // ==========================================
 session_start();
-
-$host = 'localhost';
-$dbname = 'db_moobix_1';
-$user = 'root';
-$pass = ''; 
+require 'db.php';
 
 // --- FOLDER GAMBAR (SESUAIKAN DENGAN STRUKTUR FOLDER KAMU) ---
-$local_path = 'admin_ui/uploads/'; 
+$local_path = '../ui/uploads/';
 
 // --- FUNGSI SAFETY ---
 function safe($array, $key, $default = '-') {
