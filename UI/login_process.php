@@ -1,38 +1,38 @@
 <?php
 session_start();
-require 'db.php'; // Sambung ke database
+require 'db.php'; // Or 'koneksi.php', check your filename!
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = $_POST['username']; // Di form name-nya 'username', tapi isinya email
+    $email = $_POST['username']; 
     $password = $_POST['password'];
 
-    // 1. Cari user berdasarkan email
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
-    $stmt->execute([$email]);
+    // 1. Check Database
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? OR name = ?");
+    $stmt->execute([$email, $email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // 2. Cek apakah user ketemu DAN password cocok
+    // 2. Verify Password
     if ($user && password_verify($password, $user['password'])) {
         
-        // --- LOGIN SUKSES ---
+        // SET SESSION DATA
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_name'] = $user['name'];
+        $_SESSION['user_email'] = $user['email'];
         $_SESSION['user_role'] = $user['role'];
 
-        // Redirect sesuai role (Admin ke Dashboard, User ke Home)
+        // 3. THE CRITICAL REDIRECT
         if ($user['role'] === 'admin') {
             header("Location: admin_dashboard.php");
         } else {
-            header("Location: ui_index.php");
+            header("Location: user_dashboard.php");
         }
-        exit;
+        exit();
 
     } else {
-        // --- LOGIN GAGAL ---
-        echo "<script>
-            alert('Email atau Password salah!');
-            window.location.href = 'ui_index.php';
-        </script>";
+        // Login Failed - Send back to index with error
+        $_SESSION['error'] = "Email or Password incorrect!";
+        header("Location: ui_index.php");
+        exit();
     }
 }
 ?>

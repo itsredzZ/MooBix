@@ -478,41 +478,80 @@ header {
     width: 100%; 
     scrollbar-width: none; 
 }
-.movie-card { 
-    min-width: 220px; 
-    cursor: pointer; 
-    transition: all 0.3s ease; 
+
+.movie-card {
+    /* UBAH INI: Pakai width tetap, bukan min-width */
+    width: 240px;
+    flex-shrink: 0; /* Agar tidak tergencet slider */
+    
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    background: var(--bg-card);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    
+    /* Tambahan agar tinggi kartu sama rata */
+    display: flex;
+    flex-direction: column;
 }
+
 .movie-card:hover { 
     transform: translateY(-10px); 
 }
-.poster-frame { 
-    border: 5px solid #fff; 
-    border-bottom: 25px solid #fff; 
-    box-shadow: 0 10px 20px rgba(0,0,0,0.5); 
-    overflow: hidden; 
+
+.poster-frame {
+    border: 5px solid #fff;
+    border-bottom: 25px solid #fff;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    overflow: hidden;
     position: relative;
+    
+    /* UBAH INI: Tinggi Poster harus dikunci */
+    height: 360px; 
+    width: 100%;
 }
-.movie-card img { 
-    width: 100%; 
-    height: 320px; 
+
+.movie-card img {
+    /* Pastikan gambar memenuhi kotak */
+    width: 100%;
+    height: 100%;
+    
+    /* KUNCI: Gambar akan dicrop otomatis agar pas (tidak gepeng) */
     object-fit: cover; 
-    display: block; 
-    filter: grayscale(30%); 
-    transition: all 0.5s ease; 
+    
+    display: block;
+    filter: grayscale(30%);
+    transition: all 0.5s ease;
 }
+
 .movie-card:hover img { 
     filter: grayscale(0%); 
     transform: scale(1.05); 
 }
-.movie-card h3 { 
-    text-align: center; 
-    font-family: var(--font-head); 
-    font-size: 1.2rem; 
-    margin-top: 15px; 
-    letter-spacing: 1px; 
-    color: var(--text-cream); 
+
+.movie-card h3 {
+    text-align: center;
+    font-family: var(--font-head);
+    font-size: 1.3rem;
+    margin: 15px 10px 5px 10px;
+    letter-spacing: 1px;
+    color: var(--text-cream);
+    
+    /* UBAH INI: Batasi tinggi judul agar kartu rata */
+    height: 3.2rem; /* Cukup untuk 2 baris */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Maksimal 2 baris, sisanya ... */
+    -webkit-box-orient: vertical;
+    
+    /* Tenterahkan teks secara vertikal */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
+
 .movie-card small { 
     display: block; 
     text-align: center; 

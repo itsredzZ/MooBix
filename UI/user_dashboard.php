@@ -42,34 +42,40 @@
         <div class="slider-wrapper">
             <button class="nav-btn" onclick="scrollMovies(-300)"><i class="ph ph-caret-left"></i></button>
             <div class="cards-container" id="movieList">
-                <?php if(empty($nowShowing)): ?>
-                    <p style="text-align:center; width:100%; color:#888;">Belum ada film lain.</p>
-                <?php else: ?>
-                    <?php foreach($nowShowing as $movie): ?>
-                    <div class="movie-card">
-                        <div class="poster-frame">
-                            <img src="<?php echo getPoster(safe($movie, 'poster')); ?>" alt="Poster" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
-                            <div class="poster-overlay">
-                                <button class="btn-book-now" onclick="openBookingFlow(
-                                    '<?php echo addslashes(safe($movie, 'title')); ?>', 
-                                    '<?php echo addslashes(getPoster(safe($movie, 'poster'))); ?>', 
-                                    '<?php echo addslashes($movie['synopsis'] ?? 'Sinopsis belum tersedia.'); ?>',
-                                    <?php echo (int)safe($movie, 'price', 0); ?>,
-                                    '<?php echo addslashes(safe($movie, 'duration', '2h 0min')); ?>'
-                                )">
-                                    <i class="ph ph-ticket"></i> BOOK NOW
-                                </button>
-                            </div>
-                        </div>
-                        <h3><?php echo safe($movie, 'title'); ?></h3>
-                        <small><?php echo safe($movie, 'genre'); ?></small>
-                        <div class="movie-card-footer">
-                            <span class="movie-price">Rp <?php echo number_format((int)safe($movie, 'price', 0), 0, ',', '.'); ?></span>
-                            <span class="movie-duration"><?php echo safe($movie, 'duration', '2h 0min'); ?></span>
-                        </div>
+                <?php foreach($nowShowing as $movie): 
+                // --- PERBAIKAN: Sanitasi Data untuk JavaScript ---
+                $jsTitle = addslashes($movie['title']); 
+                
+                // Bersihkan Sinopsis (Hapus Enter & Tanda Petik)
+                $cleanSynopsis = preg_replace('/\s+/', ' ', $movie['synopsis'] ?? '');
+                $jsSynopsis = addslashes($cleanSynopsis);
+                
+                $jsPoster = getPoster($movie['poster']);
+                $jsPrice = (int)($movie['price'] ?? 0);
+                $jsDuration = addslashes($movie['duration'] ?? '2h 0min');
+            ?>
+            <div class="movie-card">
+                <div class="poster-frame">
+                    <img src="<?php echo $jsPoster; ?>" alt="Poster">
+                    <div class="poster-overlay">
+                        <button class="btn-book-now" onclick="openBookingFlow(
+                            '<?php echo $jsTitle; ?>', 
+                            '<?php echo $jsPoster; ?>', 
+                            '<?php echo $jsSynopsis; ?>', 
+                            <?php echo $jsPrice; ?>, 
+                            '<?php echo $jsDuration; ?>'
+                        )">
+                            <i class="ph ph-ticket"></i> BOOK NOW
+                        </button>
                     </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+                </div>
+                <h3><?php echo safe($movie, 'title'); ?></h3>
+                <small><?php echo safe($movie, 'genre'); ?></small>
+                <div class="movie-card-footer">
+                    <span class="movie-price">Rp <?php echo number_format($jsPrice, 0, ',', '.'); ?></span>
+                </div>
+            </div>
+            <?php endforeach; ?>
             </div>
             <button class="nav-btn" onclick="scrollMovies(300)"><i class="ph ph-caret-right"></i></button>
         </div>

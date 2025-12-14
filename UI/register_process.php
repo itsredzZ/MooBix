@@ -1,32 +1,43 @@
 <?php
-require 'db.php';
+session_start();
+require 'db.php'; 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $name = $_POST['name'];
+    $fullname = $_POST['fullname'];
     $email = $_POST['email'];
-    $password = $_POST['password'];
-    
-    // Enkripsi password (biar aman dan sesuai format database)
+    $password = $_POST['reg_password'];
+    $confirm = $_POST['confirm_password'];
+
+    // Basic Validation
+    if ($password !== $confirm) {
+        $_SESSION['error'] = "Passwords do not match!";
+        header("Location: ui_index.php");
+        exit();
+    }
+
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
-    $role = 'user'; // Default role user biasa
+    $role = 'user'; 
 
     try {
-        // Masukkan ke database
-        $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$name, $email, $hashed_password, $role]);
+        // Check if email exists
+        $check = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+        $check->execute([$email]);
+        if($check->rowCount() > 0){
+            $_SESSION['error'] = "Email already registered!";
+            header("Location: ui_index.php");
+            exit();
+        }
 
-        echo "<script>
-            alert('Registrasi Berhasil! Silakan Login.');
-            window.location.href = 'ui_index.php';
-        </script>";
+        // Insert New User
+        $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$fullname, $email, $hashed_password, $role]);
+
+        $_SESSION['success'] = "Registration successful! Please Login.";
+        header("Location: ui_index.php");
 
     } catch (PDOException $e) {
-        // Jika email sudah ada
-        if ($e->getCode() == 23000) {
-            echo "<script>alert('Email sudah terdaftar!'); window.location.href = 'ui_index.php';</script>";
-        } else {
-            echo "Error: " . $e->getMessage();
-        }
+        $_SESSION['error'] = "System Error: " . $e->getMessage();
+        header("Location: ui_index.php");
     }
 }
 ?>
