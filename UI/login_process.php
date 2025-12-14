@@ -1,29 +1,38 @@
 <?php
 session_start();
-$host = 'localhost'; $dbname = 'db_moobix'; $user = 'root'; $pass = '';
+require 'db.php'; // Sambung ke database
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $user, $pass);
-    
-    // Ambil data dari form
-    $username = $_POST['username']; // Di form name="username" (bisa email/id)
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = $_POST['username']; // Di form name-nya 'username', tapi isinya email
     $password = $_POST['password'];
 
-    // Cek user di database
-    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? AND password = ?");
-    $stmt->execute([$username, $password]);
-    $user = $stmt->fetch();
+    // 1. Cari user berdasarkan email
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+    $stmt->execute([$email]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($user) {
-        // Login Sukses
-        $_SESSION['user_name'] = $user['fullname'];
-        header("Location: ui_index.php");
+    // 2. Cek apakah user ketemu DAN password cocok
+    if ($user && password_verify($password, $user['password'])) {
+        
+        // --- LOGIN SUKSES ---
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['user_name'] = $user['name'];
+        $_SESSION['user_role'] = $user['role'];
+
+        // Redirect sesuai role (Admin ke Dashboard, User ke Home)
+        if ($user['role'] === 'admin') {
+            header("Location: admin_dashboard.php");
+        } else {
+            header("Location: ui_index.php");
+        }
+        exit;
+
     } else {
-        // Login Gagal
-        echo "<script>alert('Email atau Password Salah!'); window.location='ui_index.php';</script>";
+        // --- LOGIN GAGAL ---
+        echo "<script>
+            alert('Email atau Password salah!');
+            window.location.href = 'ui_index.php';
+        </script>";
     }
-
-} catch (PDOException $e) {
-    echo "Error: " . $e->getMessage();
 }
 ?>

@@ -1,53 +1,32 @@
 <?php
-session_start();
+require 'db.php';
 
-// Konfigurasi Database
-$host = 'localhost';
-$dbname = 'db_moobix';
-$user = 'root';
-$pass = ''; 
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $password = $_POST['password'];
+    
+    // Enkripsi password (biar aman dan sesuai format database)
+    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    $role = 'user'; // Default role user biasa
 
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    try {
+        // Masukkan ke database
+        $stmt = $pdo->prepare("INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$name, $email, $hashed_password, $role]);
 
-    // Ambil data dari form Register
-    if ($_SERVER["REQUEST_METHOD"] == "POST") {
-        
-        // --- PERBAIKAN DISINI ---
-        // Kita ambil input dengan name="name" sesuai HTML kamu
-        $name = $_POST['name']; 
-        $email = $_POST['email'];
-        $password = $_POST['password'];
+        echo "<script>
+            alert('Registrasi Berhasil! Silakan Login.');
+            window.location.href = 'ui_index.php';
+        </script>";
 
-        // Cek apakah email sudah terdaftar sebelumnya?
-        $checkStmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
-        $checkStmt->execute([$email]);
-        
-        if ($checkStmt->rowCount() > 0) {
-            // Jika email sudah ada
-            echo "<script>
-                    alert('Email sudah terdaftar! Gunakan email lain.');
-                    window.location.href = 'ui_index.php';
-                  </script>";
+    } catch (PDOException $e) {
+        // Jika email sudah ada
+        if ($e->getCode() == 23000) {
+            echo "<script>alert('Email sudah terdaftar!'); window.location.href = 'ui_index.php';</script>";
         } else {
-            // --- PERBAIKAN QUERY SQL DISINI ---
-            // Masukkan ke kolom 'name' (bukan fullname)
-            $sql = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, 'user')";
-            $stmt = $pdo->prepare($sql);
-            
-            // Eksekusi dengan variabel $name
-            $stmt->execute([$name, $email, $password]);
-
-            // Sukses
-            echo "<script>
-                    alert('Registrasi Berhasil! Silakan Login.');
-                    window.location.href = 'ui_index.php';
-                  </script>";
+            echo "Error: " . $e->getMessage();
         }
     }
-
-} catch (PDOException $e) {
-    echo "Error: " . $e->getMessage();
 }
 ?>

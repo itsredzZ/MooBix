@@ -26,105 +26,118 @@ function getPoster($filename) {
 }
 
 // ==========================================
-// HARDCODE AKUN TEST CASE
+// 1. CEK SESSION USER (DATA DARI LOGIN)
 // ==========================================
-$hardcoded_users = [
-    'user' => [
-        'password' => 'user123',
-        'name' => 'Test User',
-        'role' => 'user',
-        'email' => 'user@example.com'
-    ],
-    'admin' => [
-        'password' => 'admin123',
-        'name' => 'Test Admin',
-        'role' => 'admin',
-        'email' => 'admin@example.com'
-    ],
-    'customer' => [
-        'password' => 'customer123',
-        'name' => 'Regular Customer',
-        'role' => 'user',
-        'email' => 'customer@example.com'
-    ]
-];
+$current_user = null;
+if (isset($_SESSION['user_name'])) {
+    $current_user = [
+        'name' => $_SESSION['user_name'],
+        'role' => $_SESSION['user_role'] ?? 'user',
+        'email' => $_SESSION['user_email'] ?? '-'
+    ];
+}
 
 // ==========================================
-// SIMPLE LOGIN PROCESS HANDLING
+// 2. PROSES LOGIN (DATABASE VERSION)
 // ==========================================
 $login_error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_form'])) {
-    $username = $_POST['username'] ?? '';
+    $username = $_POST['username'] ?? ''; 
     $password = $_POST['password'] ?? '';
     
-    // Cek hardcoded users
-    if (isset($hardcoded_users[$username]) && $hardcoded_users[$username]['password'] === $password) {
-        $_SESSION['user_name'] = $hardcoded_users[$username]['name'];
-        $_SESSION['user_email'] = $hardcoded_users[$username]['email'];
-        $_SESSION['user_role'] = $hardcoded_users[$username]['role'];
+    // Cari user di Database
+    $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? OR name = ?");
+    $stmt->execute([$username, $username]);
+    
+    // SAYA UBAH NAMA VARIABEL DI SINI (DARI $user JADI $user_login)
+    $user_login = $stmt->fetch(PDO::FETCH_ASSOC); 
+
+    // Verifikasi Password
+    if ($user_login && password_verify($password, $user_login['password'])) {
+        // --- LOGIN SUKSES ---
+        $_SESSION['user_id'] = $user_login['id'];
+        $_SESSION['user_name'] = $user_login['name'];
+        $_SESSION['user_email'] = $user_login['email'];
+        $_SESSION['user_role'] = $user_login['role'];
         $_SESSION['login_time'] = time();
         
-        // Redirect untuk refresh halaman
-        header('Location: ' . $_SERVER['PHP_SELF']);
+        // Redirect
+        if($user_login['role'] == 'admin'){
+            header('Location: ui_index.php');
+        } else {
+            header('Location: ' . $_SERVER['PHP_SELF']);
+        }
         exit();
     } else {
-        $login_error = "Username atau password salah!";
+        $login_error = "Username atau Password salah!";
     }
 }
 
 // ==========================================
-// SIMPLE REGISTER PROCESS HANDLING
+// 3. PROSES REGISTER (DATABASE VERSION)
 // ==========================================
 $register_error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_form'])) {
     $fullname = $_POST['fullname'] ?? '';
     $email = $_POST['email'] ?? '';
-    $username = $_POST['reg_username'] ?? '';
+    // Di form kamu name="reg_username" tapi biasanya itu untuk nama juga. 
+    // Kita asumsikan fullname = name di database.
     $password = $_POST['reg_password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
-    $phone = $_POST['phone'] ?? '';
     $terms = isset($_POST['terms']) ? true : false;
     
-    // Validasi dasar
-    if (empty($fullname) || empty($email) || empty($username) || empty($password) || empty($confirm_password)) {
+    // Validasi
+    if (empty($fullname) || empty($email) || empty($password)) {
         $register_error = "Semua field wajib diisi!";
     } elseif ($password !== $confirm_password) {
         $register_error = "Password tidak cocok!";
     } elseif (!$terms) {
-        $register_error = "Anda harus menyetujui Terms of Service dan Privacy Policy";
-    } elseif (isset($hardcoded_users[$username])) {
-        $register_error = "Username sudah digunakan!";
+        $register_error = "Anda harus menyetujui Terms & Policy";
     } else {
-        // Simpan user baru ke array hardcoded (dalam produksi, simpan ke database)
-        $hardcoded_users[$username] = [
-            'password' => $password,
-            'name' => $fullname,
-            'role' => 'user',
-            'email' => $email
-        ];
+        // Cek apakah Email sudah terdaftar?
+        $stmtCheck = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+        $stmtCheck->execute([$email]);
         
-        // Auto login setelah registrasi
-        $_SESSION['user_name'] = $fullname;
-        $_SESSION['user_email'] = $email;
-        $_SESSION['user_role'] = 'user';
-        $_SESSION['login_time'] = time();
-        
-        // Redirect untuk refresh halaman
-        header('Location: ' . $_SERVER['PHP_SELF']);
-        exit();
+        if ($stmtCheck->rowCount() > 0) {
+            $register_error = "Email sudah terdaftar!";
+        } else {
+            // Masukkan ke Database
+            // Password di-hash biar aman
+            $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+            $role = 'user'; // Default role
+
+            try {
+                $sql = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$fullname, $email, $hashed_password, $role]);
+                
+                // Auto Login setelah daftar
+                $_SESSION['user_name'] = $fullname;
+                $_SESSION['user_email'] = $email;
+                $_SESSION['user_role'] = $role;
+                $_SESSION['login_time'] = time();
+                
+                header('Location: ' . $_SERVER['PHP_SELF']);
+                exit();
+            } catch (PDOException $e) {
+                $register_error = "Gagal mendaftar: " . $e->getMessage();
+            }
+        }
     }
 }
 
 // ==========================================
-// LOGOUT HANDLING
+// 4. LOGOUT
 // ==========================================
 if (isset($_GET['logout'])) {
     session_destroy();
-    header('Location: ' . $_SERVER['PHP_SELF']);
+    header('Location: ui_index.php');
     exit();
 }
 
-// Data Default
+// ==========================================
+// 5. AMBIL DATA FILM (PERBAIKAN ERROR DI SINI)
+// ==========================================
 $heroMovie = [
     'id' => 0, 'title' => 'DATA TIDAK DITEMUKAN', 'genre' => '-', 
     'price' => 0, 'poster' => '', 'airing_date' => '-',
@@ -133,16 +146,16 @@ $heroMovie = [
 $nowShowing = [];
 
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $user, $pass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
+    // --- SAYA HAPUS BARIS 'new PDO(...)' DISINI ---
+    // Kita langsung pakai variabel $pdo yang sudah ada dari 'require db.php'
+    
     // 1. HERO MOVIE
     $stmtHero = $pdo->query("SELECT * FROM movies ORDER BY id DESC LIMIT 1");
     $fetchedHero = $stmtHero->fetch(PDO::FETCH_ASSOC);
 
     if ($fetchedHero) {
         $heroMovie = $fetchedHero;
-        $heroMovie['synopsis'] = $heroMovie['synopsis'] ?? 'Sinopsis belum tersedia di database.';
+        $heroMovie['synopsis'] = $heroMovie['synopsis'] ?? 'Sinopsis belum tersedia.';
         $heroMovie['duration'] = $heroMovie['duration'] ?? '2h 0min'; 
     }
 
@@ -154,7 +167,7 @@ try {
     }
 
 } catch (PDOException $e) { 
-    // Silent Error untuk development
+    // Silent Error
 }
 
 // Tentukan dashboard mana yang ditampilkan

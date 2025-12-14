@@ -1,6 +1,57 @@
 <?php
-// This file is included by index.php when user is admin
-// Variables from index.php: $heroMovie, $nowShowing, $userName, $userEmail, etc.
+// ==========================================
+// 1. BACKEND: LOGIKA ADMIN
+// ==========================================
+
+// Cek apakah session sudah dimulai (agar tidak error jika di-include)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Cek koneksi database (ambil dari ui_index.php jika ada)
+if (!isset($pdo)) {
+    // Jika file ini dibuka langsung (bukan via include), panggil db.php
+    require_once 'db.php';
+}
+
+// Cek User Login
+$userName = $_SESSION['user_name'] ?? 'Admin';
+$userEmail = $_SESSION['user_email'] ?? 'admin@moobix.com';
+
+// Logika Pengambilan Data Film
+$nowShowing = [];
+$heroMovie = ['id' => 0, 'title' => 'No Data', 'poster' => '', 'genre' => '-', 'price' => 0, 'synopsis' => '']; 
+
+try {
+    if (isset($pdo)) {
+        // Ambil semua film
+        $stmt = $pdo->query("SELECT * FROM movies ORDER BY id DESC");
+        $nowShowing = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Ambil 1 film untuk Featured (Hero)
+        if (!empty($nowShowing)) {
+            $heroMovie = $nowShowing[0];
+        }
+    }
+} catch (Exception $e) {
+    // Silent error agar tampilan tidak rusak
+}
+
+// Helper Function: Agar gambar muncul baik link online maupun file lokal
+if (!function_exists('getPoster')) {
+    function getPoster($filename) {
+        if (empty($filename)) return 'https://via.placeholder.com/400x600?text=No+Image';
+        if (strpos($filename, 'http') === 0) return $filename;
+        return 'admin_ui/uploads/' . $filename; // Sesuaikan path ini
+    }
+}
+
+// Helper Function: Agar tidak error jika data kosong
+if (!function_exists('safe')) {
+    function safe($array, $key, $default = '-') {
+        return isset($array[$key]) ? htmlspecialchars($array[$key]) : $default;
+    }
+}
 ?>
 
 <main id="admin-dashboard" style="padding-top: 100px;">
