@@ -833,12 +833,29 @@ $userEmail = $_SESSION['user_email'] ?? '';
             <span class="close-modal" onclick="toggleModal('bookingModal', false)">&times;</span>
             <div id="step-info" class="booking-step">
                 <div class="movie-info-layout">
-                    <div class="info-poster"><img id="modalPoster" src="" alt="Movie" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'"></div>
+                    <div class="info-poster">
+                        <img id="modalPoster" src="" alt="Movie Poster" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
+                    </div>
+                    
                     <div class="info-text">
-                        <h2 id="modalTitle">TITLE</h2>
-                        <p class="movie-duration" id="modalDuration"></p>
-                        <p id="modalSynopsis" class="synopsis">Synopsis...</p>
-                        <button class="btn-primary" onclick="proceedToSchedule()">BUY TICKET</button>
+                        <h2 id="modalTitle" style="margin-top:0; font-size:2rem; line-height:1.1;">TITLE</h2>
+                        
+                        <div style="display:flex; align-items:center; gap:15px; margin:10px 0; color:#666;">
+                            <span style="display:flex; align-items:center; gap:5px;">
+                                <span id="modalDuration">2h 0m</span>
+                            </span>
+                            
+                            <span class="rating-badge">
+                                <i class="ph ph-star-fill" style="color: gold;"></i> 
+                                <span id="modalRating">0.0</span> / 5.0
+                            </span>
+                        </div>
+
+                        <p id="modalSynopsis" class="synopsis" style="color:#444; line-height:1.6;">Synopsis...</p>
+                        
+                        <button class="btn-primary" onclick="proceedToSchedule()" style="margin-top:15px;">
+                            BUY TICKET
+                        </button>
                     </div>
                 </div>
             </div>

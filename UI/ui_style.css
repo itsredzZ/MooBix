@@ -792,20 +792,67 @@ header {
     color: var(--accent-salmon); 
 }
 
-.movie-info-layout { 
-    display: flex; 
-    gap: 20px; 
-    text-align: left; 
+/* --- FIX MODAL LAYOUT --- */
+.movie-info-layout {
+    display: flex; /* Wajib Flex agar poster & teks jejer ke samping */
+    gap: 25px;
+    align-items: flex-start;
 }
-.info-poster { 
-    width: 220px; 
-    flex-shrink: 0; 
+
+.info-poster {
+    width: 180px; /* Lebar tetap poster di modal */
+    flex-shrink: 0;
 }
-.info-poster img { 
-    width: 100%; 
-    border-radius: 5px; 
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+
+.info-poster img {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    display: block; /* Hapus gap bawah image */
 }
+
+.info-text {
+    flex: 1; /* Teks ambil sisa ruang */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Rating Style */
+/* --- RATING BADGE ON POSTER (TOP LEFT) --- */
+/* Update class ini agar teks rata tengah sempurna */
+.rating-badge-poster {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    
+    /* Styling Kotak Hitam */
+    background: rgba(0, 0, 0, 0.85); /* Sedikit lebih gelap */
+    color: #FFD700; /* Warna Emas */
+    border: 1px solid rgba(255, 215, 0, 0.3); /* Border tipis emas biar elegan */
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    z-index: 10;
+    
+    /* --- KOENTJI RATA TENGAH --- */
+    display: flex;
+    align-items: center;     /* Tengah secara vertikal */
+    justify-content: center; /* Tengah secara horizontal */
+    gap: 6px;                /* Jarak antara bintang dan angka */
+    min-width: 65px;         /* Lebar minimum agar kotak tidak gepeng */
+    height: 32px;            /* Tinggi fix */
+    
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+/* Pastikan icon bintang tidak geser */
+.rating-badge-poster i {
+    font-size: 1rem;
+    margin-bottom: 2px; /* Koreksi optik sedikit */
+}
+
 .info-text h2 { 
     font-family: var(--font-head); 
     font-size: 3.5rem; 
@@ -818,6 +865,12 @@ header {
     line-height: 1.5; 
     margin: 15px 0 20px 0; 
     color: #444; 
+}
+
+/* Sembunyikan gambar apa pun di dalam elemen durasi */
+#modalDuration img, 
+#modalDuration svg {
+    display: none !important;
 }
 
 /* Date & Time Picker */

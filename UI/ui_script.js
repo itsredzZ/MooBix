@@ -10,7 +10,11 @@ let ticketQty = 1;
  * Fungsi Utama: Membuka alur pemesanan tiket
  * TRIGGER: Tombol "GET TICKET" atau "BOOK NOW"
  */
-function openBookingFlow(title, poster, synopsis, price, duration) {
+function openBookingFlow(title, poster, synopsis, price, duration, rating) {
+    // Debugging: Cek di Console browser apakah data masuk
+    console.log("Judul:", title);
+    console.log("Rating diterima:", rating);
+    
     // --- CEK LOGIN (SATPAM) ---
     // Menggunakan variabel global PHP_DATA yang dikirim dari file PHP
     if (typeof PHP_DATA !== 'undefined' && !PHP_DATA.isLoggedIn) {
@@ -18,28 +22,61 @@ function openBookingFlow(title, poster, synopsis, price, duration) {
         toggleModal('loginModal', true);
         return; // Stop, jangan lanjut buka modal booking
     }
-
-    // Simpan data film yang dipilih
+    // --- ISI DATA MOVIE & TAMPILKAN MODAL ---
     currentMovie = { 
         title: title, 
         poster: poster, 
         synopsis: synopsis, 
         price: parseInt(price), 
-        duration: duration 
+        duration: duration,
+        rating: rating // Save rating
     };
     
-    // Isi data ke dalam elemen HTML Modal Step 1
+    // 2. Update Modal Elements
     document.getElementById('modalTitle').innerText = title;
-    const imgElement = document.getElementById('modalPoster');
-    if(imgElement) imgElement.src = poster || 'https://via.placeholder.com/300x450?text=No+Image';
+    
+    const imgEl = document.getElementById('modalPoster');
+    if(imgEl) imgEl.src = poster;
     
     document.getElementById('modalSynopsis').innerText = synopsis;
-    document.getElementById('modalDuration').innerText = duration || '2h 0min';
     
-    // Reset tampilan ke awal
-    resetBookingSteps();
-    toggleModal('bookingModal', true);
+ // Update Duration (Hanya teksnya, ikon aman di HTML)
+    // Update Duration (Hanya teksnya)
+    // ... (kode sebelumnya) ...
+    
+    // Update Duration (Pembersih Super Kuat)
+    const durEl = document.getElementById('modalDuration');
+    if(durEl) {
+        // Logika: Hapus semua karakter NON-ASCII (Emoji, simbol aneh, dll)
+        // Hanya menyisakan Huruf, Angka, Spasi, dan tanda baca dasar
+        let cleanDuration = duration.replace(/[^\x00-\x7F]/g, "").trim();
+        
+        // Opsional: Hapus spasi ganda jika ada
+        cleanDuration = cleanDuration.replace(/\s+/g, ' ');
+
+        durEl.innerText = cleanDuration; 
+    }
+
+    // ... (kode selanjutnya) ...
+
+    // Update Rating (Hanya angkanya)
+    const rateEl = document.getElementById('modalRating');
+    if(rateEl) {
+        // Cek jika rating valid, jika tidak set 0.0
+        rateEl.innerText = (rating && rating !== 'null') ? rating : '0.0';
+    }
+    
+    // 3. Show Modal
+    if(typeof resetBookingSteps === 'function') resetBookingSteps();
+    
+    // Toggle logic (using your existing toggle function or manual style)
+    const modal = document.getElementById('bookingModal');
+    if(modal) {
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
 }
+
 
 function resetBookingSteps() {
     // Tampilkan Step 1, Sembunyikan yang lain
