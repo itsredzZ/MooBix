@@ -177,7 +177,7 @@ function selectDate(element, dateValue) {
 
         // B. Ambil Data Kursi dari Database
         fetch(
-            `/Project_TekWeb/MooBix/Booking-Logic/get_booked_seats.php?movie_id=${currentMovie.id}&date=${selectedDate}&time=${selectedTime}`
+            `../Booking-Logic/get_booked_seats.php?movie_id=${currentMovie.id}&date=${selectedDate}&time=${selectedTime}`
         )
         .then((response) => response.json())
         .then((occupiedSeats) => {
@@ -236,7 +236,7 @@ function selectTime(element, time) {
 
   // 3. Ambil data kursi terisi
   fetch(
-    `/Project_TekWeb/MooBix/Booking-Logic/get_booked_seats.php?movie_id=${currentMovie.id}&date=${selectedDate}&time=${time}`
+    `../Booking-Logic/get_booked_seats.php?movie_id=${currentMovie.id}&date=${selectedDate}&time=${time}`
   )
     .then((response) => response.json())
     .then((occupiedSeats) => {
@@ -441,7 +441,7 @@ function processPayment() {
   payButton.disabled = true;
 
   // KIRIM KE DATABASE (process_booking.php)
-  fetch("/Project_TekWeb/MooBix/Booking-Logic/process_booking.php", {
+  fetch("../Booking-Logic/process_booking.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(bookingData),
