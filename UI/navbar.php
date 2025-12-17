@@ -17,7 +17,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 ?>
 
 <header id="navbar">
-    <div class="logo">CINETIX THEATER</div>
+    <div class="logo">MOOBIX THEATER</div>
     
     <?php if($isHomePage): ?>
         <!-- NAVBAR FULL untuk Home Page -->

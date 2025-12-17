@@ -184,7 +184,7 @@ $userEmail = $_SESSION['user_email'] ?? '';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CineTix - MooBix</title>
+    <title>MooBix</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -536,7 +536,7 @@ $userEmail = $_SESSION['user_email'] ?? '';
 <body>
 
     <header id="navbar">
-        <div class="logo">CINETIX THEATER</div>
+        <div class="logo">MOOBIX THEATER</div>
         <?php if(!$isAdmin): ?>
         <nav class="main-nav">
             <a href="#hero-section">NEWEST HIT</a>
@@ -567,18 +567,11 @@ $userEmail = $_SESSION['user_email'] ?? '';
                         <div class="divider-mini"></div>
                         
                         <?php if($isAdmin): ?>
-                            <a href="#"><i class="ph ph-gear"></i> Admin Panel</a>
-                            <a href="#"><i class="ph ph-film-script"></i> Manage Movies</a>
-                            <a href="#"><i class="ph ph-users"></i> Manage Users</a>
-                            <a href="#"><i class="ph ph-chart-bar"></i> Reports</a>
+                            <a href="admin_dashboard.php"><i class="ph ph-gear"></i> Admin Panel</a>
+                            <a href="user_manage.php"><i class="ph ph-users"></i> Manage Users</a>
                             <a href="#"><i class="ph ph-calendar-check"></i> Bookings</a>
                             
                             <div class="divider-mini"></div>
-                            
-                            <a href="#"><i class="ph ph-user"></i> My Profile</a>
-                            <a href="#"><i class="ph ph-ticket"></i> My Tickets</a>
-                            <a href="#"><i class="ph ph-clock-counter-clockwise"></i> Riwayat Transaksi</a>
-                            <a href="#"><i class="ph ph-pencil-simple"></i> Edit Profil</a>
                             
                         <?php else: ?>
                             <a href="index.php" class="active"><i class="ph ph-house"></i> Home/Beranda</a>
@@ -617,7 +610,7 @@ $userEmail = $_SESSION['user_email'] ?? '';
                     <i class="ph ph-ticket"></i>
                 </div>
                 <h2>WELCOME BACK</h2>
-                <p>Sign in to your CineTix account</p>
+                <p>Sign in to your Moobix account</p>
             </div>
             
             <div class="modal-body">
@@ -698,7 +691,7 @@ $userEmail = $_SESSION['user_email'] ?? '';
                     <i class="ph ph-user-plus"></i>
                 </div>
                 <h2>CREATE ACCOUNT</h2>
-                <p>Join CineTix for exclusive benefits</p>
+                <p>Join Moobix for exclusive benefits</p>
             </div>
             
             <div class="modal-body">
@@ -1052,105 +1045,6 @@ $userEmail = $_SESSION['user_email'] ?? '';
                 console.log('Role:', PHP_DATA.userRole);
             }
         });
-        
-        <?php if($isAdmin): ?>
-        // Admin Modal Functions (untuk fitur admin)
-        function openAdminModal(type) {
-            let content = '';
-            let title = '';
-            
-            switch(type) {
-                case 'addMovie':
-                    title = 'Add New Movie';
-                    content = `
-                        <h2 style="margin-bottom: 20px;">${title}</h2>
-                        <div class="input-group">
-                            <label>Movie Title</label>
-                            <input type="text" id="movieTitle" placeholder="Enter movie title">
-                        </div>
-                        <div class="input-group">
-                            <label>Genre</label>
-                            <input type="text" id="movieGenre" placeholder="e.g., Action, Drama, Comedy">
-                        </div>
-                        <div class="input-group">
-                            <label>Duration</label>
-                            <input type="text" id="movieDuration" placeholder="e.g., 2h 15min">
-                        </div>
-                        <div class="input-group">
-                            <label>Price</label>
-                            <input type="number" id="moviePrice" placeholder="e.g., 50000">
-                        </div>
-                        <div class="input-group">
-                            <label>Synopsis</label>
-                            <textarea id="movieSynopsis" rows="4" placeholder="Enter movie synopsis"></textarea>
-                        </div>
-                        <div class="input-group">
-                            <label>Poster URL</label>
-                            <input type="text" id="moviePoster" placeholder="https://example.com/poster.jpg">
-                        </div>
-                        <button class="btn-primary" onclick="addNewMovie()" style="width: 100%; margin-top: 20px;">Add Movie</button>
-                    `;
-                    break;
-                    
-                default:
-                    title = 'Admin Panel';
-                    content = `<h2>${title}</h2><p>Modal content for ${type}</p>`;
-            }
-            
-            document.getElementById('adminModalContent').innerHTML = content;
-            showModal('adminModal');
-        }
-        
-        // Admin Actions Functions
-        function editMovie(movieId) {
-            alert(`Editing movie ID: ${movieId}\nThis would open an edit form.`);
-        }
-        
-        function confirmDelete(movieId, movieTitle) {
-            if(confirm(`Are you sure you want to delete "${movieTitle}"?\nThis action cannot be undone.`)) {
-                alert(`Movie "${movieTitle}" deleted (simulation).\nIn production, this would make an AJAX call to delete from database.`);
-            }
-        }
-        
-        function viewDetails(movieId) {
-            alert(`Viewing details for movie ID: ${movieId}`);
-        }
-        
-        function featureMovie(movieId) {
-            if(confirm("Set this movie as featured?\nCurrent featured movie will be replaced.")) {
-                alert("Movie set as featured (simulation)");
-            }
-        }
-        
-        function refreshMovies() {
-            alert("Refreshing movies list...");
-            location.reload();
-        }
-        
-        function addNewMovie() {
-            const title = document.getElementById('movieTitle').value;
-            if(!title) {
-                alert("Please enter a movie title");
-                return;
-            }
-            alert(`Adding new movie: ${title}\nThis would save to database in production.`);
-            hideModal('adminModal');
-        }
-        <?php endif; ?>
-        
-        // Fungsi untuk toggle modal lama (booking modal)
-        function toggleModal(modalId, show) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                if (show) {
-                    modal.style.display = 'flex';
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    modal.style.display = 'none';
-                    document.body.style.overflow = 'auto';
-                }
-            }
-        }
     </script>
     
     <script src="ui_script.js"></script>
