@@ -582,9 +582,9 @@ $userEmail = $_SESSION['user_email'] ?? '';
                             
                         <?php else: ?>
                             <a href="index.php" class="active"><i class="ph ph-house"></i> Home/Beranda</a>
-                            <a href="#"><i class="ph ph-ticket"></i> Tiket Saya</a>
-                            <a href="#"><i class="ph ph-clock-counter-clockwise"></i> Riwayat Transaksi</a>
-                            <a href="#"><i class="ph ph-pencil-simple"></i> Edit Profil</a>
+                            <a href="my_tickets.php"><i class="ph ph-ticket"></i> Tiket Saya</a>
+                            <a href="transaction_history.php"><i class="ph ph-clock-counter-clockwise"></i> Riwayat Transaksi</a>
+                            <a href="edit_profile.php"><i class="ph ph-pencil-simple"></i> Edit Profil</a>
                         <?php endif; ?>
                         
                         <div class="divider-mini"></div>

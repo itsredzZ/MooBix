@@ -1647,3 +1647,894 @@ header {
         margin: 5px 0;
     }
 }
+
+/* ==========================================
+   STYLE UNTUK MY_TICKETS, TRANSACTION_HISTORY, EDIT_PROFILE
+   (NAVBAR MINIMALIS - NON-HOME PAGES)
+   ========================================== */
+
+/* ================= TIKET SAYA STYLES ================= */
+.tickets-container, .history-container, .profile-container {
+    max-width: 1400px;
+    margin: 90px auto 50px; /* Margin top dikurangi untuk navbar minimalis */
+    padding: 0 50px;
+    min-height: 70vh;
+}
+
+/* Header Umum untuk ketiga halaman */
+.page-header {
+    text-align: center;
+    margin-bottom: 60px;
+    padding-bottom: 30px;
+    position: relative;
+}
+
+.page-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 3px;
+    background: linear-gradient(to right, transparent, var(--accent-salmon), transparent);
+}
+
+.page-header h1 {
+    color: var(--text-cream);
+    font-family: var(--font-head);
+    font-size: 4rem;
+    margin-bottom: 15px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.page-header h1 i {
+    color: var(--accent-salmon);
+    font-size: 3.5rem;
+}
+
+.page-header p {
+    color: rgba(243, 239, 224, 0.7);
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+}
+
+/* Stat Cards (umum untuk tickets & history) */
+.stat-card, .history-stat-card {
+    background: var(--bg-card);
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+    text-align: center;
+    min-width: 180px;
+    border: 1px solid rgba(228, 143, 111, 0.2);
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover, .history-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+    border-color: rgba(228, 143, 111, 0.4);
+}
+
+.stat-number, .history-stat-number {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--accent-salmon);
+    margin-bottom: 8px;
+    font-family: var(--font-head);
+    letter-spacing: 2px;
+}
+
+.stat-label, .history-stat-label {
+    color: rgba(243, 239, 224, 0.8);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+}
+
+/* Stat Grid */
+.ticket-stats, .history-stats {
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+    margin-bottom: 50px;
+    flex-wrap: wrap;
+}
+
+/* ================= TIKET LIST STYLES ================= */
+.tickets-list, .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    margin-bottom: 80px;
+}
+
+.ticket-item, .history-item {
+    background: var(--bg-card);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    transition: all 0.4s ease;
+    position: relative;
+}
+
+/* Ticket - border kiri oranye */
+.ticket-item {
+    border-left: 5px solid var(--accent-salmon);
+}
+
+/* History - border kiri abu-abu */
+.history-item {
+    border-left: 5px solid #6c757d;
+    opacity: 0.9;
+}
+
+.ticket-item:hover, .history-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+}
+
+.history-item:hover {
+    opacity: 1;
+}
+
+/* Header Item */
+.ticket-header, .history-item-header {
+    padding: 20px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.ticket-header {
+    background: linear-gradient(135deg, var(--accent-salmon), var(--primary-orange));
+    color: var(--bg-dark);
+}
+
+.history-item-header {
+    background: linear-gradient(135deg, #495057, #343a40);
+    color: var(--text-cream);
+}
+
+/* Kode Tiket */
+.ticket-code, .history-code {
+    font-family: 'Courier New', monospace;
+    font-size: 1.3rem;
+    font-weight: bold;
+    letter-spacing: 2px;
+    background: rgba(0,0,0,0.2);
+    padding: 8px 20px;
+    border-radius: 25px;
+    border: 1px solid rgba(0,0,0,0.3);
+}
+
+/* Status Badge */
+.ticket-status, .history-status {
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: 1px;
+}
+
+.status-paid, .history-status.paid {
+    background-color: rgba(46, 204, 113, 0.9);
+    color: var(--bg-dark);
+}
+
+.status-pending {
+    background-color: rgba(243, 156, 18, 0.9);
+    color: var(--bg-dark);
+}
+
+.status-cancelled, .history-status.cancelled {
+    background-color: rgba(231, 76, 60, 0.9);
+    color: var(--bg-dark);
+}
+
+/* Watched Badge untuk History */
+.watched-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #28a745, #218838);
+    color: white;
+    padding: 8px 20px;
+    border-radius: 25px;
+    font-family: var(--font-head);
+    letter-spacing: 1px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+/* Content Area */
+.ticket-content, .history-content {
+    display: flex;
+    padding: 30px;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+/* Poster */
+.ticket-poster, .history-poster {
+    width: 180px;
+    height: 270px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    flex-shrink: 0;
+    border: 5px solid #fff;
+    border-bottom: 20px solid #fff;
+    transition: all 0.3s ease;
+}
+
+.history-poster {
+    filter: grayscale(20%);
+}
+
+.ticket-item:hover .ticket-poster,
+.history-item:hover .history-poster {
+    transform: scale(1.03);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.5);
+}
+
+.history-item:hover .history-poster {
+    filter: grayscale(0%);
+}
+
+/* Details */
+.ticket-details, .history-details {
+    flex-grow: 1;
+}
+
+.movie-title, .history-title {
+    font-family: var(--font-head);
+    font-size: 2rem;
+    color: var(--text-cream);
+    margin-bottom: 15px;
+    letter-spacing: 1.5px;
+}
+
+/* Meta Info */
+.movie-meta, .history-meta {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.movie-genre, .movie-duration, .movie-rating,
+.history-genre, .history-duration, .history-rating {
+    color: rgba(243, 239, 224, 0.8);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.05);
+    padding: 6px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.movie-rating, .history-rating {
+    color: #FFD700;
+}
+
+/* Stars */
+.stars {
+    display: flex;
+    gap: 2px;
+}
+
+.star-filled, .star-empty {
+    color: #FFD700;
+}
+
+.star-empty {
+    color: rgba(255, 215, 0, 0.3);
+}
+
+/* Detail Grid */
+.detail-grid, .history-timeline {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    margin-top: 25px;
+}
+
+.detail-item, .timeline-item {
+    background: rgba(31, 21, 20, 0.8);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-salmon);
+}
+
+.detail-label, .timeline-label {
+    display: block;
+    font-weight: bold;
+    color: rgba(243, 239, 224, 0.7);
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.detail-value, .timeline-value {
+    font-size: 1.1rem;
+    color: var(--text-cream);
+    font-weight: 500;
+    font-family: var(--font-head);
+    letter-spacing: 1px;
+}
+
+/* Time Difference untuk History */
+.time-difference {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-style: italic;
+    margin-top: 5px;
+    display: block;
+}
+
+/* Price Display */
+.price-display {
+    background: linear-gradient(135deg, rgba(31, 21, 20, 0.9), rgba(44, 30, 28, 0.9));
+    padding: 20px 30px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.price-label {
+    color: rgba(243, 239, 224, 0.8);
+    font-family: var(--font-body);
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+}
+
+.price {
+    font-family: var(--font-head);
+    font-size: 2rem;
+    color: var(--accent-salmon);
+    letter-spacing: 2px;
+}
+
+/* Actions */
+.ticket-actions, .history-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    padding: 20px 30px;
+    background: rgba(31, 21, 20, 0.7);
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+/* Button Styles Umum */
+.btn-action, .history-btn {
+    padding: 12px 25px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1rem;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    border: none;
+    font-family: var(--font-head);
+    letter-spacing: 1px;
+}
+.btn-download, .btn-browse, .btn-back, .btn-save,
+.btn-print, .btn-cancel, .btn-review, .btn-receipt {
+    /* Properti dasar */
+    display: inline-block;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px; /* Sudut sedikit melengkung untuk tampilan modern */
+    font-size: 16px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 140px; /* Lebar minimum tetap */
+    box-sizing: border-box;
+    
+    /* Properti tambahan untuk konsistensi */
+    line-height: 1.5;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Gaya khusus untuk setiap jenis tombol */
+.btn-download, .btn-browse, .btn-back, .btn-save {
+    background: linear-gradient(135deg, var(--accent-salmon), var(--primary-orange));
+    color: var(--bg-dark);
+}
+
+.btn-print {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+}
+
+.btn-cancel {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+}
+
+.btn-review {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+    color: white;
+}
+
+.btn-receipt {
+    background: linear-gradient(135deg, #6c757d, #495057);
+    color: white;
+}
+
+/* Efek hover */
+.btn-download:hover, .btn-browse:hover, .btn-back:hover, .btn-save:hover {
+    background: linear-gradient(135deg, var(--primary-orange), var(--accent-salmon));
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(228, 143, 111, 0.4);
+}
+
+.btn-print:hover {
+    background: linear-gradient(135deg, #2980b9, #3498db);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+}
+
+.btn-cancel:hover {
+    background: linear-gradient(135deg, #c0392b, #e74c3c);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+}
+
+.btn-review:hover {
+    background: linear-gradient(135deg, #138496, #17a2b8);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(23, 162, 184, 0.4);
+}
+
+.btn-receipt:hover {
+    background: linear-gradient(135deg, #495057, #6c757d);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+}
+
+/* Variasi bentuk yang lebih kotak (jika ingin sangat kotak) */
+/* Jika ingin bentuk benar-benar kotak (siku-siku), ganti border-radius: 0px; */
+/* Jika ingin sedikit melengkung, pertahankan border-radius: 8px; */
+
+/* Opsi tambahan: tombol dengan bentuk persegi panjang yang seragam */
+.btn-fixed-size {
+    width: 180px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Footer Tiket */
+.ticket-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background: rgba(31, 21, 20, 0.9);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    font-size: 0.9rem;
+    color: rgba(243, 239, 224, 0.7);
+}
+
+/* ================= EDIT PROFILE STYLES ================= */
+.profile-content {
+    background: var(--bg-card);
+    border-radius: 15px;
+    padding: 40px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    border: 1px solid rgba(228, 143, 111, 0.2);
+}
+
+.user-avatar {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.avatar-circle {
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, var(--accent-salmon), var(--primary-orange));
+    color: var(--bg-dark);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 0 auto 15px;
+    border: 4px solid rgba(255,255,255,0.1);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+}
+
+.user-avatar h3 {
+    color: var(--text-cream);
+    font-family: var(--font-head);
+    font-size: 1.5rem;
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+}
+
+.user-avatar p {
+    color: rgba(243, 239, 224, 0.7);
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.user-badge {
+    display: inline-block;
+    background: rgba(228, 143, 111, 0.2);
+    color: var(--accent-salmon);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    border: 1px solid rgba(228, 143, 111, 0.3);
+}
+
+/* Section Titles */
+.section-title {
+    color: var(--text-cream);
+    font-family: var(--font-head);
+    font-size: 1.8rem;
+    margin: 40px 0 25px 0;
+    letter-spacing: 2px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.section-title i {
+    color: var(--accent-salmon);
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-label {
+    display: block;
+    color: rgba(243, 239, 224, 0.9);
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.form-label i {
+    margin-right: 8px;
+    color: var(--accent-salmon);
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 15px;
+    background: rgba(31, 21, 20, 0.8);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-cream);
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent-salmon);
+    box-shadow: 0 0 0 3px rgba(228, 143, 111, 0.1);
+}
+
+.form-input::placeholder {
+    color: rgba(243, 239, 224, 0.5);
+}
+
+/* Password Input */
+.password-wrapper {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: rgba(243, 239, 224, 0.5);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Form Actions */
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.btn-cancel-form {
+    background: transparent;
+    color: rgba(243, 239, 224, 0.8);
+    border: 1px solid rgba(255,255,255,0.2);
+    padding: 15px 30px;
+    border-radius: 8px;
+    font-family: var(--font-head);
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    justify-content: center;
+}
+
+.btn-cancel-form:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--accent-salmon);
+}
+
+/* Messages */
+.message {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    animation: slideDown 0.3s ease;
+}
+
+.error-message {
+    background: rgba(220, 53, 69, 0.1);
+    color: #ff6b6b;
+    border-left: 4px solid #ff6b6b;
+}
+
+.success-message {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+    border-left: 4px solid #28a745;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ================= NO DATA STYLES ================= */
+.no-tickets, .no-history {
+    text-align: center;
+    padding: 80px 20px;
+    background: var(--bg-card);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    margin-top: 50px;
+    border: 2px dashed rgba(228, 143, 111, 0.3);
+}
+
+.no-tickets-icon, .no-history-icon {
+    font-size: 6rem;
+    color: rgba(228, 143, 111, 0.5);
+    margin-bottom: 30px;
+}
+
+.no-tickets h3, .no-history h3 {
+    color: var(--text-cream);
+    margin-bottom: 20px;
+    font-size: 2.5rem;
+    font-family: var(--font-head);
+    letter-spacing: 2px;
+}
+
+.no-tickets p, .no-history p {
+    color: rgba(243, 239, 224, 0.7);
+    margin-bottom: 40px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.8;
+    font-size: 1.1rem;
+}
+
+/* ================= FILTER CONTROLS ================= */
+.filter-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 10px 25px;
+    background: var(--bg-card);
+    color: rgba(243, 239, 224, 0.8);
+    border: 1px solid rgba(228, 143, 111, 0.3);
+    border-radius: 25px;
+    cursor: pointer;
+    font-family: var(--font-head);
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+    background: rgba(228, 143, 111, 0.1);
+    color: var(--accent-salmon);
+}
+
+.filter-btn.active {
+    background: var(--accent-salmon);
+    color: var(--bg-dark);
+}
+
+/* ================= FOOTER STYLES ================= */
+.minimal-footer {
+    background: var(--bg-card);
+    color: var(--text-cream);
+    text-align: center;
+    padding: 30px;
+    margin-top: 50px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.minimal-footer p {
+    font-family: var(--font-body);
+    color: rgba(243, 239, 224, 0.7);
+    font-size: 0.9rem;
+}
+
+/* ================= RESPONSIVE DESIGN ================= */
+@media (max-width: 1200px) {
+    .tickets-container, .history-container, .profile-container {
+        padding: 0 30px;
+    }
+}
+
+@media (max-width: 992px) {
+    .ticket-content, .history-content {
+        flex-direction: column;
+        padding: 25px;
+    }
+    
+    .ticket-poster, .history-poster {
+        width: 100%;
+        height: auto;
+        max-height: 350px;
+        margin: 0 auto;
+        display: block;
+    }
+    
+    .detail-grid, .history-timeline {
+        grid-template-columns: 1fr;
+    }
+    
+    .movie-meta, .history-meta {
+        justify-content: center;
+    }
+    
+    .profile-content {
+        padding: 25px;
+    }
+}
+
+@media (max-width: 768px) {
+    .tickets-container, .history-container, .profile-container {
+        margin-top: 80px;
+        padding: 0 20px;
+    }
+    
+    .page-header h1 {
+        font-size: 2.8rem;
+    }
+    
+    .ticket-stats, .history-stats {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .stat-card, .history-stat-card {
+        width: 100%;
+        max-width: 300px;
+    }
+    
+    .ticket-actions, .history-actions, .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn-action, .history-btn, .btn-save, .btn-cancel-form {
+        justify-content: center;
+        width: 100%;
+    }
+    
+    .ticket-header, .history-item-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .page-header h1 {
+        font-size: 2.2rem;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .filter-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .filter-btn {
+        width: 100%;
+        max-width: 250px;
+    }
+    
+    .movie-title, .history-title {
+        font-size: 1.6rem;
+        text-align: center;
+    }
+    
+    .movie-meta, .history-meta {
+        justify-content: center;
+    }
+    
+    .avatar-circle {
+        width: 80px;
+        height: 80px;
+        font-size: 2rem;
+    }
+}

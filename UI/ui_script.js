@@ -507,3 +507,363 @@ function scrollMovies(amount) {
         movieList.scrollBy({ left: amount, behavior: 'smooth' });
     }
 }
+
+// ================= 6. MY TICKETS & HISTORY FUNCTIONS =================
+
+// Download Ticket
+function downloadTicket(bookingCode) {
+    alert(`Download tiket dengan kode: ${bookingCode}\nFitur ini akan mengunduh file PDF tiket Anda.`);
+    // Di sini bisa diimplementasikan AJAX untuk generate PDF
+}
+
+// Print Ticket
+function printTicket() {
+    window.print();
+}
+
+// Proceed Payment (untuk pending tickets)
+function proceedPayment(ticketId) {
+    if(confirm('Lanjutkan pembayaran untuk tiket ini?')) {
+        alert(`Mengarahkan ke halaman pembayaran untuk tiket ID: ${ticketId}`);
+        // window.location.href = `payment.php?id=${ticketId}`;
+    }
+}
+
+// Cancel Ticket
+function cancelTicket(ticketId, movieTitle) {
+    if(confirm(`Yakin ingin membatalkan tiket untuk film "${movieTitle}"?\nPembatalan mungkin dikenakan biaya administrasi.`)) {
+        alert(`Tiket ID: ${ticketId} akan dibatalkan.\nSilahkan hubungi customer service untuk proses lebih lanjut.`);
+        // Di sini bisa diimplementasikan AJAX untuk pembatalan tiket
+    }
+}
+
+// Filter transactions by time period
+function filterTransactions(period) {
+    const items = document.querySelectorAll('.history-item');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+    const now = new Date();
+    
+    // Update active button
+    filterBtns.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    items.forEach(item => {
+        const showDateStr = item.getAttribute('data-show-date');
+        const showDate = new Date(showDateStr);
+        let show = true;
+        
+        switch(period) {
+            case 'this_month':
+                show = showDate.getMonth() === now.getMonth() && 
+                       showDate.getFullYear() === now.getFullYear();
+                break;
+            case 'last_month':
+                const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+                show = showDate.getMonth() === lastMonth.getMonth() && 
+                       showDate.getFullYear() === lastMonth.getFullYear();
+                break;
+            case 'this_year':
+                show = showDate.getFullYear() === now.getFullYear();
+                break;
+            case 'all':
+            default:
+                show = true;
+        }
+        
+        item.style.display = show ? '' : 'none';
+    });
+}
+
+// Write Review
+function writeReview(transactionId, movieTitle) {
+    const review = prompt(`Tulis review untuk film "${movieTitle}" (1-5 bintang):`);
+    if (review !== null && review.trim() !== '') {
+        const rating = parseInt(review);
+        if (rating >= 1 && rating <= 5) {
+            alert(`Terima kasih! Review Anda untuk "${movieTitle}" telah disimpan: ${rating}/5 bintang.`);
+            // Di sini bisa diimplementasikan AJAX untuk save review
+        } else {
+            alert('Harap beri rating 1-5 bintang!');
+        }
+    }
+}
+
+// Download Receipt
+function downloadReceipt(bookingCode) {
+    alert(`Download struk untuk kode: ${bookingCode}\nStruk akan diunduh dalam format PDF.`);
+    // Di sini bisa diimplementasikan AJAX untuk generate PDF receipt
+}
+
+// ================= 7. EDIT PROFILE FUNCTIONS =================
+
+// Password toggle
+function setupPasswordToggle() {
+    const toggleButtons = document.querySelectorAll('.toggle-password');
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const input = this.parentElement.querySelector('input');
+            if (input.type === 'password') {
+                input.type = 'text';
+                this.innerHTML = '<i class="ph ph-eye-slash"></i>';
+            } else {
+                input.type = 'password';
+                this.innerHTML = '<i class="ph ph-eye"></i>';
+            }
+        });
+    });
+}
+
+// Form validation for profile
+function setupProfileValidation() {
+    const profileForm = document.getElementById('profileForm');
+    const passwordForm = document.getElementById('passwordForm');
+    
+    if (profileForm) {
+        profileForm.addEventListener('submit', function(e) {
+            const usernameInput = this.querySelector('input[name="username"]');
+            const emailInput = this.querySelector('input[name="email"]');
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
+            // Validasi username
+            if (usernameInput.value.trim().length < 3) {
+                e.preventDefault();
+                alert('Username minimal 3 karakter!');
+                usernameInput.focus();
+                return;
+            }
+            
+            // Validasi email
+            if (!emailRegex.test(emailInput.value)) {
+                e.preventDefault();
+                alert('Format email tidak valid!');
+                emailInput.focus();
+                return;
+            }
+            
+            // Tampilkan loading
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Menyimpan...';
+            submitBtn.disabled = true;
+        });
+        
+        // Real-time username validation
+        const usernameInput = document.querySelector('input[name="username"]');
+        if (usernameInput) {
+            usernameInput.addEventListener('input', function() {
+                const username = this.value;
+                const errorSpan = document.getElementById('username-error');
+                
+                if (username.length > 0 && username.length < 3) {
+                    errorSpan.textContent = 'Username minimal 3 karakter';
+                    errorSpan.style.color = '#ff6b6b';
+                } else if (username.includes(' ')) {
+                    errorSpan.textContent = 'Username tidak boleh mengandung spasi';
+                    errorSpan.style.color = '#ff6b6b';
+                } else if (username.length >= 3) {
+                    errorSpan.textContent = '✓ Username valid';
+                    errorSpan.style.color = '#28a745';
+                } else {
+                    errorSpan.textContent = '';
+                }
+            });
+        }
+        
+        // Real-time email validation
+        const emailInput = document.querySelector('input[name="email"]');
+        if (emailInput) {
+            emailInput.addEventListener('input', function() {
+                const email = this.value;
+                const errorSpan = document.getElementById('email-error');
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                
+                if (email.length > 0 && !emailRegex.test(email)) {
+                    errorSpan.textContent = 'Format email tidak valid';
+                    errorSpan.style.color = '#ff6b6b';
+                } else if (emailRegex.test(email)) {
+                    errorSpan.textContent = '✓ Format email valid';
+                    errorSpan.style.color = '#28a745';
+                } else {
+                    errorSpan.textContent = '';
+                }
+            });
+        }
+    }
+    
+    if (passwordForm) {
+        passwordForm.addEventListener('submit', function(e) {
+            const currentPass = this.querySelector('input[name="current_password"]');
+            const newPass = this.querySelector('input[name="new_password"]');
+            const confirmPass = this.querySelector('input[name="confirm_password"]');
+            
+            // Validasi panjang password baru
+            if (newPass.value.length < 6) {
+                e.preventDefault();
+                alert('Password baru minimal 6 karakter!');
+                newPass.focus();
+                return;
+            }
+            
+            // Validasi konfirmasi password
+            if (newPass.value !== confirmPass.value) {
+                e.preventDefault();
+                alert('Password baru tidak cocok!');
+                confirmPass.focus();
+                return;
+            }
+            
+            // Validasi password saat ini tidak boleh sama dengan yang baru
+            if (currentPass.value === newPass.value) {
+                e.preventDefault();
+                alert('Password baru tidak boleh sama dengan password saat ini!');
+                newPass.focus();
+                return;
+            }
+            
+            // Tampilkan loading
+            const submitBtn = this.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Mengubah...';
+            submitBtn.disabled = true;
+        });
+        
+        // Real-time password strength checker
+        const newPasswordInput = document.querySelector('input[name="new_password"]');
+        const confirmPasswordInput = document.querySelector('input[name="confirm_password"]');
+        
+        if (newPasswordInput && confirmPasswordInput) {
+            newPasswordInput.addEventListener('input', function() {
+                const password = this.value;
+                const strengthSpan = document.getElementById('password-strength');
+                
+                if (password.length === 0) {
+                    strengthSpan.textContent = '';
+                } else if (password.length < 6) {
+                    strengthSpan.textContent = '⚠️ Lemah (minimal 6 karakter)';
+                    strengthSpan.style.color = '#ff6b6b';
+                } else if (password.length < 8) {
+                    strengthSpan.textContent = '⚠️ Sedang';
+                    strengthSpan.style.color = '#ffc107';
+                } else {
+                    strengthSpan.textContent = '✓ Kuat';
+                    strengthSpan.style.color = '#28a745';
+                }
+                
+                // Cek match dengan konfirmasi password
+                checkPasswordMatch();
+            });
+            
+            confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+            
+            function checkPasswordMatch() {
+                const newPass = newPasswordInput.value;
+                const confirmPass = confirmPasswordInput.value;
+                const matchSpan = document.getElementById('password-match');
+                
+                if (confirmPass.length === 0) {
+                    matchSpan.textContent = '';
+                } else if (newPass === confirmPass && newPass.length >= 6) {
+                    matchSpan.textContent = '✓ Password cocok';
+                    matchSpan.style.color = '#28a745';
+                } else if (newPass !== confirmPass && confirmPass.length > 0) {
+                    matchSpan.textContent = '✗ Password tidak cocok';
+                    matchSpan.style.color = '#ff6b6b';
+                } else {
+                    matchSpan.textContent = '';
+                }
+            }
+        }
+    }
+}
+
+// ================= 8. HOVER EFFECTS FOR TICKETS & HISTORY =================
+function setupTicketHoverEffects() {
+    const ticketItems = document.querySelectorAll('.ticket-item, .history-item');
+    ticketItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-8px)';
+            this.style.boxShadow = '0 15px 40px rgba(0,0,0,0.6)';
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+        });
+    });
+}
+
+// ================= 9. SEARCH FUNCTIONALITY =================
+function setupSearch() {
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const items = document.querySelectorAll('.ticket-item, .history-item');
+            
+            items.forEach(item => {
+                const title = item.querySelector('.movie-title, .history-title')?.textContent.toLowerCase() || '';
+                const code = item.querySelector('.ticket-code, .history-code')?.textContent.toLowerCase() || '';
+                const genre = item.querySelector('.movie-genre, .history-genre')?.textContent.toLowerCase() || '';
+                
+                if (title.includes(searchTerm) || code.includes(searchTerm) || genre.includes(searchTerm)) {
+                    item.style.display = '';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
+}
+
+// ================= 10. INITIALIZE ALL FEATURES =================
+document.addEventListener('DOMContentLoaded', function() {
+    // Profile dropdown untuk semua halaman
+    setupProfileDropdown();
+    
+    // Search functionality
+    setupSearch();
+    
+    // Ticket/history hover effects
+    setupTicketHoverEffects();
+    
+    // Profile page specific
+    if (document.getElementById('profileForm')) {
+        setupPasswordToggle();
+        setupProfileValidation();
+    }
+    
+    // Booking flow (jika ada di halaman)
+    if (document.querySelector('.seat')) {
+        initializeSeatSelection();
+    }
+});
+
+// ================= 11. PROFILE DROPDOWN HANDLER =================
+function setupProfileDropdown() {
+    const profileTrigger = document.querySelector('.profile-trigger');
+    if (profileTrigger) {
+        profileTrigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const dropdown = this.parentElement.querySelector('.dropdown-menu');
+            if (dropdown) {
+                const isVisible = dropdown.style.display === 'block';
+                document.querySelectorAll('.dropdown-menu').forEach(d => {
+                    d.style.display = 'none';
+                });
+                dropdown.style.display = isVisible ? 'none' : 'block';
+            }
+        });
+    }
+    
+    // Close dropdown ketika klik di luar
+    document.addEventListener('click', function() {
+        document.querySelectorAll('.dropdown-menu').forEach(dropdown => {
+            dropdown.style.display = 'none';
+        });
+    });
+    
+    // Prevent dropdown close ketika klik di dalam dropdown
+    document.querySelectorAll('.dropdown-menu').forEach(dropdown => {
+        dropdown.addEventListener('click', function(e) {
+            e.stopPropagation();
+        });
+    });
+}
