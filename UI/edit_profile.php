@@ -340,16 +340,6 @@ function safe($array, $key, $default = '') {
             </div>
         </div>
     </div>
-    
-    <!-- ==========================================
-        INCLUDE UNIVERSAL FOOTER
-    ========================================== -->
-    <?php include 'footer.php'; ?>
-    
-    <!-- ==========================================
-        INCLUDE JAVASCRIPT DARI ui_script.js
-        (Semua fungsi sudah ada di ui_script.js)
-    ========================================== -->
     <script src="ui_script.js"></script>
 </body>
 </html>

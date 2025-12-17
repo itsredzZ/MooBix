@@ -304,15 +304,6 @@ $isLoggedIn = isset($_SESSION['user_name']);
             </div>
         <?php endif; ?>
     </div>
-    
-    <!-- ==========================================
-        INCLUDE UNIVERSAL FOOTER
-    ========================================== -->
-    <?php include 'footer.php'; ?>
-    
-    <!-- ==========================================
-        INCLUDE JAVASCRIPT DARI ui_script.js
-    ========================================== -->
     <script src="ui_script.js"></script>
 </body>
 </html>
