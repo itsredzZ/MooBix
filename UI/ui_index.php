@@ -567,7 +567,7 @@ $userEmail = $_SESSION['user_email'] ?? '';
                         <div class="divider-mini"></div>
                         
                         <?php if($isAdmin): ?>
-                            <a href="admin_dashboard.php"><i class="ph ph-gear"></i> Admin Panel</a>
+                            <a href="ui_index.php"><i class="ph ph-gear"></i> Admin Panel</a>
                             <a href="user_manage.php"><i class="ph ph-users"></i> Manage Users</a>
                             <a href="#"><i class="ph ph-calendar-check"></i> Bookings</a>
                             

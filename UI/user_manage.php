@@ -13,11 +13,11 @@ if (!isset($pdo)) {
     require_once 'db.php';
 }
 
-// Cek User Login
+// Cek User Login (Session Check)
 $userName = $_SESSION['user_name'] ?? 'Admin';
 $userEmail = $_SESSION['user_email'] ?? 'admin@moobix.com';
 
-// Logika Pengambilan Data Users
+// --- LOGIKA PENGAMBILAN DATA USERS ---
 $usersList = [];
 $totalUsers = 0;
 $activeUsers = 0;
@@ -25,27 +25,38 @@ $adminsCount = 0;
 
 try {
     if (isset($pdo)) {
-        // Ambil semua users
-        $stmt = $pdo->query("SELECT * FROM users ORDER BY id DESC");
+        // 1. Setup Pagination
+        $limit = 10; 
+        $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+        if ($page < 1) $page = 1;
+        $offset = ($page - 1) * $limit;
+
+        // 2. Hitung Total Data (untuk pagination)
+        $stmtCount = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'user'");
+        $totalUsers = $stmtCount->fetchColumn();
+        $totalPages = ceil($totalUsers / $limit);
+
+        // 3. Ambil Data User (sesuai halaman)
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE role = 'user' ORDER BY id DESC LIMIT :limit OFFSET :offset");
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
         $usersList = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
-        // Hitung statistik
-        $totalUsers = count($usersList);
+        // 4. Hitung Statistik
+        $stmtStats = $pdo->query("SELECT status, role FROM users");
+        $allUsers = $stmtStats->fetchAll(PDO::FETCH_ASSOC);
         
-        foreach ($usersList as $user) {
-            if ($user['status'] == 'active') {
-                $activeUsers++;
-            }
-            if ($user['role'] == 'admin') {
-                $adminsCount++;
-            }
+        foreach ($allUsers as $u) {
+            if ($u['status'] == 'active') $activeUsers++;
+            if ($u['role'] == 'admin') $adminsCount++;
         }
     }
 } catch (Exception $e) {
-    // Silent error agar tampilan tidak rusak
+    // Silent error
 }
 
-// Helper Function: Format tanggal
+// --- HELPER FUNCTIONS ---
 if (!function_exists('formatDate')) {
     function formatDate($dateString) {
         if (empty($dateString) || $dateString == '0000-00-00 00:00:00') return '-';
@@ -54,219 +65,237 @@ if (!function_exists('formatDate')) {
     }
 }
 
-// Helper Function: Agar tidak error jika data kosong
 if (!function_exists('safe')) {
     function safe($array, $key, $default = '-') {
         return isset($array[$key]) ? htmlspecialchars($array[$key]) : $default;
     }
 }
 
-// Warna berdasarkan role
 function getRoleColor($role) {
     switch($role) {
-        case 'admin':
-            return '#d32f2f'; // Merah Moobix
-        case 'moderator':
-            return '#ff9800'; // Orange
-        case 'user':
-            return '#4caf50'; // Hijau
-        default:
-            return '#607d8b'; // Abu-abu
+        case 'admin': return '#d32f2f';
+        case 'user': return '#4caf50';
+        default: return '#607d8b';
     }
 }
 
-// Warna berdasarkan status
 function getStatusColor($status) {
     switch($status) {
-        case 'active':
-            return '#4caf50'; // Hijau
-        case 'inactive':
-            return '#f44336'; // Merah
-        case 'suspended':
-            return '#ff9800'; // Orange
-        case 'pending':
-            return '#2196f3'; // Biru
-        default:
-            return '#607d8b'; // Abu-abu
+        case 'active': return '#4caf50';
+        case 'inactive': return '#f44336';
+        default: return '#607d8b';
     }
 }
 ?>
 
-<main id="admin-dashboard" style="padding-top: 100px;">
-    <div class="section-header">
-        <span>👥 Admin Control Center</span>
-        <h2>USER MANAGEMENT PANEL</h2>
-    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Users - Moobix Admin</title>
     
-    <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dancing+Script:wght@700&family=Oswald:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <link rel="stylesheet" href="ui_style.css">
+    
+    <style>
+        /* Perbaikan kecil agar Navbar tidak menumpuk konten */
+        body {
+            font-family: 'Oswald', sans-serif; /* Pakai font Oswald sebagai default body */
+            background-color: #f9f9f9;
+        }
         
-        <!-- Header User Info -->
-        <div style="display: flex; align-items: center; margin-bottom: 30px; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 4px 20px rgba(170, 43, 43, 0.1);">
-            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #aa2b2b, #d32f2f); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; margin-right: 25px;">
-                <?php echo strtoupper(substr($userName, 0, 1)); ?>
-            </div>
-            <div style="flex: 1;">
-                <h3 style="margin: 0; color: #333; font-size: 28px;">User Management, <?php echo htmlspecialchars($userName); ?>! 👋</h3>
-                <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Last login: <?php echo date('d M Y H:i', $_SESSION['login_time'] ?? time()); ?></p>
-            </div>
-            <div style="text-align: right;">
-                <p style="margin: 0; color: #666; font-size: 14px;">Role: <span style="background: linear-gradient(135deg, #aa2b2b, #d32f2f); color: white; padding: 5px 15px; border-radius: 20px; font-size: 14px; font-weight: bold;">ADMINISTRATOR</span></p>
-                <a href="?logout=true" style="display: inline-block; margin-top: 10px; color: #aa2b2b; text-decoration: none; font-weight: bold;"><i class="ph ph-sign-out"></i> Logout</a>
-            </div>
+        /* Pastikan font judul menggunakan font keren (Bebas Neue/Playfair) */
+        h2, h3, .logo {
+            font-family: 'Bebas Neue', cursive; 
+            letter-spacing: 1px;
+        }
+        
+        .section-header span {
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.5rem;
+            color: #d32f2f;
+        }
+
+        /* Tambahan style khusus halaman ini */
+        .search-container {
+            position: relative;
+            margin-right: 15px;
+        }
+    </style>
+</head>
+<body>
+
+    <?php 
+    // Set variabel agar navbar tahu ini bukan Home Page user biasa
+    $isHomePage = false; 
+    include 'navbar.php'; //
+    ?>
+
+    <main id="admin-dashboard" style="padding-top: 100px;">
+        <div class="section-header">
+            <span>👥 Admin Control Center</span>
+            <h2>USER MANAGEMENT PANEL</h2>
         </div>
         
-        <!-- Stats Cards -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 40px;">
-            <div style="background: linear-gradient(135deg, #aa2b2b, #d32f2f); color: white; padding: 25px; border-radius: 15px; box-shadow: 0 8px 25px rgba(170, 43, 43, 0.3);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <div>
-                        <h4 style="margin: 0 0 10px 0; font-size: 16px; opacity: 0.9;">👥 Total Users</h4>
-                        <p style="font-size: 36px; font-weight: bold; margin: 0;"><?php echo $totalUsers; ?></p>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.2); width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 28px;">
-                        <i class="ph ph-users-three"></i>
-                    </div>
-                </div>
-                <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;"><?php echo $activeUsers; ?> active, <?php echo $adminsCount; ?> admins</p>
-            </div>
+        <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
             
-            <div style="background: linear-gradient(135deg, #c62828, #b71c1c); color: white; padding: 25px; border-radius: 15px; box-shadow: 0 8px 25px rgba(198, 40, 40, 0.3);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <div>
-                        <h4 style="margin: 0 0 10px 0; font-size: 16px; opacity: 0.9;">✅ Active Users</h4>
-                        <p style="font-size: 36px; font-weight: bold; margin: 0;"><?php echo $activeUsers; ?></p>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.2); width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 28px;">
-                        <i class="ph ph-user-circle-check"></i>
-                    </div>
+            <div style="display: flex; align-items: center; margin-bottom: 30px; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 4px 20px rgba(170, 43, 43, 0.1);">
+                <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #aa2b2b, #d32f2f); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: bold; margin-right: 25px;">
+                    <?php echo strtoupper(substr($userName, 0, 1)); ?>
                 </div>
-                <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;"><?php echo round(($activeUsers/$totalUsers)*100, 1); ?>% of total users</p>
-            </div>
-            
-            <div style="background: linear-gradient(135deg, #d32f2f, #aa2b2b); color: white; padding: 25px; border-radius: 15px; box-shadow: 0 8px 25px rgba(211, 47, 47, 0.3);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <div>
-                        <h4 style="margin: 0 0 10px 0; font-size: 16px; opacity: 0.9;">👑 Admin Users</h4>
-                        <p style="font-size: 36px; font-weight: bold; margin: 0;"><?php echo $adminsCount; ?></p>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.2); width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 28px;">
-                        <i class="ph ph-crown"></i>
-                    </div>
+                <div style="flex: 1;">
+                    <h3 style="margin: 0; color: #333; font-size: 28px;">Welcome back, <?php echo htmlspecialchars($userName); ?>! 👋</h3>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Last login: <?php echo date('d M Y H:i', $_SESSION['login_time'] ?? time()); ?></p>
                 </div>
-                <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;"><?php echo $totalUsers - $adminsCount; ?> regular users</p>
-            </div>
-            
-            <div style="background: linear-gradient(135deg, #e53935, #c62828); color: white; padding: 25px; border-radius: 15px; box-shadow: 0 8px 25px rgba(229, 57, 53, 0.3);">
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <div>
-                        <h4 style="margin: 0 0 10px 0; font-size: 16px; opacity: 0.9;">📊 User Activity</h4>
-                        <p style="font-size: 36px; font-weight: bold; margin: 0;">156</p>
-                    </div>
-                    <div style="background: rgba(255,255,255,0.2); width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 28px;">
-                        <i class="ph ph-activity"></i>
-                    </div>
-                </div>
-                <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;">Active sessions last 24h</p>
-            </div>
-        </div>
-        
-        <!-- Users Table Section -->
-        <div style="background: white; border-radius: 15px; padding: 30px; box-shadow: 0 4px 20px rgba(170, 43, 43, 0.1); margin-bottom: 40px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                <h3 style="color: #333; margin: 0; font-size: 24px; display: flex; align-items: center; gap: 10px;">
-                    <i class="ph ph-users" style="color: #aa2b2b;"></i>
-                    Active Users List
-                </h3>
-                <div style="display: flex; gap: 15px;">
-                    <button onclick="addNewUser()" style="background: linear-gradient(135deg, #aa2b2b, #d32f2f); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; font-weight: bold; transition: transform 0.3s, box-shadow 0.3s;" 
-                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(170, 43, 43, 0.4)';" 
-                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                        <i class="ph ph-user-circle-plus" style="font-size: 18px;"></i>
-                        Add New User
-                    </button>
-                    
-                    <button onclick="refreshUsers()" style="background: #f5f5f5; border: 1px solid #ddd; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.3s;" 
-                            onmouseover="this.style.background='#e9e9e9';" 
-                            onmouseout="this.style.background='#f5f5f5';">
-                        <i class="ph ph-arrows-clockwise"></i>
-                        Refresh
-                    </button>
+                <div style="text-align: right;">
+                    <p style="margin: 0; color: #666; font-size: 14px;">Role: <span style="background: linear-gradient(135deg, #aa2b2b, #d32f2f); color: white; padding: 5px 15px; border-radius: 20px; font-size: 14px; font-weight: bold;">ADMINISTRATOR</span></p>
                 </div>
             </div>
             
-            <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; min-width: 1000px;">
-                    <thead>
-                        <tr style="background: linear-gradient(135deg, #2C1E1C, #1F1514); color: white;">
-                            <th style="padding: 15px; text-align: left; border-bottom: 2px solid #444; width: 50px;">ID</th>
-                            <th style="padding: 15px; text-align: left; border-bottom: 2px solid #444;">User Info</th>
-                            <th style="padding: 15px; text-align: left; border-bottom: 2px solid #444;">Role</th>
-                            <th style="padding: 15px; text-align: left; border-bottom: 2px solid #444;">Status</th>
-                            <th style="padding: 15px; text-align: left; border-bottom: 2px solid #444;">Created At</th>
-                            <th style="padding: 15px; text-align: left; border-bottom: 2px solid #444;">Last Login</th>
-                            <th style="padding: 15px; text-align: left; border-bottom: 2px solid #444; width: 180px;">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php if(empty($usersList)): ?>
-                            <tr>
-                                <td colspan="7" style="padding: 30px; text-align: center; color: #888;">No users found in database.</td>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 40px;">
+                <div style="background: linear-gradient(135deg, #aa2b2b, #d32f2f); color: white; padding: 25px; border-radius: 15px; box-shadow: 0 8px 25px rgba(170, 43, 43, 0.3);">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <h4 style="margin: 0 0 10px 0; font-size: 16px; opacity: 0.9;">👥 Total Users</h4>
+                            <p style="font-size: 36px; font-weight: bold; margin: 0;"><?php echo $totalUsers; ?></p>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 28px;">
+                            <i class="ph ph-users-three"></i>
+                        </div>
+                    </div>
+                    <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;"><?php echo $activeUsers; ?> active, <?php echo $adminsCount; ?> admins</p>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #c62828, #b71c1c); color: white; padding: 25px; border-radius: 15px; box-shadow: 0 8px 25px rgba(198, 40, 40, 0.3);">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <h4 style="margin: 0 0 10px 0; font-size: 16px; opacity: 0.9;">✅ Active Users</h4>
+                            <p style="font-size: 36px; font-weight: bold; margin: 0;"><?php echo $activeUsers; ?></p>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 28px;">
+                            <i class="ph ph-user-circle-check"></i>
+                        </div>
+                    </div>
+                    <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;"><?php echo $totalUsers > 0 ? round(($activeUsers/$totalUsers)*100, 1) : 0; ?>% of total users</p>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #d32f2f, #aa2b2b); color: white; padding: 25px; border-radius: 15px; box-shadow: 0 8px 25px rgba(211, 47, 47, 0.3);">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <h4 style="margin: 0 0 10px 0; font-size: 16px; opacity: 0.9;">👑 Admin Users</h4>
+                            <p style="font-size: 36px; font-weight: bold; margin: 0;"><?php echo $adminsCount; ?></p>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 28px;">
+                            <i class="ph ph-crown"></i>
+                        </div>
+                    </div>
+                    <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;"><?php echo $totalUsers - $adminsCount; ?> regular users</p>
+                </div>
+                
+                <div style="background: linear-gradient(135deg, #e53935, #c62828); color: white; padding: 25px; border-radius: 15px; box-shadow: 0 8px 25px rgba(229, 57, 53, 0.3);">
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <h4 style="margin: 0 0 10px 0; font-size: 16px; opacity: 0.9;">📊 User Activity</h4>
+                            <p style="font-size: 36px; font-weight: bold; margin: 0;">156</p>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.2); width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 28px;">
+                            <i class="ph ph-activity"></i>
+                        </div>
+                    </div>
+                    <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;">Active sessions last 24h</p>
+                </div>
+            </div>
+            
+            <div style="background: white; border-radius: 15px; padding: 30px; box-shadow: 0 4px 20px rgba(170, 43, 43, 0.1); margin-bottom: 40px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h3 style="color: #333; margin: 0; font-size: 24px; display: flex; align-items: center; gap: 10px;">
+                        <i class="ph ph-users" style="color: #aa2b2b;"></i>
+                        Active Users List
+                    </h3>
+                    <div style="display: flex; gap: 15px;">
+                        <button onclick="refreshUsers()" style="background: #f5f5f5; border: 1px solid #ddd; padding: 10px 20px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: background 0.3s;" 
+                                onmouseover="this.style.background='#e9e9e9';" 
+                                onmouseout="this.style.background='#f5f5f5';">
+                            <i class="ph ph-arrows-clockwise"></i>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+                
+                <div style="overflow-x: auto;">
+                    <table id="usersTable" style="width: 100%; border-collapse: collapse; min-width: 1000px;">
+                        <thead>
+                            <tr style="background: linear-gradient(135deg, #2C1E1C, #1F1514); color: white;">
+                                <th onclick="sortTable(0)" style="padding: 15px; text-align: left; border-bottom: 2px solid #444; width: 50px; cursor: pointer;">
+                                    ID <i class="ph ph-caret-up-down" style="font-size: 12px; opacity: 0.7;"></i>
+                                </th>
+                                <th onclick="sortTable(1)" style="padding: 15px; text-align: left; border-bottom: 2px solid #444; cursor: pointer;">
+                                    User Info <i class="ph ph-caret-up-down" style="font-size: 12px; opacity: 0.7;"></i>
+                                </th>
+                                <th onclick="sortTable(2)" style="padding: 15px; text-align: left; border-bottom: 2px solid #444; cursor: pointer;">
+                                    Role <i class="ph ph-caret-up-down" style="font-size: 12px; opacity: 0.7;"></i>
+                                </th>
+                                <th onclick="sortTable(3)" style="padding: 15px; text-align: left; border-bottom: 2px solid #444; cursor: pointer;">
+                                    Status <i class="ph ph-caret-up-down" style="font-size: 12px; opacity: 0.7;"></i>
+                                </th>
+                                <th onclick="sortTable(4)" style="padding: 15px; text-align: left; border-bottom: 2px solid #444; cursor: pointer;">
+                                    Created At <i class="ph ph-caret-up-down" style="font-size: 12px; opacity: 0.7;"></i>
+                                </th>
+                                <th onclick="sortTable(5)" style="padding: 15px; text-align: left; border-bottom: 2px solid #444; cursor: pointer;">
+                                    Last Login <i class="ph ph-caret-up-down" style="font-size: 12px; opacity: 0.7;"></i>
+                                </th>
+                                <th style="padding: 15px; text-align: left; border-bottom: 2px solid #444; width: 180px;">
+                                    Actions
+                                </th>
                             </tr>
-                        <?php else: ?>
-                            <?php foreach($usersList as $user): ?>
-                            <tr style="border-bottom: 1px solid #eee; transition: background 0.3s;">
-                                <td style="padding: 15px; color: #666; font-weight: bold;"><?php echo safe($user, 'id'); ?></td>
-                                <td style="padding: 15px;">
-                                    <div style="display: flex; align-items: center; gap: 12px;">
-                                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, <?php echo getRoleColor($user['role'] ?? 'user'); ?>, <?php echo getRoleColor($user['role'] ?? 'user'); ?>80); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px;">
-                                            <?php echo strtoupper(substr(safe($user, 'username'), 0, 1)); ?>
+                        </thead>
+                        <tbody>
+                            <?php if(empty($usersList)): ?>
+                                <tr>
+                                    <td colspan="7" style="padding: 30px; text-align: center; color: #888;">No users found in database.</td>
+                                </tr>
+                            <?php else: ?>
+                                <?php foreach($usersList as $user): ?>
+                                <tr style="border-bottom: 1px solid #eee; transition: background 0.3s;">
+                                    <td style="padding: 15px; color: #666; font-weight: bold;"><?php echo safe($user, 'id'); ?></td>
+                                    <td style="padding: 15px;">
+                                        <div style="display: flex; align-items: center; gap: 12px;">
+                                            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, <?php echo getRoleColor($user['role'] ?? 'user'); ?>, <?php echo getRoleColor($user['role'] ?? 'user'); ?>80); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 16px;">
+                                                <?php echo strtoupper(substr(safe($user, 'name'), 0, 1)); ?>
+                                            </div>
+                                            <div>
+                                                <div style="font-weight: 500; color: #333;"><?php echo safe($user, 'name'); ?></div>
+                                                <div style="color: #666; font-size: 13px;"><?php echo safe($user, 'email'); ?></div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <div style="font-weight: 500; color: #333;"><?php echo safe($user, 'username'); ?></div>
-                                            <div style="color: #666; font-size: 13px;"><?php echo safe($user, 'email'); ?></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td style="padding: 15px;">
-                                    <?php 
-                                    $role = safe($user, 'role', 'user');
-                                    $roleColor = getRoleColor($role);
-                                    $roleText = strtoupper($role);
-                                    ?>
-                                    <span style="background: <?php echo $roleColor; ?>; color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;"><?php echo $roleText; ?></span>
-                                </td>
-                                <td style="padding: 15px;">
-                                    <?php 
-                                    $status = safe($user, 'status', 'active');
-                                    $statusColor = getStatusColor($status);
-                                    $statusText = strtoupper($status);
-                                    ?>
-                                    <span style="background: <?php echo $statusColor; ?>; color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;"><?php echo $statusText; ?></span>
-                                </td>
-                                <td style="padding: 15px; color: #666; font-size: 14px;">
-                                    <?php echo formatDate(safe($user, 'created_at')); ?>
-                                </td>
-                                <td style="padding: 15px; color: #666; font-size: 14px;">
-                                    <?php echo formatDate(safe($user, 'last_login')); ?>
-                                </td>
-                                <td style="padding: 15px;">
-                                    <div style="display: flex; gap: 8px; justify-content: flex-start;">
-                                        <!-- TOMBOL VIEW - MERAH MOOBIX -->
+                                    </td>
+                                    <td style="padding: 15px;">
+                                        <span style="background: <?php echo getRoleColor(safe($user, 'role', 'user')); ?>; color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;"><?php echo strtoupper(safe($user, 'role', 'user')); ?></span>
+                                    </td>
+                                    <td style="padding: 15px;">
+                                        <span style="background: <?php echo getStatusColor(safe($user, 'status', 'active')); ?>; color: white; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold;"><?php echo strtoupper(safe($user, 'status', 'active')); ?></span>
+                                    </td>
+                                    <td style="padding: 15px; color: #666; font-size: 14px;">
+                                        <?php echo formatDate(safe($user, 'created_at')); ?>
+                                    </td>
+                                    <td style="padding: 15px; color: #666; font-size: 14px;">
+                                        <?php echo formatDate(safe($user, 'last_login')); ?>
+                                    </td>
+                                    <td style="padding: 15px;">
+                                        <div style="display: flex; gap: 8px; justify-content: flex-start;">
+                                            <!-- TOMBOL VIEW - MERAH MOOBIX -->
                                         <button onclick="showViewModal(<?php echo safe($user, 'id'); ?>)" 
                                                 style="background: linear-gradient(135deg, #2C1E1C, #1F1514); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 4px; transition: transform 0.2s;" 
                                                 onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 3px 8px rgba(44, 30, 28, 0.3)'" 
                                                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                                             <i class="ph ph-eye" style="font-size: 12px;"></i>
                                             <span>View</span>
-                                        </button>
-                                        
-                                        <!-- TOMBOL EDIT - MERAH MOOBIX -->
-                                        <button onclick="showEditUserModal(<?php echo safe($user, 'id'); ?>)" 
-                                                style="background: linear-gradient(135deg, #aa2b2b, #d32f2f); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 4px; transition: transform 0.2s;" 
-                                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 3px 8px rgba(170, 43, 43, 0.3)'" 
-                                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                                            <i class="ph ph-pencil-simple" style="font-size: 12px;"></i>
-                                            <span>Edit</span>
                                         </button>
                                         
                                         <!-- TOMBOL DELETE - MERAH MOOBIX GELAP -->
@@ -277,45 +306,45 @@ function getStatusColor($status) {
                                             <i class="ph ph-trash" style="font-size: 12px;"></i>
                                             <span>Delete</span>
                                         </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Pagination -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-                <div style="color: #666; font-size: 14px;">
-                    Showing <?php echo min(count($usersList), 10); ?> of <?php echo $totalUsers; ?> users
+                                        </div>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
-                <div style="display: flex; gap: 8px;">
-                    <button style="background: #f5f5f5; border: 1px solid #ddd; padding: 8px 15px; border-radius: 5px; cursor: pointer; color: #666; font-size: 14px;"
-                            onmouseover="this.style.background='#e9e9e9'" 
-                            onmouseout="this.style.background='#f5f5f5'">
-                        <i class="ph ph-caret-left"></i> Previous
-                    </button>
-                    <button style="background: linear-gradient(135deg, #aa2b2b, #d32f2f); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-size: 14px;">1</button>
-                    <button style="background: #f5f5f5; border: 1px solid #ddd; padding: 8px 15px; border-radius: 5px; cursor: pointer; color: #666; font-size: 14px;"
-                            onmouseover="this.style.background='#e9e9e9'" 
-                            onmouseout="this.style.background='#f5f5f5'">2</button>
-                    <button style="background: #f5f5f5; border: 1px solid #ddd; padding: 8px 15px; border-radius: 5px; cursor: pointer; color: #666; font-size: 14px;"
-                            onmouseover="this.style.background='#e9e9e9'" 
-                            onmouseout="this.style.background='#f5f5f5'">3</button>
-                    <button style="background: #f5f5f5; border: 1px solid #ddd; padding: 8px 15px; border-radius: 5px; cursor: pointer; color: #666; font-size: 14px;"
-                            onmouseover="this.style.background='#e9e9e9'" 
-                            onmouseout="this.style.background='#f5f5f5'">
-                        Next <i class="ph ph-caret-right"></i>
-                    </button>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <div style="color: #666; font-size: 14px;">
+                        Showing <?php echo ($offset + 1); ?> - <?php echo min($offset + count($usersList), $totalUsers); ?> of <?php echo $totalUsers; ?> users
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <?php if($page > 1): ?>
+                            <a href="?page=<?php echo $page - 1; ?>"><button class="pagination-btn">Previous</button></a>
+                        <?php else: ?>
+                            <button class="pagination-btn" disabled>Previous</button>
+                        <?php endif; ?>
+
+                        <?php for($i = 1; $i <= $totalPages; $i++): ?>
+                            <a href="?page=<?php echo $i; ?>">
+                                <button class="pagination-btn <?php echo ($i == $page) ? 'active' : ''; ?>"><?php echo $i; ?></button>
+                            </a>
+                        <?php endfor; ?>
+
+                        <?php if($page < $totalPages): ?>
+                            <a href="?page=<?php echo $page + 1; ?>"><button class="pagination-btn">Next</button></a>
+                        <?php else: ?>
+                            <button class="pagination-btn" disabled>Next</button>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</main>
+    </main>
 
-<!-- ========================================== -->
+
+    <!-- ========================================== -->
 <!-- MODAL DELETE USER CONFIRMATION - TEMA MOOBIX -->
 <!-- ========================================== -->
 <div id="deleteUserModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; animation: fadeIn 0.3s ease;">
@@ -495,7 +524,6 @@ function getStatusColor($status) {
         </div>
     </div>
 </div>
-
 <style>
 @keyframes fadeIn {
     from { opacity: 0; transform: scale(0.95); }
@@ -513,7 +541,6 @@ function getStatusColor($status) {
     75% { transform: translateX(5px); }
 }
 </style>
-
 <script>
 // Variabel global
 let userToDelete = null;
@@ -522,14 +549,15 @@ let currentViewingId = null;
 // ==========================================
 // FUNGSI UNTUK MODAL DELETE USER
 // ==========================================
+
 function showDeleteUserModal(userId, username, email) {
-    userToDelete = { id: userId, username: username, email: email };
+    userToDelete = { id: userId, name: username, email: email };
     
     // Set data ke modal
     document.getElementById('deleteUserId').textContent = userId;
-    document.getElementById('deleteUserName').textContent = username;
+    document.getElementById('deleteUserName').textContent = name;
     document.getElementById('deleteUserEmail').textContent = email;
-    document.getElementById('deleteUserAvatar').textContent = username.charAt(0).toUpperCase();
+    document.getElementById('deleteUserAvatar').textContent = name.charAt(0).toUpperCase();
     
     // Reset confirmation input
     document.getElementById('deleteConfirmationInput').value = '';
@@ -592,7 +620,7 @@ function processUserDelete() {
             <i class="ph ph-user-minus" style="font-size: 20px;"></i>
             <div>
                 <strong>User Deleted!</strong><br>
-                "${userToDelete.username}" has been permanently removed.
+                "${userToDelete.name}" has been permanently removed.
             </div>
         `;
         document.body.appendChild(notification);
@@ -627,8 +655,8 @@ function showViewModal(userId) {
     const user = users.find(u => u.id == userId) || {};
     
     // Isi data ke modal
-    document.getElementById('viewUserAvatar').textContent = user.username ? user.username.charAt(0).toUpperCase() : 'U';
-    document.getElementById('viewUserName').textContent = user.username || 'No Name';
+    document.getElementById('viewUserAvatar').textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+    document.getElementById('viewUserName').textContent = user.name || 'No Name';
     document.getElementById('viewUserEmail').textContent = user.email || 'No Email';
     
     // Role dan Status
@@ -648,70 +676,35 @@ function showViewModal(userId) {
     modal.style.display = 'flex';
     modal.style.animation = 'fadeIn 0.3s ease';
 }
-
-// ==========================================
-// FUNGSI UNTUK MODAL EDIT USER
-// ==========================================
-function showEditUserModal(userId) {
-    // Untuk demo
-    const users = <?php echo json_encode($usersList); ?>;
-    const user = users.find(u => u.id == userId) || {};
-    
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed; top: 20px; right: 20px; 
-        background: linear-gradient(135deg, #aa2b2b, #d32f2f); 
-        color: white; padding: 15px 25px; 
-        border-radius: 10px; box-shadow: 0 10px 25px rgba(170, 43, 43, 0.3);
-        z-index: 1001; animation: slideIn 0.3s ease;
-        display: flex; align-items: center; gap: 10px;
-    `;
-    notification.innerHTML = `
-        <i class="ph ph-pencil-simple" style="font-size: 20px;"></i>
-        <div>
-            <strong>Edit User</strong><br>
-            Would open edit form for: ${user.username || 'User'} (ID: ${userId})
-        </div>
-    `;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.animation = 'fadeIn 0.3s ease reverse';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
-
-// ==========================================
-// FUNGSI UNTUK ADD NEW USER
-// ==========================================
-function addNewUser() {
-    const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed; top: 20px; right: 20px; 
-        background: linear-gradient(135deg, #aa2b2b, #d32f2f); 
-        color: white; padding: 15px 25px; 
-        border-radius: 10px; box-shadow: 0 10px 25px rgba(170, 43, 43, 0.3);
-        z-index: 1001; animation: slideIn 0.3s ease;
-        display: flex; align-items: center; gap: 10px;
-    `;
-    notification.innerHTML = `
-        <i class="ph ph-user-circle-plus" style="font-size: 20px;"></i>
-        <div>
-            <strong>Add New User</strong><br>
-            Would open form to create new user account
-        </div>
-    `;
-    document.body.appendChild(notification);
-    
-    setTimeout(() => {
-        notification.style.animation = 'fadeIn 0.3s ease reverse';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
-}
+        document.addEventListener('DOMContentLoaded', function() {
+            const profileTrigger = document.querySelector('.profile-trigger');
+            if (profileTrigger) {
+                profileTrigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const dropdown = this.nextElementSibling; 
+                    if(dropdown) {
+                        dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+                        this.classList.toggle('active');
+                    }
+                });
+            }
+            
+            window.addEventListener('click', function(e) {
+                if (!e.target.closest('.profile-dropdown')) {
+                    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                        menu.style.display = 'none';
+                    });
+                    document.querySelectorAll('.profile-trigger').forEach(trigger => {
+                        trigger.classList.remove('active');
+                    });
+                }
+            });
+        });
 
 // ==========================================
 // FUNGSI UMUM
 // ==========================================
+
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     modal.style.animation = 'fadeIn 0.3s ease reverse';
@@ -725,39 +718,10 @@ function refreshUsers() {
     location.reload();
 }
 
-function getRoleColor(role) {
-    switch(role) {
-        case 'admin': return '#d32f2f';
-        case 'moderator': return '#ff9800';
-        case 'user': return '#4caf50';
-        default: return '#607d8b';
-    }
-}
-
-function getStatusColor(status) {
-    switch(status) {
-        case 'active': return '#4caf50';
-        case 'inactive': return '#f44336';
-        case 'suspended': return '#ff9800';
-        case 'pending': return '#2196f3';
-        default: return '#607d8b';
-    }
-}
-
-function formatDate(dateString) {
-    if (!dateString || dateString === '-' || dateString === '0000-00-00 00:00:00') return '-';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-}
 
 // Tutup modal saat klik di luar modal atau tekan ESC
-window.onclick = function(event) {
+    
+    window.onclick = function(event) {
     const modals = ['deleteUserModal', 'viewUserModal'];
     modals.forEach(modalId => {
         const modal = document.getElementById(modalId);
@@ -779,3 +743,5 @@ document.onkeydown = function(event) {
     }
 };
 </script>
+</body>
+</html>
