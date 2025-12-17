@@ -295,9 +295,6 @@ $isLoggedIn = isset($_SESSION['user_name']);
                         <button class="btn-action btn-print" onclick="printTicket()">
                             <i class="ph ph-printer"></i> Cetak Tiket
                         </button>
-                        <button class="btn-action btn-cancel" onclick="cancelTicket('<?php echo $ticket['id']; ?>', '<?php echo htmlspecialchars($ticket['title']); ?>')">
-                            <i class="ph ph-x"></i> Batalkan Tiket
-                        </button>
                     </div>
                     
                     <div class="ticket-footer">
