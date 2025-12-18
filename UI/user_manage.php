@@ -17,6 +17,29 @@ if (!isset($pdo)) {
 $userName = $_SESSION['user_name'] ?? 'Admin';
 $userEmail = $_SESSION['user_email'] ?? 'admin@moobix.com';
 
+// ==========================================
+// 2. LOGIKA HAPUS USER (DATABASE)
+// ==========================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user_id'])) {
+    $idToDelete = $_POST['delete_user_id'];
+    
+    // Pastikan admin tidak menghapus dirinya sendiri
+    if ($idToDelete == $_SESSION['user_id']) {
+        echo "<script>alert('Anda tidak bisa menghapus akun sendiri!');</script>";
+    } else {
+        try {
+            $stmt = $pdo->prepare("DELETE FROM users WHERE id = ?");
+            $stmt->execute([$idToDelete]);
+            
+            // Refresh halaman agar data hilang dari tabel
+            header("Location: " . $_SERVER['PHP_SELF']);
+            exit();
+        } catch (PDOException $e) {
+            echo "<script>alert('Gagal menghapus user: " . $e->getMessage() . "');</script>";
+        }
+    }
+}
+
 // --- LOGIKA PENGAMBILAN DATA USERS ---
 $usersList = [];
 $totalUsers = 0;
@@ -232,7 +255,7 @@ function getStatusColor($status) {
                     <table id="usersTable" style="width: 100%; border-collapse: collapse; min-width: 1000px;">
                         <thead>
                             <tr style="background: linear-gradient(135deg, #2C1E1C, #1F1514); color: white;">
-                                <th onclick="sortTable(0)" style="padding: 15px; text-align: left; border-bottom: 2px solid #444; width: 50px; cursor: pointer;">
+                                <th onclick="sortTable(0)" style="padding: 15px; text-align: left; border-bottom: 2px solid #444; width: 80px; min-width: 80px; white-space: nowrap; cursor: pointer;">
                                     ID <i class="ph ph-caret-up-down" style="font-size: 12px; opacity: 0.7;"></i>
                                 </th>
                                 <th onclick="sortTable(1)" style="padding: 15px; text-align: left; border-bottom: 2px solid #444; cursor: pointer;">
@@ -290,16 +313,24 @@ function getStatusColor($status) {
                                     <td style="padding: 15px;">
                                         <div style="display: flex; gap: 8px; justify-content: flex-start;">
                                             <!-- TOMBOL VIEW - MERAH MOOBIX -->
-                                        <button onclick="showViewModal(<?php echo safe($user, 'id'); ?>)" 
-                                                style="background: linear-gradient(135deg, #2C1E1C, #1F1514); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 4px; transition: transform 0.2s;" 
-                                                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 3px 8px rgba(44, 30, 28, 0.3)'" 
-                                                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+                                        <button onclick="showViewModal(
+                                            '<?php echo safe($user, 'id'); ?>',
+                                            '<?php echo addslashes(safe($user, 'name')); ?>',
+                                            '<?php echo addslashes(safe($user, 'email')); ?>',
+                                            '<?php echo safe($user, 'role'); ?>',
+                                            '<?php echo safe($user, 'status'); ?>',
+                                            '<?php echo formatDate(safe($user, 'created_at')); ?>',
+                                            '<?php echo formatDate(safe($user, 'last_login')); ?>'
+                                        )" 
+                                            style="background: linear-gradient(135deg, #2C1E1C, #1F1514); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 4px; transition: transform 0.2s;" 
+                                            onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 3px 8px rgba(44, 30, 28, 0.3)'" 
+                                            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
                                             <i class="ph ph-eye" style="font-size: 12px;"></i>
                                             <span>View</span>
                                         </button>
                                         
                                         <!-- TOMBOL DELETE - MERAH MOOBIX GELAP -->
-                                        <button onclick="showDeleteUserModal(<?php echo safe($user, 'id'); ?>, '<?php echo addslashes(safe($user, 'username')); ?>', '<?php echo addslashes(safe($user, 'email')); ?>')" 
+                                        <button onclick="showDeleteUserModal(<?php echo safe($user, 'id'); ?>, '<?php echo addslashes(safe($user, 'name')); ?>', '<?php echo addslashes(safe($user, 'email')); ?>')" 
                                                 style="background: linear-gradient(135deg, #c62828, #b71c1c); color: white; border: none; padding: 6px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; display: flex; align-items: center; gap: 4px; transition: transform 0.2s;"
                                                 onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 3px 8px rgba(198, 40, 40, 0.3)'" 
                                                 onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
@@ -319,25 +350,56 @@ function getStatusColor($status) {
                     <div style="color: #666; font-size: 14px;">
                         Showing <?php echo ($offset + 1); ?> - <?php echo min($offset + count($usersList), $totalUsers); ?> of <?php echo $totalUsers; ?> users
                     </div>
-                    <div style="display: flex; gap: 8px;">
-                        <?php if($page > 1): ?>
-                            <a href="?page=<?php echo $page - 1; ?>"><button class="pagination-btn">Previous</button></a>
-                        <?php else: ?>
-                            <button class="pagination-btn" disabled>Previous</button>
-                        <?php endif; ?>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                <div style="color: #666; font-size: 14px;">
+                    Showing <?php echo ($offset + 1); ?> - <?php echo min($offset + count($usersList), $totalUsers); ?> of <?php echo $totalUsers; ?> users
+                </div>
+                
+                <div style="display: flex; gap: 8px;">
+                    <?php if($page > 1): ?>
+                        <a href="?page=<?php echo $page - 1; ?>" style="text-decoration: none;">
+                            <button style="background: #f5f5f5; border: 1px solid #ddd; padding: 8px 15px; border-radius: 5px; cursor: pointer; color: #666; font-size: 14px; display: flex; align-items: center; gap: 5px;"
+                                    onmouseover="this.style.background='#e9e9e9'" 
+                                    onmouseout="this.style.background='#f5f5f5'">
+                                <i class="ph ph-caret-left"></i> Previous
+                            </button>
+                        </a>
+                    <?php else: ?>
+                        <button disabled style="background: #eee; border: 1px solid #ddd; padding: 8px 15px; border-radius: 5px; cursor: not-allowed; color: #aaa; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                            <i class="ph ph-caret-left"></i> Previous
+                        </button>
+                    <?php endif; ?>
 
-                        <?php for($i = 1; $i <= $totalPages; $i++): ?>
-                            <a href="?page=<?php echo $i; ?>">
-                                <button class="pagination-btn <?php echo ($i == $page) ? 'active' : ''; ?>"><?php echo $i; ?></button>
-                            </a>
-                        <?php endfor; ?>
+                    <?php for($i = 1; $i <= $totalPages; $i++): ?>
+                        <a href="?page=<?php echo $i; ?>" style="text-decoration: none;">
+                            <?php if($i == $page): ?>
+                                <button style="background: linear-gradient(135deg, #aa2b2b, #d32f2f); color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: default; font-size: 14px; font-weight: bold;">
+                                    <?php echo $i; ?>
+                                </button>
+                            <?php else: ?>
+                                <button style="background: #f5f5f5; border: 1px solid #ddd; padding: 8px 15px; border-radius: 5px; cursor: pointer; color: #666; font-size: 14px;"
+                                        onmouseover="this.style.background='#e9e9e9'" 
+                                        onmouseout="this.style.background='#f5f5f5'">
+                                    <?php echo $i; ?>
+                                </button>
+                            <?php endif; ?>
+                        </a>
+                    <?php endfor; ?>
 
-                        <?php if($page < $totalPages): ?>
-                            <a href="?page=<?php echo $page + 1; ?>"><button class="pagination-btn">Next</button></a>
-                        <?php else: ?>
-                            <button class="pagination-btn" disabled>Next</button>
-                        <?php endif; ?>
-                    </div>
+                    <?php if($page < $totalPages): ?>
+                        <a href="?page=<?php echo $page + 1; ?>" style="text-decoration: none;">
+                            <button style="background: #f5f5f5; border: 1px solid #ddd; padding: 8px 15px; border-radius: 5px; cursor: pointer; color: #666; font-size: 14px; display: flex; align-items: center; gap: 5px;"
+                                    onmouseover="this.style.background='#e9e9e9'" 
+                                    onmouseout="this.style.background='#f5f5f5'">
+                                Next <i class="ph ph-caret-right"></i>
+                            </button>
+                        </a>
+                    <?php else: ?>
+                        <button disabled style="background: #eee; border: 1px solid #ddd; padding: 8px 15px; border-radius: 5px; cursor: not-allowed; color: #aaa; font-size: 14px; display: flex; align-items: center; gap: 5px;">
+                            Next <i class="ph ph-caret-right"></i>
+                        </button>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -503,24 +565,6 @@ function getStatusColor($status) {
                     </div>
                 </div>
             </div>
-            
-            <!-- Action Buttons -->
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                <button onclick="closeModal('viewUserModal')" 
-                        style="background: linear-gradient(135deg, #f5f5f5, #e0e0e0); color: #666; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s;"
-                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'" 
-                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                    <i class="ph ph-x-circle"></i>
-                    Close
-                </button>
-                <button onclick="closeModal('viewUserModal'); showEditUserModal(currentViewingId)" 
-                        style="background: linear-gradient(135deg, #aa2b2b, #d32f2f); color: white; border: none; padding: 12px; border-radius: 10px; cursor: pointer; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.3s;"
-                        onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(170, 43, 43, 0.4)'" 
-                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                    <i class="ph ph-pencil-simple"></i>
-                    Edit User
-                </button>
-            </div>
         </div>
     </div>
 </div>
@@ -557,7 +601,7 @@ function showDeleteUserModal(userId, username, email) {
     document.getElementById('deleteUserId').textContent = userId;
     document.getElementById('deleteUserName').textContent = name;
     document.getElementById('deleteUserEmail').textContent = email;
-    document.getElementById('deleteUserAvatar').textContent = name.charAt(0).toUpperCase();
+    document.getElementById('deleteUserAvatar').textContent = username.charAt(0).toUpperCase();
     
     // Reset confirmation input
     document.getElementById('deleteConfirmationInput').value = '';
@@ -599,77 +643,112 @@ function checkDeleteConfirmation() {
 function processUserDelete() {
     if (!userToDelete) return;
     
+    // 1. Ubah tombol jadi Loading
     const confirmBtn = document.getElementById('confirmDeleteBtn');
     const originalText = confirmBtn.innerHTML;
     confirmBtn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Deleting...';
     confirmBtn.disabled = true;
     
-    // Simulasi proses delete dengan AJAX
-    setTimeout(() => {
-        // Simulasi response sukses
-        const notification = document.createElement('div');
-        notification.style.cssText = `
-            position: fixed; top: 20px; right: 20px; 
-            background: linear-gradient(135deg, #c62828, #b71c1c); 
-            color: white; padding: 15px 25px; 
-            border-radius: 10px; box-shadow: 0 10px 25px rgba(198, 40, 40, 0.3);
-            z-index: 1001; animation: slideIn 0.3s ease;
-            display: flex; align-items: center; gap: 10px;
-        `;
-        notification.innerHTML = `
-            <i class="ph ph-user-minus" style="font-size: 20px;"></i>
-            <div>
-                <strong>User Deleted!</strong><br>
-                "${userToDelete.name}" has been permanently removed.
-            </div>
-        `;
-        document.body.appendChild(notification);
-        
-        // Reset button
+    // 2. Siapkan data untuk dikirim ke PHP
+    const formData = new FormData();
+    formData.append('delete_user_id', userToDelete.id); // Sesuai dengan yang ditangkap PHP
+
+    // 3. Kirim via Fetch (AJAX) tanpa reload halaman dulu
+    fetch(window.location.href, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (response.ok) {
+            // 4. Jika Sukses Hapus di Database, Tampilkan Notifikasi Pop-up
+            showDeleteSuccessNotification();
+        } else {
+            alert("Terjadi kesalahan saat menghapus data.");
+            confirmBtn.innerHTML = originalText;
+            confirmBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert("Gagal terhubung ke server.");
         confirmBtn.innerHTML = originalText;
         confirmBtn.disabled = false;
-        
-        // Hapus notifikasi setelah 3 detik
-        setTimeout(() => {
-            notification.style.animation = 'fadeIn 0.3s ease reverse';
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-        
-        // Tutup modal
-        closeModal('deleteUserModal');
-        
-        // Refresh halaman
-        setTimeout(() => location.reload(), 1000);
-        
-    }, 1500);
+    });
 }
+
+// Fungsi Terpisah untuk Menampilkan Notifikasi & Refresh
+function showDeleteSuccessNotification() {
+    // Tutup modal konfirmasi dulu agar rapi
+    closeModal('deleteUserModal');
+
+    // Buat elemen notifikasi
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed; top: 20px; right: 20px; 
+        background: linear-gradient(135deg, #c62828, #b71c1c); 
+        color: white; padding: 15px 25px; 
+        border-radius: 10px; box-shadow: 0 10px 25px rgba(198, 40, 40, 0.3);
+        z-index: 2000; animation: slideIn 0.5s ease;
+        display: flex; align-items: center; gap: 10px;
+        min-width: 300px;
+    `;
+    
+    notification.innerHTML = `
+        <div style="background: rgba(255,255,255,0.2); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
+            <i class="ph ph-trash" style="font-size: 20px;"></i>
+        </div>
+        <div>
+            <strong style="font-size: 16px;">Deleted Successfully!</strong><br>
+            <span style="font-size: 13px; opacity: 0.9;">User "${userToDelete.name}" has been removed.</span>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Timer: Biarkan user membaca notifikasi selama 2 detik, baru refresh halaman
+    setTimeout(() => {
+        // Efek fade out sebelum reload
+        notification.style.animation = 'fadeOut 0.5s ease forwards';
+        
+        setTimeout(() => {
+            // REFRESH HALAMAN (Agar data di tabel hilang)
+            window.location.reload(); 
+        }, 500); // Tunggu animasi fade out selesai
+    }, 2000); // Durasi notifikasi tampil
+}
+
+// Tambahkan animasi fadeOut di CSS jika belum ada
+const styleSheet = document.createElement("style");
+styleSheet.innerText = `
+    @keyframes fadeOut {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(-20px); }
+    }
+`;
+document.head.appendChild(styleSheet);
 
 // ==========================================
 // FUNGSI UNTUK MODAL VIEW USER
 // ==========================================
-function showViewModal(userId) {
-    currentViewingId = userId;
+function showViewModal(id, name, email, role, status, created, login) {
+    // Isi data ke modal langsung dari parameter (tidak ambil dari array PHP lagi)
+    document.getElementById('viewUserAvatar').textContent = name ? name.charAt(0).toUpperCase() : 'U';
+    document.getElementById('viewUserName').textContent = name || 'No Name';
+    document.getElementById('viewUserEmail').textContent = email || 'No Email';
     
-    // Ambil data user dari PHP array
-    const users = <?php echo json_encode($usersList); ?>;
-    const user = users.find(u => u.id == userId) || {};
+    // Role styling
+    const roleEl = document.getElementById('viewUserRole');
+    roleEl.textContent = role.toUpperCase();
+    roleEl.style.background = (role === 'admin') ? '#d32f2f' : '#4caf50';
     
-    // Isi data ke modal
-    document.getElementById('viewUserAvatar').textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
-    document.getElementById('viewUserName').textContent = user.name || 'No Name';
-    document.getElementById('viewUserEmail').textContent = user.email || 'No Email';
+    // Status styling
+    const statusEl = document.getElementById('viewUserStatus');
+    statusEl.textContent = status.toUpperCase();
+    statusEl.style.background = (status === 'active') ? '#4caf50' : '#f44336';
     
-    // Role dan Status
-    const role = user.role || 'user';
-    const status = user.status || 'active';
-    document.getElementById('viewUserRole').textContent = role.toUpperCase();
-    document.getElementById('viewUserRole').style.background = getRoleColor(role);
-    document.getElementById('viewUserStatus').textContent = status.toUpperCase();
-    document.getElementById('viewUserStatus').style.background = getStatusColor(status);
-    
-    // Tanggal
-    document.getElementById('viewUserCreated').textContent = user.created_at ? formatDate(user.created_at) : '-';
-    document.getElementById('viewUserLastLogin').textContent = user.last_login ? formatDate(user.last_login) : '-';
+    // Dates
+    document.getElementById('viewUserCreated').textContent = created;
+    document.getElementById('viewUserLastLogin').textContent = login;
     
     // Tampilkan modal
     const modal = document.getElementById('viewUserModal');
@@ -742,6 +821,83 @@ document.onkeydown = function(event) {
         });
     }
 };
+
+// ==========================================
+// FUNGSI SORTING TABEL (Wajib Ada)
+// ==========================================
+function sortTable(n) {
+    var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    table = document.getElementById("usersTable"); // Pastikan ID tabel sesuai
+    switching = true;
+    dir = "asc"; // Set arah awal ascending
+    
+    while (switching) {
+        switching = false;
+        rows = table.rows;
+        
+        // Loop semua baris (mulai dari 1 karena 0 adalah header)
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+            
+            if (!x || !y) continue; // Mencegah error jika data kosong
+
+            var xValue = x.innerText.toLowerCase();
+            var yValue = y.innerText.toLowerCase();
+            
+            // Khusus kolom ID (kolom ke-0), ubah jadi angka agar urutannya benar (1, 2, 10 bukan 1, 10, 2)
+            if (n === 0) {
+                xValue = parseInt(xValue) || 0;
+                yValue = parseInt(yValue) || 0;
+            }
+
+            if (dir == "asc") {
+                if (xValue > yValue) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (xValue < yValue) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+        
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount ++; 
+        } else {
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+    
+    // Update Icon Panah (Opsional, agar terlihat cantik)
+    updateSortIcons(n, dir);
+}
+
+function updateSortIcons(columnIndex, direction) {
+    // Reset semua icon jadi transparan
+    const headers = document.querySelectorAll('th i');
+    headers.forEach(icon => {
+        icon.className = 'ph ph-caret-up-down';
+        icon.style.opacity = '0.3';
+    });
+    
+    // Highlight icon di kolom yang sedang aktif
+    const activeHeader = document.querySelectorAll('th')[columnIndex];
+    const activeIcon = activeHeader.querySelector('i');
+    if (activeIcon) {
+        activeIcon.style.opacity = '1';
+        activeIcon.className = direction === 'asc' ? 'ph ph-caret-up' : 'ph ph-caret-down';
+    }
+}
 </script>
 </body>
 </html>

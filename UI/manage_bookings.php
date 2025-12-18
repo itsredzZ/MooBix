@@ -41,7 +41,8 @@ try {
                     SELECT GROUP_CONCAT(seat_number SEPARATOR ', ') 
                     FROM booked_seats 
                     WHERE transaction_id = t.id
-                ) as seat_numbers
+                ) as seat_numbers,
+                COUNT(m.id) AS ticket_quantity
               FROM transactions t
               JOIN movies m ON t.movie_id = m.id
               JOIN users u ON t.user_id = u.id

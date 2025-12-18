@@ -569,7 +569,7 @@ $userEmail = $_SESSION['user_email'] ?? '';
                         <?php if($isAdmin): ?>
                             <a href="ui_index.php"><i class="ph ph-gear"></i> Admin Panel</a>
                             <a href="user_manage.php"><i class="ph ph-users"></i> Manage Users</a>
-                            <a href="#"><i class="ph ph-calendar-check"></i> Bookings</a>
+                            <a href="manage_bookings.php"><i class="ph ph-calendar-check"></i> Bookings</a>
                             
                             <div class="divider-mini"></div>
                             
