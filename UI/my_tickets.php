@@ -6,7 +6,7 @@ require 'db.php';
 // ==========================================
 // SET NAVBAR TYPE (MINIMALIS UNTUK NON-HOME)
 // ==========================================
-$isHomePage = false; // <-- INI PENTING untuk navbar minimalis
+$isHomePage = false; 
 
 // Cek apakah user sudah login
 if (!isset($_SESSION['user_id'])) {
@@ -21,7 +21,8 @@ $user_id = $_SESSION['user_id'];
 $tickets = [];
 
 try {
-    // Query untuk mengambil data tiket aktif
+    // [PERBAIKAN 1: Query SQL Menggunakan Sub-Query untuk ambil kursi]
+    // Ini aman dan tidak akan merusak layout atau bikin error database
     $query = "SELECT 
                 t.*,
                 m.title,
@@ -30,7 +31,12 @@ try {
                 m.synopsis,
                 m.duration,
                 m.rating,
-                m.price
+                m.price,
+                (
+                    SELECT GROUP_CONCAT(seat_number SEPARATOR ', ') 
+                    FROM booked_seats 
+                    WHERE transaction_id = t.id
+                ) as seat_numbers
               FROM transactions t
               LEFT JOIN movies m ON t.movie_id = m.id
               WHERE t.user_id = ? 
@@ -43,10 +49,7 @@ try {
     $tickets = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
 } catch (PDOException $e) {
-    echo "<div style='color:red; padding:20px; background:#ffe6e6; border:1px solid red; margin:20px;'>";
-    echo "<h3>Database Error:</h3>";
-    echo "<p>" . $e->getMessage() . "</p>";
-    echo "</div>";
+    echo "<div style='color:red; padding:20px;'>Database Error: " . $e->getMessage() . "</div>";
     exit();
 }
 
@@ -60,19 +63,13 @@ function safe($array, $key, $default = '-') {
 function getPoster($filename) {
     $local_path = 'uploads/';
     if (empty($filename)) return 'https://via.placeholder.com/400x600?text=No+Image';
-    
-    if (strpos($filename, 'http') === 0) {
-        return $filename;
-    } else {
-        return $local_path . $filename;
-    }
+    if (strpos($filename, 'http') === 0) return $filename;
+    return $local_path . $filename;
 }
 
 // Data user untuk header
 $userName = $_SESSION['user_name'] ?? '';
-$userEmail = $_SESSION['user_email'] ?? '';
 $userRole = $_SESSION['user_role'] ?? 'user';
-$isAdmin = isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
 $isLoggedIn = isset($_SESSION['user_name']);
 ?>
 
@@ -89,32 +86,45 @@ $isLoggedIn = isset($_SESSION['user_name']);
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     
     <link rel="stylesheet" href="ui_style.css">
+    
     <style>
-        /* Additional custom styles if needed */
-        .ticket-content {
-            position: relative;
+        .ticket-content { position: relative; }
+        .seat-numbers {
+            position: absolute; top: 10px; right: 10px;
+            background: rgba(0,0,0,0.8); color: #FFD700;
+            padding: 8px 15px; border-radius: 8px;
+            font-family: var(--font-head); letter-spacing: 1px; font-size: 0.9rem;
         }
         
-        .seat-numbers {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.8);
-            color: #FFD700;
-            padding: 8px 15px;
-            border-radius: 8px;
-            font-family: var(--font-head);
-            letter-spacing: 1px;
-            font-size: 0.9rem;
+        /* Modal Styles */
+        .qr-modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 9999;
+            display: none; justify-content: center; align-items: center;
         }
+        .qr-modal-content {
+            background: white; padding: 0; border-radius: 16px;
+            position: relative; max-width: 320px; width: 100%;
+            overflow: hidden;
+        }
+        .digital-ticket { text-align: center; padding-bottom: 20px; }
+        .ticket-header-modal {
+            background: #1a1a1a; color: #e50914; padding: 15px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 2px solid #e50914; font-weight: bold;
+        }
+        .ticket-body-modal { padding: 20px; text-align: left; }
+        .ticket-body-modal h2 { margin: 0 0 10px 0; color: #000; font-size: 1.2rem; }
+        .info-grid-modal { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .info-item-modal label { font-size: 0.7rem; color: #888; display: block; }
+        .info-item-modal span { font-weight: bold; color: #000; font-size: 0.95rem; }
+        .ticket-divider { height: 20px; border-top: 2px dashed #ccc; margin: 10px 0; position: relative; }
+        .close-qr { position: absolute; top: 10px; right: 10px; color: #fff; font-size: 24px; cursor: pointer; z-index: 100; }
+        #qrcode-container img { margin: 0 auto; }
     </style>
 </head>
 <body>
 
-    <!-- ==========================================
-        INCLUDE UNIVERSAL NAVBAR
-        (Otomatis akan render navbar minimalis karena $isHomePage = false)
-    ========================================== -->
     <?php include 'navbar.php'; ?>
 
     <div class="tickets-container">
@@ -124,7 +134,6 @@ $isLoggedIn = isset($_SESSION['user_name']);
         </div>
         
         <?php if (count($tickets) > 0): ?>
-            <!-- STATISTIK TIKET -->
             <?php
             $total_tickets = count($tickets);
             $total_spent = 0;
@@ -154,48 +163,40 @@ $isLoggedIn = isset($_SESSION['user_name']);
                 </div>
             </div>
             
-            <!-- DAFTAR TIKET -->
             <div class="tickets-list">
                 <?php foreach ($tickets as $ticket): 
-                    // Format tanggal Indonesia
                     $show_date = new DateTime($ticket['show_date']);
                     $transaction_date = new DateTime($ticket['transaction_date']);
                     
                     $hari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
                     $bulan = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
                     
-                    // Format tanggal tayang
                     $hari_show = $hari[$show_date->format('w')];
                     $tanggal_show = $show_date->format('j');
                     $bulan_show = $bulan[$show_date->format('n')-1];
                     $tahun_show = $show_date->format('Y');
                     
-                    // Format tanggal pembelian
                     $hari_trans = $hari[$transaction_date->format('w')];
                     $tanggal_trans = $transaction_date->format('j');
                     $bulan_trans = $bulan[$transaction_date->format('n')-1];
                     $tahun_trans = $transaction_date->format('Y');
                     $jam_trans = $transaction_date->format('H:i');
                     
-                    // Format rating bintang
                     $rating = floatval($ticket['rating'] ?? 0);
                     $stars_full = floor($rating);
                     $stars_empty = 5 - $stars_full;
                     
-                    // Tentukan path gambar poster
                     $poster_path = getPoster(safe($ticket, 'poster'));
-                    
-                    // Format harga
                     $total_price = number_format($ticket['total_price'], 0, ',', '.');
                     $movie_price = number_format($ticket['price'], 0, ',', '.');
                     
-                    // Format seat numbers
-                    $seat_numbers = isset($ticket['seat_numbers']) ? $ticket['seat_numbers'] : 'A1,A2';
+                    // [PERBAIKAN DATA KURSI]
+                    // Mengambil data asli dari database, jika kosong pakai '-'
+                    $seat_numbers = !empty($ticket['seat_numbers']) ? $ticket['seat_numbers'] : '-';
+                    
                     $seats_array = explode(',', $seat_numbers);
                     $seats_display = implode(', ', array_slice($seats_array, 0, 3));
-                    if (count($seats_array) > 3) {
-                        $seats_display .= '...';
-                    }
+                    if (count($seats_array) > 3) $seats_display .= '...';
                 ?>
                 <div class="ticket-item" data-ticket-id="<?php echo $ticket['id']; ?>">
                     <div class="ticket-header">
@@ -235,14 +236,8 @@ $isLoggedIn = isset($_SESSION['user_name']);
                                 <div class="movie-rating">
                                     <span class="stars">
                                         <?php 
-                                        // Tampilkan bintang penuh
-                                        for ($i = 0; $i < $stars_full; $i++) {
-                                            echo '<i class="ph ph-star-fill star-filled"></i>';
-                                        }
-                                        // Tampilkan bintang kosong
-                                        for ($i = 0; $i < $stars_empty; $i++) {
-                                            echo '<i class="ph ph-star star-empty"></i>';
-                                        }
+                                        for ($i = 0; $i < $stars_full; $i++) echo '<i class="ph ph-star-fill star-filled"></i>';
+                                        for ($i = 0; $i < $stars_empty; $i++) echo '<i class="ph ph-star star-empty"></i>';
                                         ?>
                                     </span>
                                     <span><?php echo number_format($rating, 1); ?>/5.0</span>
@@ -262,12 +257,12 @@ $isLoggedIn = isset($_SESSION['user_name']);
                                 </div>
                                 
                                 <div class="detail-item">
-                                    <span class="detail-label"><i class="ph ph-shopping-cart"></i> Tanggal Pembelian</span>
-                                    <span class="detail-value"><?php echo "$hari_trans, $tanggal_trans $bulan_trans $tahun_trans - $jam_trans"; ?></span>
+                                    <span class="detail-label"><i class="ph ph-shopping-cart"></i> Pembelian</span>
+                                    <span class="detail-value"><?php echo "$tanggal_trans $bulan_trans - $jam_trans"; ?></span>
                                 </div>
                                 
                                 <div class="detail-item">
-                                    <span class="detail-label"><i class="ph ph-tag"></i> Harga Tiket</span>
+                                    <span class="detail-label"><i class="ph ph-tag"></i> Harga</span>
                                     <span class="detail-value">Rp <?php echo $movie_price; ?>/tiket</span>
                                 </div>
                             </div>
@@ -287,52 +282,110 @@ $isLoggedIn = isset($_SESSION['user_name']);
                         <div class="price-label">Total Pembayaran</div>
                         <div class="price">Rp <?php echo $total_price; ?></div>
                     </div>
-                    
-                    <div class="ticket-actions">
-                        <button class="btn-action btn-download" onclick="downloadTicket('<?php echo $ticket['booking_code']; ?>')">
-                            <i class="ph ph-download"></i> Download E-Ticket
-                        </button>
-                        <button class="btn-action btn-print" onclick="printTicket()">
-                            <i class="ph ph-printer"></i> Cetak Tiket
-                        </button>
-                        <button class="btn-action btn-cancel" onclick="cancelTicket('<?php echo $ticket['id']; ?>', '<?php echo htmlspecialchars($ticket['title']); ?>')">
-                            <i class="ph ph-x"></i> Batalkan Tiket
+
+                    <div class="ticket-action" style="margin-top: 15px; border-top: 1px dashed #ccc; padding-top: 15px; text-align: center;">
+                        <button class="btn-primary" type="button" 
+                                style="width: 100%; background: #e50914; color: white; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                                onclick="showQRCode(
+                            '<?php echo $ticket['booking_code']; ?>',
+                            '<?php echo htmlspecialchars($ticket['title'], ENT_QUOTES); ?>', 
+                            '<?php echo "$tanggal_show $bulan_show"; ?>',
+                            '<?php echo $ticket['show_time']; ?>',
+                            '<?php echo safe($ticket, 'seat_numbers', '-'); ?>' 
+                        )">
+                            <i class="ph ph-qr-code" style="font-size: 1.2rem;"></i> LIHAT E-TICKET
                         </button>
                     </div>
                     
                     <div class="ticket-footer">
-                        <div>
-                            <i class="ph ph-info"></i> 
-                            Harap datang 30 menit sebelum jam tayang
-                        </div>
-                        <div>
-                            ID Transaksi: <strong><?php echo $ticket['id']; ?></strong>
-                        </div>
+                        <div><i class="ph ph-info"></i> Harap datang 30 menit sebelum jam tayang</div>
+                        <div>ID: <strong><?php echo $ticket['id']; ?></strong></div>
                     </div>
                 </div>
                 <?php endforeach; ?>
             </div>
         <?php else: ?>
-            <!-- TAMPILAN JIKA TIDAK ADA TIKET -->
             <div class="no-tickets">
-                <div class="no-tickets-icon">
-                    <i class="ph ph-ticket"></i>
-                </div>
+                <div class="no-tickets-icon"><i class="ph ph-ticket"></i></div>
                 <h3>Belum Ada Tiket Aktif</h3>
-                <p>Anda belum memiliki tiket yang sedang aktif. Silakan kembali ke halaman utama untuk memesan tiket film favorit Anda.</p>
-                <a href="ui_index.php" class="btn-browse">
-                    <i class="ph ph-house"></i> Kembali ke Beranda
-                </a>
+                <p>Anda belum memiliki tiket yang sedang aktif. Silakan kembali ke halaman utama.</p>
+                <a href="ui_index.php" class="btn-browse"><i class="ph ph-house"></i> Kembali ke Beranda</a>
             </div>
         <?php endif; ?>
     </div>
+    
+    <div id="qrModal" class="qr-modal-overlay">
+        <div class="qr-modal-content">
+            <span class="close-qr" onclick="closeQRModal()">&times;</span>
+            <div class="digital-ticket">
+                <div class="ticket-header-modal">
+                    <span>MOOBIX</span>
+                </div>
+                <div class="ticket-body-modal">
+                    <h2 id="modal-movie-title">JUDUL FILM</h2>
+                    <div class="info-grid-modal">
+                        <div class="info-item-modal"><label>DATE</label><span id="modal-date">-</span></div>
+                        <div class="info-item-modal"><label>TIME</label><span id="modal-time">-</span></div>
+                        <div class="info-item-modal"><label>SEATS</label><span id="modal-seats" style="color:#e50914">-</span></div>
+                    </div>
+                    <div class="ticket-divider"></div>
+                    <div style="text-align: center;">
+                        <p style="font-size:0.7rem; color:#888; margin-bottom:10px;">SCAN THIS CODE AT ENTRANCE</p>
+                        <div id="qrcode-container" style="margin-bottom: 10px;"></div>
+                        <h3 id="qr-booking-code" style="letter-spacing: 2px; margin:0; color:#e50914">CODE</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="ui_script.js"></script>
     
     <script>
-        // Additional JavaScript for this page
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('My Tickets page loaded');
-        });
+        // Script Logic untuk Tombol E-Ticket
+        let qrcodeObj = null;
+
+        function showQRCode(code, title, date, time, seats) {
+            const modal = document.getElementById('qrModal');
+            if(!modal) return;
+            
+            modal.style.display = 'flex';
+
+            document.getElementById('modal-movie-title').innerText = title;
+            document.getElementById('modal-date').innerText = date;
+            
+            let cleanTime = time.length > 5 ? time.substring(0, 5) : time;
+            document.getElementById('modal-time').innerText = cleanTime;
+            
+            document.getElementById('modal-seats').innerText = seats;
+            document.getElementById('qr-booking-code').innerText = code;
+
+            const container = document.getElementById('qrcode-container');
+            container.innerHTML = ""; 
+            
+            setTimeout(() => {
+                qrcodeObj = new QRCode(container, {
+                    text: code,
+                    width: 140,
+                    height: 140,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+            }, 50);
+        }
+
+        function closeQRModal() {
+            document.getElementById('qrModal').style.display = 'none';
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('qrModal');
+            if (event.target == modal) {
+                closeQRModal();
+            }
+        }
     </script>
 </body>
 </html>

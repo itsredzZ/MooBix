@@ -198,11 +198,6 @@ $isLoggedIn = isset($_SESSION['user_name']);
                     <div class="history-item-header">
                         <div class="history-code"><?php echo htmlspecialchars($ticket['booking_code']); ?></div>
                         <div class="history-status <?php echo $ticket['payment_status']; ?>">
-                            <?php if($ticket['payment_status'] == 'paid'): ?>
-                                <i class="ph ph-check-circle"></i> Lunas
-                            <?php else: ?>
-                                <i class="ph ph-x-circle"></i> Dibatalkan
-                            <?php endif; ?>
                         </div>
                     </div>
                     
