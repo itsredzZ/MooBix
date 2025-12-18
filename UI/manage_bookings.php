@@ -30,6 +30,7 @@ $today = date('Y-m-d');
 
 try {
     // Query dasar
+    // Query dasar (IMPROVED TICKET COUNT)
     $query = "SELECT 
                 t.*, 
                 m.title as movie_title, 
@@ -42,7 +43,11 @@ try {
                     FROM booked_seats 
                     WHERE transaction_id = t.id
                 ) as seat_numbers,
-                COUNT(m.id) AS ticket_quantity
+                (
+                    SELECT COUNT(*) 
+                    FROM booked_seats 
+                    WHERE transaction_id = t.id
+                ) as ticket_quantity
               FROM transactions t
               JOIN movies m ON t.movie_id = m.id
               JOIN users u ON t.user_id = u.id
@@ -81,15 +86,27 @@ try {
     $stmt->execute();
     $bookings = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    // --- 1. NEW VARIABLES FOR STATS ---
+    $totalSoldTickets = 0; // This will count actual seats (e.g., 9 tickets)
+
     // Hitung statistik
     foreach ($bookings as $booking) {
+        // Calculate Revenue
         $totalRevenue += $booking['total_price'];
+        
         if (date('Y-m-d', strtotime($booking['transaction_date'])) === $today) {
             $todayRevenue += $booking['total_price'];
         }
+
+        // --- 2. CALCULATE ACTUAL TICKETS SOLD ---
+        // Only count tickets if the payment is 'paid'
+        if ($booking['payment_status'] === 'paid') {
+            // Ensure ticket_quantity is treated as a number
+            $totalSoldTickets += (int)$booking['ticket_quantity'];
+        }
     }
     
-    // Statistik berdasarkan status
+    // Statistik berdasarkan status (Tetap hitung jumlah transaksi per status)
     $statusStats = [];
     if ($bookings) {
         $statuses = ['pending', 'paid', 'cancelled', 'expired'];
@@ -537,7 +554,7 @@ function getStatusBg($status) {
             </div>
             <div class="stat-card">
                 <div class="stat-number">
-                    <?php echo $statusStats['paid'] ?? 0; ?>
+                    <?php echo $totalSoldTickets; ?>
                 </div>
                 <div class="stat-label">Tiket Terbayar</div>
             </div>

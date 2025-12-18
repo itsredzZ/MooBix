@@ -15,10 +15,18 @@
                     <span><?php echo safe($heroMovie, 'duration'); ?></span> &bull;
                     <span>Rp <?php echo number_format((int)safe($heroMovie, 'price', 0), 0, ',', '.'); ?></span>
                 </div>
+                
+                <?php 
+                // 1. Clean the synopsis for the Hero Movie (Remove newlines)
+                $heroSynopsis = preg_replace('/\s+/', ' ', safe($heroMovie, 'synopsis'));
+                $jsHeroSynopsis = addslashes($heroSynopsis);
+                ?>
+
                 <button class="btn-primary" onclick="openBookingFlow(
-                    <?php echo $heroMovie['id']; ?>,   '<?php echo addslashes(safe($heroMovie, 'title')); ?>', 
+                    <?php echo (int)$heroMovie['id']; ?>, 
+                    '<?php echo addslashes(safe($heroMovie, 'title')); ?>', 
                     '<?php echo addslashes(getPoster(safe($heroMovie, 'poster'))); ?>', 
-                    '<?php echo addslashes(safe($heroMovie, 'synopsis')); ?>', 
+                    '<?php echo $jsHeroSynopsis; ?>', 
                     <?php echo (int)safe($heroMovie, 'price', 0); ?>, 
                     '<?php echo safe($heroMovie, 'duration'); ?>',
                     '<?php echo safe($heroMovie, 'rating'); ?>'

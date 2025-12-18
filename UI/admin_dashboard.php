@@ -178,8 +178,7 @@ if (!function_exists('safe')) {
                         <i class="ph ph-users"></i>
                     </div>
                 </div>
-                <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;">< style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;">
-    <?php echo $adminCount; ?> admins, <?php echo $userCount; ?> users</p>
+                <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;"><?php echo $adminCount; ?> admins, <?php echo $userCount; ?> users</p>
             </div>
         </div>
     
@@ -1216,36 +1215,54 @@ function previewEditImage(input) {
     }
 }
 
-// Handle submit form edit
+// Handle submit form edit (CONNECTED TO DATABASE)
 document.getElementById('editMovieForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
+    // Get the ID from the badge we set in showEditModal
     const movieId = document.getElementById('editMovieIdValue').textContent;
-    const formData = new FormData(this);
-    const title = formData.get('title');
     
-    // Animasi loading
+    const formData = new FormData(this);
+    formData.append('action', 'edit_movie');
+    formData.append('id', movieId); // Don't forget to send the ID!
+    
+    // Handle File Input (Only if user selected a new file)
+    const fileInput = document.getElementById('editPosterFile');
+    if(fileInput.files.length > 0) {
+        formData.append('poster', fileInput.files[0]);
+    }
+    
+    // Animation
     const submitBtn = this.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Saving...';
     submitBtn.disabled = true;
     
-    // Simulasi proses save
-    setTimeout(() => {
-        showNotification(`"${title}" has been successfully updated!`, 'success');
-        
-        // Reset button
+    // Send to Backend
+    fetch('admin_actions.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.status === 'success') {
+            showNotification(data.message, 'success');
+            setTimeout(() => {
+                closeModal('editMovieModal');
+                location.reload(); 
+            }, 1000);
+        } else {
+            showNotification(data.message, 'error');
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('System error occurred', 'error');
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
-        
-        // Tutup modal setelah sukses
-        setTimeout(() => {
-            closeModal('editMovieModal');
-            // Refresh halaman setelah 1 detik
-            setTimeout(() => location.reload(), 1000);
-        }, 1000);
-        
-    }, 1500);
+    });
 });
 
 // ==========================================
@@ -1269,27 +1286,44 @@ function processDelete() {
     const movieId = document.getElementById('deleteMovieId').textContent;
     const movieTitle = document.getElementById('deleteMovieTitle').textContent;
     
-    // Animasi loading
+    // Animation
     const deleteBtn = document.querySelector('#deleteMovieModal button[onclick="processDelete()"]');
     const originalText = deleteBtn.innerHTML;
     deleteBtn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Deleting...';
     deleteBtn.disabled = true;
     
-    // Simulasi proses delete
-    setTimeout(() => {
-        showNotification(`"${movieTitle}" has been permanently removed!`, 'error');
-        
-        // Reset button
+    // Create Data to Send
+    const formData = new FormData();
+    formData.append('action', 'delete_movie');
+    formData.append('id', movieId);
+    
+    // Send to Backend
+    fetch('admin_actions.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.status === 'success') {
+            // Show red notification because it's a "destructive" action
+            showNotification(`"${movieTitle}" has been permanently removed!`, 'error');
+            
+            setTimeout(() => {
+                closeModal('deleteMovieModal');
+                location.reload(); // Refresh to update list
+            }, 1000);
+        } else {
+            showNotification(data.message, 'error');
+            deleteBtn.innerHTML = originalText;
+            deleteBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Connection error occurred', 'error');
         deleteBtn.innerHTML = originalText;
         deleteBtn.disabled = false;
-        
-        // Tutup modal
-        closeModal('deleteMovieModal');
-        
-        // Refresh halaman
-        setTimeout(() => location.reload(), 1000);
-        
-    }, 1500);
+    });
 }
 
 // ==========================================
