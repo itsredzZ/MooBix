@@ -150,8 +150,15 @@ try {
     // Kita langsung pakai variabel $pdo yang sudah ada dari 'require db.php'
     
     // 1. HERO MOVIE
-    $stmtHero = $pdo->query("SELECT * FROM movies ORDER BY id DESC LIMIT 1");
+    // Try to find the featured movie first
+    $stmtHero = $pdo->query("SELECT * FROM movies WHERE is_featured = 1 LIMIT 1");
     $fetchedHero = $stmtHero->fetch(PDO::FETCH_ASSOC);
+
+    // Fallback: If no movie is featured, just grab the latest one
+    if (!$fetchedHero) {
+        $stmtHero = $pdo->query("SELECT * FROM movies ORDER BY id DESC LIMIT 1");
+        $fetchedHero = $stmtHero->fetch(PDO::FETCH_ASSOC);
+    }
 
     if ($fetchedHero) {
         $heroMovie = $fetchedHero;

@@ -18,6 +18,52 @@ if (!isset($pdo)) {
 $userName = $_SESSION['user_name'] ?? 'Admin';
 $userEmail = $_SESSION['user_email'] ?? 'admin@moobix.com';
 
+// --- REAL TIME REPORT QUERIES ---
+$totalMovies = 0;
+$todaysBookings = 0;
+$revenueToday = 0;
+$activeUsers = 0;
+
+if (isset($pdo)) {
+    // 1. Total Movies
+    $stmt = $pdo->query("SELECT COUNT(*) FROM movies");
+    $totalMovies = $stmt->fetchColumn();
+
+    // 2. Today's Bookings (Count transactions made today)
+    $stmt = $pdo->query("SELECT COUNT(*) FROM transactions WHERE DATE(transaction_date) = CURDATE()");
+    $todaysBookings = $stmt->fetchColumn();
+
+    // 3. Revenue Today
+    $stmt = $pdo->query("SELECT SUM(total_price) FROM transactions WHERE DATE(transaction_date) = CURDATE()");
+    $revenueToday = $stmt->fetchColumn() ?: 0; // Default to 0 if null
+
+    // 4. Active Users
+    $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE status = 'active'");
+    $activeUsers = $stmt->fetchColumn();
+
+        // A. Active Users Breakdown (Admins vs Regular Users)
+    // We already have $activeUsers (total). Now let's count just the admins.
+    $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'admin' AND status = 'active'");
+    $adminCount = $stmt->fetchColumn();
+    $userCount = $activeUsers - $adminCount; // Remaining are regular users
+
+    // B. Booking Growth (Today vs Yesterday)
+    // Get count for yesterday
+    $stmt = $pdo->query("SELECT COUNT(*) FROM transactions WHERE DATE(transaction_date) = SUBDATE(CURDATE(), 1)");
+    $yesterdayBookings = $stmt->fetchColumn();
+
+    // Calculate Percentage
+    $growthText = "0% from yesterday"; // Default
+    if ($yesterdayBookings > 0) {
+        $growth = (($todaysBookings - $yesterdayBookings) / $yesterdayBookings) * 100;
+        $sign = ($growth > 0) ? '+' : ''; // Add plus sign if positive
+        $growthText = $sign . number_format($growth, 0) . "% from yesterday";
+    } elseif ($todaysBookings > 0) {
+        // If yesterday was 0 but today has bookings, that's 100% growth
+        $growthText = "+100% from yesterday"; 
+    }
+}
+
 // Logika Pengambilan Data Film
 $nowShowing = [];
 $heroMovie = ['id' => 0, 'title' => 'No Data', 'poster' => '', 'genre' => '-', 'price' => 0, 'synopsis' => '']; 
@@ -48,7 +94,7 @@ if (!function_exists('getPoster')) {
     function getPoster($filename) {
         if (empty($filename)) return 'https://via.placeholder.com/400x600?text=No+Image';
         if (strpos($filename, 'http') === 0) return $filename;
-        return 'admin_ui/uploads/' . $filename; // Sesuaikan path ini
+        return 'UI/uploads/' . $filename; // Sesuaikan path ini
     }
 }
 
@@ -100,20 +146,20 @@ if (!function_exists('safe')) {
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div>
                         <h4 style="margin: 0 0 10px 0; font-size: 16px; opacity: 0.9;">📅 Today's Bookings</h4>
-                        <p style="font-size: 36px; font-weight: bold; margin: 0;">48</p>
+                        <p style="font-size: 36px; font-weight: bold; margin: 0;"><?php echo $todaysBookings; ?></p>
                     </div>
                     <div style="background: rgba(255,255,255,0.2); width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 28px;">
                         <i class="ph ph-ticket"></i>
                     </div>
                 </div>
-                <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;">+12% from yesterday</p>
+                <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;"><p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;"><?php echo $growthText; ?></p></p>
             </div>
             
             <div style="background: linear-gradient(135deg, #d32f2f, #aa2b2b); color: white; padding: 25px; border-radius: 15px; box-shadow: 0 8px 25px rgba(211, 47, 47, 0.3);">
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div>
                         <h4 style="margin: 0 0 10px 0; font-size: 16px; opacity: 0.9;">💰 Revenue Today</h4>
-                        <p style="font-size: 36px; font-weight: bold; margin: 0;">Rp 2.4M</p>
+                        <p style="font-size: 36px; font-weight: bold; margin: 0;"><?php echo number_format($revenueToday, 0, ',', '.'); ?></p>
                     </div>
                     <div style="background: rgba(255,255,255,0.2); width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 28px;">
                         <i class="ph ph-currency-circle-dollar"></i>
@@ -126,13 +172,14 @@ if (!function_exists('safe')) {
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <div>
                         <h4 style="margin: 0 0 10px 0; font-size: 16px; opacity: 0.9;">👥 Active Users</h4>
-                        <p style="font-size: 36px; font-weight: bold; margin: 0;">156</p>
+                        <p style="font-size: 36px; font-weight: bold; margin: 0;"><?php echo $activeUsers; ?></p>
                     </div>
                     <div style="background: rgba(255,255,255,0.2); width: 60px; height: 60px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 28px;">
                         <i class="ph ph-users"></i>
                     </div>
                 </div>
-                <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;">3 admins, 153 users</p>
+                <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;">< style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;">
+    <?php echo $adminCount; ?> admins, <?php echo $userCount; ?> users</p>
             </div>
         </div>
     
@@ -1083,36 +1130,50 @@ function updateAddPosterFromUrl() {
     }
 }
 
-// Handle submit form add
+// Handle submit form add (CONNECTED TO DATABASE)
 document.getElementById('addMovieForm').addEventListener('submit', function(e) {
     e.preventDefault();
     
     const formData = new FormData(this);
-    const title = formData.get('title');
+    formData.append('action', 'add_movie'); // Tell backend this is an add action
     
-    // Animasi loading
+    // Handle specific file input manually if needed, or rely on FormData
+    const fileInput = document.getElementById('addPosterFile');
+    if(fileInput.files.length > 0) {
+        formData.append('poster', fileInput.files[0]);
+    }
+    
+    // Loading Animation
     const submitBtn = this.querySelector('button[type="submit"]');
     const originalText = submitBtn.innerHTML;
     submitBtn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Adding...';
     submitBtn.disabled = true;
-    
-    // Simulasi proses save
-    setTimeout(() => {
-        // Untuk demo, tampilkan alert
-        showNotification(`"${title}" has been successfully added to the database!`, 'success');
-        
-        // Reset button
+
+    // Send to Backend
+    fetch('admin_actions.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.status === 'success') {
+            showNotification(data.message, 'success');
+            setTimeout(() => {
+                closeModal('addMovieModal');
+                location.reload(); // Refresh to show new movie
+            }, 1000);
+        } else {
+            showNotification(data.message, 'error');
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('System error occurred', 'error');
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
-        
-        // Tutup modal setelah sukses
-        setTimeout(() => {
-            closeModal('addMovieModal');
-            // Refresh halaman setelah 1 detik
-            setTimeout(() => location.reload(), 1000);
-        }, 1000);
-        
-    }, 1500);
+    });
 });
 
 // ==========================================
@@ -1337,27 +1398,39 @@ function processFeature() {
     const movieId = document.getElementById('featureMovieId').textContent;
     const movieTitle = document.getElementById('featureMovieTitle').textContent;
     
-    // Animasi loading
     const featureBtn = document.querySelector('#featureMovieModal button[onclick="processFeature()"]');
     const originalText = featureBtn.innerHTML;
     featureBtn.innerHTML = '<i class="ph ph-circle-notch ph-spin"></i> Processing...';
     featureBtn.disabled = true;
     
-    // Simulasi proses feature
-    setTimeout(() => {
-        showNotification(`"${movieTitle}" is now featured for ${selectedFeatureDays} days!`, 'success');
-        
-        // Reset button
+    const formData = new FormData();
+    formData.append('action', 'feature_movie');
+    formData.append('movie_id', movieId);
+
+    fetch('admin_actions.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.status === 'success') {
+            showNotification(`"${movieTitle}" is now the Featured Movie!`, 'success');
+            setTimeout(() => {
+                closeModal('featureMovieModal');
+                location.reload();
+            }, 1000);
+        } else {
+            showNotification(data.message, 'error');
+            featureBtn.innerHTML = originalText;
+            featureBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Connection failed', 'error');
         featureBtn.innerHTML = originalText;
         featureBtn.disabled = false;
-        
-        // Tutup modal
-        closeModal('featureMovieModal');
-        
-        // Refresh halaman
-        setTimeout(() => location.reload(), 1000);
-        
-    }, 1500);
+    });
 }
 
 // ==========================================
@@ -1375,7 +1448,7 @@ function closeModal(modalId) {
 function getPoster(filename) {
     if (!filename) return 'https://via.placeholder.com/300x450?text=No+Poster';
     if (filename.startsWith('http')) return filename;
-    return 'admin_ui/uploads/' + filename;
+    return 'UI/uploads/' + filename;
 }
 
 function refreshMovies() {
