@@ -60,11 +60,15 @@
                 ?>
                     <div class="movie-card">
                         <div class="poster-frame">
-                            <img src="<?php echo $jsPoster; ?>" alt="Poster" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
-
-                            <div class="rating-badge-poster">
-                                <i class="ph ph-star-fill"></i> <?php echo $jsRating; ?>
-                            </div>
+                        <img src="<?php echo $jsPoster; ?>" alt="Poster" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
+                        
+                        <div class="rating-badge-poster" style="display: flex; align-items: center; gap: 4px;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="gold" viewBox="0 0 256 256">
+                        <path d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-30.15-51.1,30.15a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z"></path>
+                        </svg>
+    
+                        <span><?php echo $jsRating; ?></span>
+                        </div>
 
                             <div class="poster-overlay">
                                 <button class="btn-book-now" onclick="openBookingFlow(

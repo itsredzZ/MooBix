@@ -50,60 +50,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     $username = $_POST['username'] ?? '';
     $email = $_POST['email'] ?? '';
     
-    // Validasi
     if (empty($username) || empty($email)) {
         $error_message = "Username dan email wajib diisi!";
     } else {
         try {
-            // Cek apakah username sudah digunakan
+            // 1. Cek duplikasi username (kolom 'name' di DB)
             $stmt = $pdo->prepare("SELECT id FROM users WHERE name = ? AND id != ?");
             $stmt->execute([$username, $user_id]);
             
             if ($stmt->rowCount() > 0) {
-                $error_message = "Username sudah digunakan oleh pengguna lain!";
+                $error_message = "Username sudah digunakan!";
             } else {
-                // Cek apakah email sudah digunakan
+                // 2. Cek duplikasi email
                 $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? AND id != ?");
                 $stmt->execute([$email, $user_id]);
                 
                 if ($stmt->rowCount() > 0) {
-                    $error_message = "Email sudah digunakan oleh pengguna lain!";
+                    $error_message = "Email sudah digunakan!";
                 } else {
-                    // Update data user
-                    $sql = "UPDATE users SET 
-                            name = ?,
-                            email = ?,
-                            updated_at = NOW()
-                            WHERE id = ?";
-                    
+                    // 3. Update data (HANYA kolom name dan email sesuai gambar DB)
+                    $sql = "UPDATE users SET name = ?, email = ? WHERE id = ?";
                     $stmt = $pdo->prepare($sql);
                     $success = $stmt->execute([$username, $email, $user_id]);
                     
                     if ($success) {
-                        // Update session data
                         $_SESSION['user_name'] = $username;
                         $_SESSION['user_email'] = $email;
-                        
                         $success_message = "Profil berhasil diperbarui!";
                         
-                        // Refresh user data
+                        // Refresh data terbaru
                         $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
                         $stmt->execute([$user_id]);
                         $user_data = $stmt->fetch(PDO::FETCH_ASSOC);
-                        
-                        // Update variabel
-                        $userName = $username;
-                        $userEmail = $email;
-                    } else {
-                        $error_message = "Gagal memperbarui profil!";
                     }
                 }
             }
         } catch (PDOException $e) {
-            $error_message = "Database error: " . $e->getMessage();
+            // Tampilkan error spesifik jika masih gagal
+            $error_message = "Kesalahan Database: " . $e->getMessage();
         }
     }
 }
+
 
 // ==========================================
 // PROSES UPDATE PASSWORD
@@ -113,7 +101,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_password'])) {
     $new_password = $_POST['new_password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
     
-    // Validasi
     if (empty($current_password) || empty($new_password) || empty($confirm_password)) {
         $error_message = "Semua field password wajib diisi!";
     } elseif ($new_password !== $confirm_password) {
@@ -122,29 +109,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_password'])) {
         $error_message = "Password baru minimal 6 karakter!";
     } else {
         try {
-            // Ambil data user untuk verifikasi password
             $stmt = $pdo->prepare("SELECT password FROM users WHERE id = ?");
             $stmt->execute([$user_id]);
             $user = $stmt->fetch();
             
             if ($user && password_verify($current_password, $user['password'])) {
-                // Update password
                 $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-                $sql = "UPDATE users SET password = ?, updated_at = NOW() WHERE id = ?";
                 
+                // HANYA kolom password yang diupdate
+                $sql = "UPDATE users SET password = ? WHERE id = ?";
                 $stmt = $pdo->prepare($sql);
                 $success = $stmt->execute([$hashed_password, $user_id]);
                 
                 if ($success) {
                     $success_message = "Password berhasil diperbarui!";
-                } else {
-                    $error_message = "Gagal memperbarui password!";
                 }
             } else {
                 $error_message = "Password saat ini salah!";
             }
         } catch (PDOException $e) {
-            $error_message = "Database error: " . $e->getMessage();
+            $error_message = "Kesalahan Database: " . $e->getMessage();
         }
     }
 }
