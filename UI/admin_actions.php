@@ -2,39 +2,13 @@
 session_start();
 require_once 'db.php';
 
-// // Define upload directory (relative to this file)
-// // Based on your ui_index.php, images seem to be in '../ui/uploads/'
-// $uploadDir = 'UI/uploads';
-// if (!file_exists($uploadDir)) {
-//     mkdir($uploadDir, 0777, true);
-// }
-
-// We check multiple possible locations for the 'uploads' folder
-$possiblePaths = [
-    __DIR__ . '/uploads/',       // 1. If admin_actions.php is INSIDE the UI folder
-    __DIR__ . '/UI/uploads/',    // 2. If admin_actions.php is in the ROOT folder
-    __DIR__ . '/../UI/uploads/'  // 3. One level up then into UI (Standard relative)
-];
-
-$uploadDir = false;
-
-// Loop through possibilities and pick the first one that actually exists
-foreach ($possiblePaths as $path) {
-    if (is_dir($path)) {
-        $uploadDir = $path;
-        break;
-    }
+// Define upload directory (relative to this file)
+// Based on your ui_index.php, images seem to be in '../ui/uploads/'
+$uploadDir = 'UI/uploads';
+if (!file_exists($uploadDir)) {
+    mkdir($uploadDir, 0777, true);
 }
 
-// ERROR HANDLER: If we still can't find it, stop everything and tell us why.
-if ($uploadDir === false) {
-    echo json_encode([
-        'status' => 'error', 
-        'message' => 'System Error: "uploads" folder not found. Please create a folder named "uploads" inside your UI folder.'
-    ]);
-    exit;
-}
-// ----------------------------
 
 $response = ['status' => 'error', 'message' => 'Invalid request'];
 
