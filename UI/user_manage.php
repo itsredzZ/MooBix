@@ -57,10 +57,11 @@ try {
         // 2. Hitung Total Data (untuk pagination)
         $stmtCount = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'user'");
         $totalUsers = $stmtCount->fetchColumn();
+        $totalAllUsers = $pdo->query("SELECT COUNT(*) FROM users")->fetchColumn(); // Simpan total user untuk statistik
         $totalPages = ceil($totalUsers / $limit);
 
         // 3. Ambil Data User (sesuai halaman)
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE role = 'user' ORDER BY id DESC LIMIT :limit OFFSET :offset");
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE role = 'user' ORDER BY id ASC LIMIT :limit OFFSET :offset");
         $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();
@@ -71,7 +72,7 @@ try {
         $allUsers = $stmtStats->fetchAll(PDO::FETCH_ASSOC);
         
         foreach ($allUsers as $u) {
-            if ($u['status'] == 'active') $activeUsers++;
+            if ($u['status'] == 'active' && $u['role'] == 'user') $activeUsers++;
             if ($u['role'] == 'admin') $adminsCount++;
         }
     }
@@ -218,7 +219,7 @@ function getStatusColor($status) {
                             <i class="ph ph-crown"></i>
                         </div>
                     </div>
-                    <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;"><?php echo $totalUsers - $adminsCount; ?> regular users</p>
+                    <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;"><?php echo $totalAllUsers - $adminsCount; ?> regular users</p>
                 </div>
                 
                 <div style="background: linear-gradient(135deg, #e53935, #c62828); color: white; padding: 25px; border-radius: 15px; box-shadow: 0 8px 25px rgba(229, 57, 53, 0.3);">
@@ -293,8 +294,8 @@ function getStatusColor($status) {
                                                 <?php echo strtoupper(substr(safe($user, 'name'), 0, 1)); ?>
                                             </div>
                                             <div>
-                                                <div style="font-weight: 500; color: #333;"><?php echo safe($user, 'name'); ?></div>
-                                                <div style="color: #666; font-size: 13px;"><?php echo safe($user, 'email'); ?></div>
+                                                <div style="font-weight: 500; color: antiquewhite;"><?php echo safe($user, 'name'); ?></div>
+                                                <div style="color: #8a8a8aff; font-size: 13px;"><?php echo safe($user, 'email'); ?></div>
                                             </div>
                                         </div>
                                     </td>
