@@ -653,21 +653,23 @@ if (searchInput) {
 
 // Profile Dropdown Toggle
 document.addEventListener("DOMContentLoaded", () => {
+  const profileDropdown = document.querySelector(".profile-dropdown");
   const profileTrigger = document.querySelector(".profile-trigger");
-  if (profileTrigger) {
+
+  if (profileTrigger && profileDropdown) {
     profileTrigger.addEventListener("click", function (e) {
-      e.stopPropagation(); // Mencegah event bubbling
-      const dropdown = this.parentElement.querySelector(".dropdown-menu");
-      if (dropdown) {
-        dropdown.style.display =
-          dropdown.style.display === "block" ? "none" : "block";
-      }
+      e.stopPropagation(); // Mencegah klik tembus ke document
+      
+      // Mengaktifkan/menonaktifkan class 'active' pada parent
+      profileDropdown.classList.toggle("active");
     });
 
-    // Tutup dropdown jika klik di tempat lain
-    document.addEventListener("click", () => {
-      const dropdown = document.querySelector(".dropdown-menu");
-      if (dropdown) dropdown.style.display = "none";
+    // Tutup dropdown jika klik di tempat lain mana pun
+    document.addEventListener("click", (e) => {
+      // Jika yang diklik bukan area dropdown, maka hapus class active
+      if (!profileDropdown.contains(e.target)) {
+        profileDropdown.classList.remove("active");
+      }
     });
   }
 });

@@ -274,8 +274,8 @@ header {
     z-index: 1001;
     border-radius: 5px;
 }
-.profile-dropdown:hover .dropdown-menu { 
-    display: flex; 
+.profile-dropdown.active .dropdown-menu {
+    display: flex;
     animation: slideDown 0.3s ease;
 }
 .dropdown-menu a {
