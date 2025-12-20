@@ -1,6 +1,4 @@
 <?php
-// This file is included by index.php when user is not admin
-// Variables from index.php: $heroMovie, $nowShowing, $isLoggedIn, $userName, etc.
 ?>
 
 <main id="user-dashboard">
@@ -15,9 +13,8 @@
                     <span><?php echo safe($heroMovie, 'duration'); ?></span> &bull;
                     <span>Rp <?php echo number_format((int)safe($heroMovie, 'price', 0), 0, ',', '.'); ?></span>
                 </div>
-                
-                <?php 
-                // 1. Clean the synopsis for the Hero Movie (Remove newlines)
+
+                <?php
                 $heroSynopsis = preg_replace('/\s+/', ' ', safe($heroMovie, 'synopsis'));
                 $jsHeroSynopsis = addslashes($heroSynopsis);
                 ?>
@@ -54,7 +51,6 @@
             <button class="nav-btn" onclick="scrollMovies(-300)"><i class="ph ph-caret-left"></i></button>
             <div class="cards-container" id="movieList">
                 <?php foreach ($nowShowing as $movie):
-                    // --- 1. SIAPKAN DATA ---
                     $jsTitle = addslashes($movie['title']);
                     $cleanSynopsis = preg_replace('/\s+/', ' ', $movie['synopsis'] ?? '');
                     $jsSynopsis = addslashes($cleanSynopsis);
@@ -63,20 +59,19 @@
                     $jsPrice = (int)safe($movie, 'price', 0);
                     $jsDuration = htmlspecialchars($movie['duration'] ?? '-');
 
-                    // AMBIL RATING DARI DATABASE (PENTING!)
                     $jsRating = htmlspecialchars($movie['rating'] ?? '0.0');
                 ?>
                     <div class="movie-card">
                         <div class="poster-frame">
-                        <img src="<?php echo $jsPoster; ?>" alt="Poster" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
-                        
-                        <div class="rating-badge-poster" style="display: flex; align-items: center; gap: 4px;">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="gold" viewBox="0 0 256 256">
-                        <path d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-30.15-51.1,30.15a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z"></path>
-                        </svg>
-    
-                        <span><?php echo $jsRating; ?></span>
-                        </div>
+                            <img src="<?php echo $jsPoster; ?>" alt="Poster" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
+
+                            <div class="rating-badge-poster" style="display: flex; align-items: center; gap: 4px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="gold" viewBox="0 0 256 256">
+                                    <path d="M234.5,114.38l-45.1,39.36,13.51,58.6a16,16,0,0,1-23.84,17.34l-51.11-30.15-51.1,30.15a16,16,0,0,1-23.84-17.34L66.61,153.8,21.5,114.38a16,16,0,0,1,9.11-28.06l59.46-5.15,23.21-55.36a15.95,15.95,0,0,1,29.44,0h0L166,81.17l59.44,5.15a16,16,0,0,1,9.11,28.06Z"></path>
+                                </svg>
+
+                                <span><?php echo $jsRating; ?></span>
+                            </div>
 
                             <div class="poster-overlay">
                                 <button class="btn-book-now" onclick="openBookingFlow(
@@ -92,7 +87,15 @@
                             </div>
                         </div>
 
-                        <h3><?php echo safe($movie, 'title'); ?></h3>
+                        <?php
+                        $judulMovie = safe($movie, 'title');
+                        $isLong = (strlen($judulMovie) > 50) ? 'title-small' : '';
+                        ?>
+
+                        <h3 class="<?php echo $isLong; ?>">
+                            <?php echo $judulMovie; ?>
+                        </h3>
+
                         <small><?php echo safe($movie, 'genre'); ?></small>
 
                         <div class="movie-card-footer">

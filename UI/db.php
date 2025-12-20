@@ -1,6 +1,5 @@
 <?php
 $host = 'localhost';
-// SESUAIKAN DENGAN NAMA DATABASE YANG BARU KAMU BUAT
 $dbname = 'db_moobix_1'; 
 $user = 'root';
 $pass = '';

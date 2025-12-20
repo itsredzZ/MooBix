@@ -1,30 +1,22 @@
-// ================= VARIABLES =================
 let currentMovie = {};
 let selectedDate = null;
 let selectedTime = null;
 let ticketQty = 1;
+let bookingTimer;
+let currentTransactionId = null;
 
-// ================= 1. BOOKING FLOW LOGIC =================
-
-/**
- * Fungsi Utama: Membuka alur pemesanan tiket
- * TRIGGER: Tombol "GET TICKET" atau "BOOK NOW"
- */
 function openBookingFlow(id, title, poster, synopsis, price, duration, rating) {
-  // Debugging: Cek di Console browser apakah data masuk
   console.log("Judul:", title);
   console.log("Rating diterima:", rating);
 
-  // --- CEK LOGIN (SATPAM) ---
-  // Menggunakan variabel global PHP_DATA yang dikirim dari file PHP
   if (typeof PHP_DATA !== "undefined" && !PHP_DATA.isLoggedIn) {
     alert("Silakan login terlebih dahulu untuk memesan tiket!");
     toggleModal("loginModal", true);
-    return; // Stop, jangan lanjut buka modal booking
+    return; 
   }
-  // --- ISI DATA MOVIE & TAMPILKAN MODAL ---
+  
   currentMovie = {
-    id: id, // <--- INI PENTING UNTUK DATABASE
+    id: id, 
     title: title,
     poster: poster,
     synopsis: synopsis,
@@ -33,7 +25,6 @@ function openBookingFlow(id, title, poster, synopsis, price, duration, rating) {
     rating: rating,
   };
 
-  // 2. Update Modal Elements
   document.getElementById("modalTitle").innerText = title;
 
   const imgEl = document.getElementById("modalPoster");
@@ -41,36 +32,20 @@ function openBookingFlow(id, title, poster, synopsis, price, duration, rating) {
 
   document.getElementById("modalSynopsis").innerText = synopsis;
 
-  // Update Duration (Hanya teksnya, ikon aman di HTML)
-  // Update Duration (Hanya teksnya)
-  // ... (kode sebelumnya) ...
-
-  // Update Duration (Pembersih Super Kuat)
   const durEl = document.getElementById("modalDuration");
   if (durEl) {
-    // Logika: Hapus semua karakter NON-ASCII (Emoji, simbol aneh, dll)
-    // Hanya menyisakan Huruf, Angka, Spasi, dan tanda baca dasar
     let cleanDuration = duration.replace(/[^\x00-\x7F]/g, "").trim();
-
-    // Opsional: Hapus spasi ganda jika ada
     cleanDuration = cleanDuration.replace(/\s+/g, " ");
-
     durEl.innerText = cleanDuration;
   }
 
-  // ... (kode selanjutnya) ...
-
-  // Update Rating (Hanya angkanya)
   const rateEl = document.getElementById("modalRating");
   if (rateEl) {
-    // Cek jika rating valid, jika tidak set 0.0
     rateEl.innerText = rating && rating !== "null" ? rating : "0.0";
   }
 
-  // 3. Show Modal
   if (typeof resetBookingSteps === "function") resetBookingSteps();
 
-  // Toggle logic (using your existing toggle function or manual style)
   const modal = document.getElementById("bookingModal");
   if (modal) {
     modal.style.display = "flex";
@@ -79,14 +54,12 @@ function openBookingFlow(id, title, poster, synopsis, price, duration, rating) {
 }
 
 function resetBookingSteps() {
-  // Tampilkan Step 1, Sembunyikan yang lain
   toggleDisplay("step-info", true);
   toggleDisplay("step-schedule", false);
   toggleDisplay("step-confirm", false);
   toggleDisplay("timeSlots", false);
   toggleDisplay("seatMapArea", false);
 
-  // Reset variabel
   selectedDate = null;
   selectedTime = null;
   ticketQty = 1;
@@ -94,7 +67,6 @@ function resetBookingSteps() {
   const qtyDisplay = document.getElementById("qtyDisplay");
   if (qtyDisplay) qtyDisplay.innerText = ticketQty;
 
-  // Hapus seleksi visual (warna merah/tombol aktif)
   document
     .querySelectorAll(".date-item")
     .forEach((el) => el.classList.remove("selected"));
@@ -111,143 +83,117 @@ function proceedToSchedule() {
 }
 
 function backToSeats() {
-  toggleDisplay("step-confirm", false);
-  toggleDisplay("step-schedule", true);
+    if (confirm("Batalkan pesanan ini dan pilih kursi ulang?")) {
+        document.querySelectorAll(".seat").forEach(s => s.classList.remove("selected", "occupied"));
+        
+        cancelCurrentBooking().then((data) => {
+            if (data && data.success) {
+                toggleDisplay("step-confirm", false);
+                toggleDisplay("step-schedule", true);
+                const activeTimeBtn = document.querySelector(".time-btn.selected");
+                if (activeTimeBtn) selectTime(activeTimeBtn, selectedTime);
+            }
+        });
+    }
 }
 
-// --- DATE & TIME SELECTION ---
-
 function selectDate(element, dateValue) {
-    // 1. Reset tampilan tombol tanggal (Visual)
-    document
-        .querySelectorAll(".date-item")
-        .forEach((el) => el.classList.remove("selected"));
+  document
+    .querySelectorAll(".date-item")
+    .forEach((el) => el.classList.remove("selected"));
 
-    // 2. Tandai tanggal baru sebagai terpilih
-    element.classList.add("selected");
-    selectedDate = dateValue;
+  element.classList.add("selected");
+  selectedDate = dateValue;
 
-    // 3. Pastikan Slot Waktu Terlihat
-    const timeSlots = document.getElementById("timeSlots");
-    if (timeSlots) {
-        timeSlots.style.display = "block";
+  const timeSlots = document.getElementById("timeSlots");
+  if (timeSlots) {
+    timeSlots.style.display = "block";
+  }
+
+  const now = new Date(); 
+
+  document.querySelectorAll(".time-btn").forEach((btn) => {
+    const timeText = btn.innerText.trim();
+    const scheduleTime = new Date(`${selectedDate}T${timeText}:00`);
+
+    if (scheduleTime < now) {
+      btn.classList.add("disabled");
+      btn.style.opacity = "0.4";
+      btn.style.pointerEvents = "none"; 
+      btn.style.cursor = "not-allowed";
+      btn.style.border = "1px solid #ccc";
+
+      if (btn.classList.contains("selected")) {
+        btn.classList.remove("selected");
+        selectedTime = null; 
+      }
+    } else {
+      btn.classList.remove("disabled");
+      btn.style.opacity = "1";
+      btn.style.pointerEvents = "auto"; 
+      btn.style.cursor = "pointer";
+      btn.style.border = ""; 
     }
+  });
 
-    // === FITUR BARU: DISABLE JAM YANG SUDAH LEWAT ===
-    const now = new Date(); // Waktu user saat ini
-
-    document.querySelectorAll(".time-btn").forEach((btn) => {
-        // Ambil teks jam, misal "14:00"
-        const timeText = btn.innerText.trim();
-        
-        // Buat objek Date untuk jadwal tayang (YYYY-MM-DD + T + HH:mm:00)
-        // Contoh: "2023-12-25T14:00:00"
-        const scheduleTime = new Date(`${selectedDate}T${timeText}:00`);
-
-        // Bandingkan dengan waktu sekarang
-        if (scheduleTime < now) {
-            // SUDAH LEWAT: Matikan tombol
-            btn.classList.add("disabled");
-            btn.style.opacity = "0.4";
-            btn.style.pointerEvents = "none"; // Tidak bisa diklik
-            btn.style.cursor = "not-allowed";
-            btn.style.border = "1px solid #ccc";
-            
-            // Jika tombol ini tadinya terpilih, batalkan pilihannya
-            if (btn.classList.contains("selected")) {
-                btn.classList.remove("selected");
-                selectedTime = null; // Reset variable global
-            }
-        } else {
-            // BELUM LEWAT: Hidupkan tombol
-            btn.classList.remove("disabled");
-            btn.style.opacity = "1";
-            btn.style.pointerEvents = "auto"; // Bisa diklik lagi
-            btn.style.cursor = "pointer";
-            btn.style.border = ""; // Reset border ke CSS asli
-        }
-    });
-
-    // === LOGIKA REFRESH MAP (YANG TADI) ===
-    
-    // Cek: Apakah User sudah memilih jam? (Dan jamnya masih valid/tidak didisable)
-    if (selectedTime) {
-        // A. Reset pilihan kursi user (Harga jadi 0) 
-        resetSeats(); 
-
-        // B. Ambil Data Kursi dari Database
-        fetch(
-            `../Booking-Logic/get_booked_seats.php?movie_id=${currentMovie.id}&date=${selectedDate}&time=${selectedTime}`
-        )
-        .then((response) => response.json())
-        .then((occupiedSeats) => {
-            // Bersihkan status merah lama
-            document.querySelectorAll(".seat").forEach((seat) => {
-                seat.classList.remove("occupied");
-            });
-
-            // Pasang status merah baru
-            occupiedSeats.forEach((seatNum) => {
-                const seatEl = Array.from(document.querySelectorAll(".seat")).find(
-                    (el) => el.innerText === seatNum
-                );
-                if (seatEl) {
-                    seatEl.classList.add("occupied");
-                }
-            });
-
-            // Pastikan peta kursi tetap terbuka
-            const seatMap = document.getElementById("seatMapArea");
-            if (seatMap) {
-                seatMap.style.display = "block";
-            }
-        })
-        .catch((error) => {
-            console.error("Error updating seats:", error);
+  if (selectedTime) {
+    resetSeats();
+    fetch(
+      `../Booking-Logic/get_booked_seats.php?movie_id=${currentMovie.id}&date=${selectedDate}&time=${selectedTime}`
+    )
+      .then((response) => response.json())
+      .then((occupiedSeats) => {
+        document.querySelectorAll(".seat").forEach((seat) => {
+          seat.classList.remove("occupied");
         });
 
-    } else {
-        // Kalau jam belum dipilih atau jam yang dipilih ternyata sudah lewat (otomatis ter-unselect)
-        // Sembunyikan peta kursi biar user pilih jam lagi yang valid
+        occupiedSeats.forEach((seatNum) => {
+          const seatEl = Array.from(document.querySelectorAll(".seat")).find(
+            (el) => el.innerText === seatNum
+          );
+          if (seatEl) {
+            seatEl.classList.add("occupied");
+          }
+        });
+
         const seatMap = document.getElementById("seatMapArea");
         if (seatMap) {
-            seatMap.style.display = "none";
+          seatMap.style.display = "block";
         }
-
-        // Scroll ke area jam
-        if (timeSlots) {
-             timeSlots.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        }
+      })
+      .catch((error) => {
+        console.error("Error updating seats:", error);
+      });
+  } else {
+    const seatMap = document.getElementById("seatMapArea");
+    if (seatMap) {
+      seatMap.style.display = "none";
     }
+
+    if (timeSlots) {
+      timeSlots.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }
 }
 
 function selectTime(element, time) {
-  // 1. Reset seleksi jam sebelumnya
   document
     .querySelectorAll(".time-btn")
     .forEach((el) => el.classList.remove("selected"));
 
-  // 2. Pilih jam baru
   element.classList.add("selected");
   selectedTime = time;
 
-  // Opsional: Beri indikator loading jika koneksi lambat
-  // document.getElementById('seatMapArea').style.opacity = '0.5';
-
-  // 3. Ambil data kursi terisi
   fetch(
     `../Booking-Logic/get_booked_seats.php?movie_id=${currentMovie.id}&date=${selectedDate}&time=${time}`
   )
     .then((response) => response.json())
     .then((occupiedSeats) => {
-      // A. Reset semua kursi dulu (Hapus status occupied & selected dari sesi sebelumnya)
       document.querySelectorAll(".seat").forEach((seat) => {
         seat.classList.remove("occupied", "selected");
       });
 
-      // B. Tandai kursi yang occupied dari database
       occupiedSeats.forEach((seatNum) => {
-        // Cari elemen kursi berdasarkan teks (misal "A1")
         const seatEl = Array.from(document.querySelectorAll(".seat")).find(
           (el) => el.innerText === seatNum
         );
@@ -256,15 +202,12 @@ function selectTime(element, time) {
         }
       });
 
-      // C. Update Total Harga (karena kursi terreset, harga jadi 0)
       updateTotal();
 
-      // D. BARU TAMPILKAN PETA KURSI DISINI (Agar sinkron)
       const seatMap = document.getElementById("seatMapArea");
       if (seatMap) {
         seatMap.style.display = "block";
         seatMap.scrollIntoView({ behavior: "smooth", block: "start" });
-        // seatMap.style.opacity = '1'; // Balikkan opacity jika pakai loading
       }
     })
     .catch((error) => {
@@ -273,47 +216,37 @@ function selectTime(element, time) {
     });
 }
 
-// ================= 2. SEAT LOGIC =================
-
 function updateQty(change) {
   let newQty = ticketQty + change;
-  // Limit minimal 1, maksimal 8 tiket
   if (newQty < 1) newQty = 1;
   if (newQty > 8) newQty = 8;
 
   ticketQty = newQty;
   document.getElementById("qtyDisplay").innerText = ticketQty;
 
-  // Jika qty berubah, reset kursi yang dipilih agar user memilih ulang sesuai jumlah baru
   resetSeats();
 }
 
-// Initialize Seat Listeners (Dijalankan saat DOM Load)
 document.addEventListener("DOMContentLoaded", () => {
   initializeSeatSelection();
 });
 
 function initializeSeatSelection() {
   document.querySelectorAll(".seat").forEach((seat) => {
-    // Hapus listener lama biar gak double, lalu pasang yang baru
     seat.removeEventListener("click", handleSeatClick);
     seat.addEventListener("click", handleSeatClick);
   });
 }
 
 function handleSeatClick() {
-  // Cek kursi occupied (sudah dibooking orang lain)
   if (this.classList.contains("occupied")) {
     alert("Maaf, kursi ini sudah terisi!");
     return;
   }
 
-  // Logika Toggle (Pilih / Hapus Pilih)
   if (this.classList.contains("selected")) {
-    // Unselect
     this.classList.remove("selected");
   } else {
-    // Select
     const currentSelected = document.querySelectorAll(".seat.selected").length;
     if (currentSelected >= ticketQty) {
       alert(
@@ -343,18 +276,14 @@ function updateTotal() {
   if (totalEl) totalEl.innerText = formatRupiah(total);
 }
 
-// ================= 3. CONFIRMATION & PAYMENT =================
-
 function showConfirmation() {
   const selectedSeats = document.querySelectorAll(".seat.selected");
 
-  // Validasi 1: Belum pilih kursi
   if (selectedSeats.length === 0) {
     alert("Silakan pilih kursi terlebih dahulu!");
     return;
   }
 
-  // Validasi 2: Jumlah kursi tidak sesuai tiket
   if (selectedSeats.length !== ticketQty) {
     alert(
       `Anda memesan ${ticketQty} tiket, tapi baru memilih ${selectedSeats.length} kursi.`
@@ -362,13 +291,11 @@ function showConfirmation() {
     return;
   }
 
-  // Validasi 3: Belum pilih tanggal/jam
   if (!selectedDate || !selectedTime) {
     alert("Silakan pilih tanggal dan waktu terlebih dahulu!");
     return;
   }
 
-  // Format Tanggal Cantik (Senin, 12 Agustus 2024)
   const dateObj = new Date(selectedDate);
   const formattedDate = dateObj.toLocaleDateString("id-ID", {
     weekday: "long",
@@ -377,7 +304,6 @@ function showConfirmation() {
     year: "numeric",
   });
 
-  // Ambil nomor kursi & Urutkan (A1, A2, B1...)
   const seatNumbers = Array.from(selectedSeats).map((s) => s.innerText);
   seatNumbers.sort((a, b) => {
     const rowA = a.charAt(0);
@@ -391,67 +317,130 @@ function showConfirmation() {
   const seatNames = seatNumbers.join(", ");
   const totalText = document.getElementById("totalPrice").innerText;
 
-  // Isi Modal Konfirmasi
   document.getElementById("confMovie").innerText = currentMovie.title;
   document.getElementById("confDate").innerText = formattedDate;
   document.getElementById("confTime").innerText = selectedTime;
   document.getElementById("confSeats").innerText = seatNames;
   document.getElementById("confTotal").innerText = totalText;
 
-  // Pindah ke Step Konfirmasi
   toggleDisplay("step-schedule", false);
   toggleDisplay("step-confirm", true);
+
+  const bookingData = {
+    movie_id: currentMovie.id,
+    show_date: selectedDate,
+    show_time: selectedTime,
+    seats: Array.from(document.querySelectorAll(".seat.selected")).map(
+      (s) => s.innerText
+    ),
+    total_price: parseInt(
+      document.getElementById("totalPrice").innerText.replace(/[^0-9]/g, "")
+    ),
+  };
+
+fetch("../Booking-Logic/reserve_seats.php", {
+    method: "POST",
+    headers: {
+        "Content-Type": "application/json" 
+    },
+    body: JSON.stringify(bookingData),
+})
+.then(async (res) => {
+    const contentType = res.headers.get("content-type");
+    if (!contentType || !contentType.includes("application/json")) {
+        const text = await res.text();
+        throw new Error("Server mengembalikan format non-JSON: " + text);
+    }
+    return res.json();
+})
+.then((data) => {
+    if (data.success) {
+        currentTransactionId = data.transaction_id;
+        startTimer(600); // Mulai timer 10 menit
+        toggleDisplay("step-schedule", false);
+        toggleDisplay("step-confirm", true);
+    } else {
+        alert("Gagal mengunci kursi: " + data.message);
+    }
+})
+.catch((err) => {
+    console.error("Kesalahan koneksi/sistem:", err);
+    alert("Terjadi kesalahan sistem. Cek konsol (F12) untuk detail.");
+});
 }
 
-// Enhanced Payment Processing
-// ui_script.js
+function startTimer(duration) {
+  let timer = duration,
+    minutes,
+    seconds;
+  clearInterval(bookingTimer);
+
+  bookingTimer = setInterval(function () {
+    minutes = parseInt(timer / 60, 10);
+    seconds = parseInt(timer % 60, 10);
+
+    minutes = minutes < 10 ? "0" + minutes : minutes;
+    seconds = seconds < 10 ? "0" + seconds : seconds;
+
+    const display = document.getElementById("timerDisplay");
+    if (display) display.innerText = minutes + ":" + seconds;
+
+    if (--timer < 0) {
+      clearInterval(bookingTimer);
+      alert("Waktu habis! Kursi dilepaskan otomatis.");
+      cancelCurrentBooking().then(() => {
+        window.location.reload(); 
+      });
+    }
+  }, 1000);
+}
+
+function cancelCurrentBooking() {
+    if (!currentTransactionId) return Promise.resolve({success: true});
+
+    return fetch("../Booking-Logic/cancel_pending.php", { 
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transaction_id: currentTransactionId })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            console.log("Booking berhasil dibatalkan.");
+            currentTransactionId = null;
+            clearInterval(bookingTimer);
+        } else {
+            console.error("Gagal hapus di DB:", data.message);
+        }
+        return data; 
+    });
+}
 
 function processPayment() {
   const payButton = document.querySelector(".btn-pay-now");
 
-  // Validasi sederhana
-  if (
-    !selectedDate ||
-    !selectedTime ||
-    document.querySelectorAll(".seat.selected").length === 0
-  ) {
-    alert("Mohon lengkapi data pemesanan (Tanggal, Jam, Kursi).");
+  if (!currentTransactionId) {
+    alert("Sesi booking tidak valid. Silakan pilih ulang.");
     return;
   }
 
-  // Ambil data kursi & harga
-  const selectedSeatsElements = document.querySelectorAll(".seat.selected");
-  const seatNumbers = Array.from(selectedSeatsElements).map((s) => s.innerText);
-  const totalPriceClean = parseInt(
-    document.getElementById("totalPrice").innerText.replace(/[^0-9]/g, "")
-  );
-
-  // Siapkan Data untuk dikirim ke Backend
-  const bookingData = {
-    movie_id: currentMovie.id, // ID dari Langkah 1 tadi
-    show_date: selectedDate,
-    show_time: selectedTime,
-    seats: seatNumbers,
-    total_price: totalPriceClean,
-  };
-
-  // UI Loading
   payButton.innerHTML =
     '<i class="ph ph-circle-notch ph-spin"></i> MEMPROSES...';
   payButton.disabled = true;
 
-  // KIRIM KE DATABASE (process_booking.php)
   fetch("../Booking-Logic/process_booking.php", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(bookingData),
+    body: JSON.stringify({ transaction_id: currentTransactionId }),
   })
     .then((response) => response.json())
     .then((data) => {
       if (data.success) {
-        // === SUKSES! ===
+        clearInterval(bookingTimer);
 
-        // 1. Tampilkan Pesan Konfirmasi
+        const timerCont = document.getElementById("timerContainer");
+        if (timerCont) timerCont.style.display = "none";
+
         const confirmBox = document.querySelector(".confirm-box");
         confirmBox.innerHTML = `
             <div style="text-align: center; padding: 20px;">
@@ -460,60 +449,29 @@ function processPayment() {
                 <button class="btn-primary" onclick="window.location.href='my_tickets.php'">LIHAT TIKET SAYA</button>
             </div>
         `;
-
-        // 2. HILANGKAN TOMBOL BAYAR SEKARANG (Tambahkan Kode Ini)
-        if (payButton) {
-            const buttonContainer = payButton.parentElement; // Ambil elemen pembungkus tombol
-            if (buttonContainer) {
-                buttonContainer.style.display = "none"; // Hilangkan pembungkusnya (otomatis isinya hilang semua)
-            } else {
-                // Jaga-jaga kalau tidak punya pembungkus, kita hide manual
-                payButton.style.display = "none";
-            }
-        }
-
-        // 3. Hilangkan container tombol (Opsional, biar lebih bersih)
-        const btnContainer = document.querySelector(".confirm-buttons");
-        if (btnContainer) {
-          btnContainer.style.display = "none";
-        }
+        document.getElementById("timerContainer").style.display = "none";
+        payButton.parentElement.style.display = "none";
       } else {
-        // === GAGAL (Kursi diambil orang / error validasi) ===
         alert("Gagal: " + data.message);
-
-        // Reset tombol agar bisa dicoba lagi
-        payButton.innerHTML = "Bayar Sekarang";
+        payButton.innerHTML = "PAY NOW";
         payButton.disabled = false;
       }
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      alert("Terjadi kesalahan koneksi.");
-
-      // Reset tombol agar bisa dicoba lagi
-      payButton.innerHTML = "Bayar Sekarang";
-      payButton.disabled = false;
     });
 }
 
-// Reset booking flow
 function resetBookingFlow() {
-  // Reset steps
   document.getElementById("step-info").style.display = "block";
   document.getElementById("step-schedule").style.display = "none";
   document.getElementById("step-seats").style.display = "none";
   document.getElementById("step-confirm").style.display = "none";
 
-  // Reset selections
   document.getElementById("qtyDisplay").textContent = "1";
   document.getElementById("totalPrice").textContent = "0";
 
-  // Reset seat selections
   document.querySelectorAll(".seat.selected").forEach((seat) => {
     seat.classList.remove("selected");
   });
 
-  // Reset time selection if using the old version
   document.querySelectorAll(".time-btn.selected").forEach((btn) => {
     btn.classList.remove("selected");
   });
@@ -523,15 +481,12 @@ function resetBookingFlow() {
   });
 }
 
-// ================= 4. ADMIN FUNCTIONS =================
-
 function openAdminModal(type) {
   const contentDiv = document.getElementById("adminModalContent");
   if (!contentDiv) return;
 
   let html = "";
 
-  // Logic konten modal berdasarkan tipe tombol yang diklik
   switch (type) {
     case "addMovie":
       html = `
@@ -568,13 +523,11 @@ function addNewMovie() {
 
 function editMovie(id) {
   alert(`Membuka form edit untuk Movie ID: ${id}`);
-  // Di real app, ini akan fetch data film lalu buka modal edit
 }
 
 function confirmDelete(id, title) {
   if (confirm(`Apakah Anda yakin ingin menghapus film "${title}"?`)) {
     alert(`Film "${title}" telah dihapus.`);
-    // Di real app, panggil AJAX delete disini
     location.reload();
   }
 }
@@ -593,30 +546,23 @@ function refreshMovies() {
   location.reload();
 }
 
-// ================= 5. UTILITY & HELPER FUNCTIONS =================
-
-// Helper untuk Toggle Display (Show/Hide)
 function toggleDisplay(elementId, show) {
   const el = document.getElementById(elementId);
   if (el) el.style.display = show ? "block" : "none";
 }
 
-// Helper untuk Toggle Modal (Flex/None)
 function toggleModal(modalId, show) {
   const modal = document.getElementById(modalId);
   if (modal) {
     modal.style.display = show ? "flex" : "none";
-    // Kunci scroll body saat modal terbuka
     document.body.style.overflow = show ? "hidden" : "auto";
   }
 }
 
-// Helper Format Rupiah
 function formatRupiah(amount) {
   return new Intl.NumberFormat("id-ID").format(amount);
 }
 
-// Menutup modal saat klik di luar area konten (Overlay)
 window.onclick = function (event) {
   if (event.target.classList.contains("modal-overlay")) {
     event.target.style.display = "none";
@@ -624,7 +570,6 @@ window.onclick = function (event) {
   }
 };
 
-// Tombol Close (X) di Modal
 document.querySelectorAll(".close-modal").forEach((btn) => {
   btn.addEventListener("click", function () {
     const modal = this.closest(".modal-overlay");
@@ -635,7 +580,6 @@ document.querySelectorAll(".close-modal").forEach((btn) => {
   });
 });
 
-// Search Filter (Client Side)
 const searchInput = document.getElementById("searchInput");
 if (searchInput) {
   searchInput.addEventListener("input", (e) => {
@@ -651,22 +595,17 @@ if (searchInput) {
   });
 }
 
-// Profile Dropdown Toggle
 document.addEventListener("DOMContentLoaded", () => {
   const profileDropdown = document.querySelector(".profile-dropdown");
   const profileTrigger = document.querySelector(".profile-trigger");
 
   if (profileTrigger && profileDropdown) {
     profileTrigger.addEventListener("click", function (e) {
-      e.stopPropagation(); // Mencegah klik tembus ke document
-      
-      // Mengaktifkan/menonaktifkan class 'active' pada parent
+      e.stopPropagation(); 
       profileDropdown.classList.toggle("active");
     });
 
-    // Tutup dropdown jika klik di tempat lain mana pun
     document.addEventListener("click", (e) => {
-      // Jika yang diklik bukan area dropdown, maka hapus class active
       if (!profileDropdown.contains(e.target)) {
         profileDropdown.classList.remove("active");
       }
@@ -674,7 +613,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-// Horizontal Scroll Slider (Tombol Kiri/Kanan di List Film)
 function scrollMovies(amount) {
   const movieList = document.getElementById("movieList");
   if (movieList) {
@@ -682,36 +620,11 @@ function scrollMovies(amount) {
   }
 }
 
-// ================= 6. MY TICKETS & HISTORY FUNCTIONS =================
-
-// Download Ticket
-function downloadTicket(bookingCode) {
-  alert(
-    `Download tiket dengan kode: ${bookingCode}\nFitur ini akan mengunduh file PDF tiket Anda.`
-  );
-  // Di sini bisa diimplementasikan AJAX untuk generate PDF
-}
-
-// Print Ticket
-function printTicket() {
-  window.print();
-}
-
-// Proceed Payment (untuk pending tickets)
-function proceedPayment(ticketId) {
-  if (confirm("Lanjutkan pembayaran untuk tiket ini?")) {
-    alert(`Mengarahkan ke halaman pembayaran untuk tiket ID: ${ticketId}`);
-    // window.location.href = `payment.php?id=${ticketId}`;
-  }
-}
-
-// Filter transactions by time period
 function filterTransactions(period) {
   const items = document.querySelectorAll(".history-item");
   const filterBtns = document.querySelectorAll(".filter-btn");
   const now = new Date();
 
-  // Update active button
   filterBtns.forEach((btn) => btn.classList.remove("active"));
   event.target.classList.add("active");
 
@@ -744,7 +657,6 @@ function filterTransactions(period) {
   });
 }
 
-// Write Review
 function writeReview(transactionId, movieTitle) {
   const review = prompt(
     `Tulis review untuk film "${movieTitle}" (1-5 bintang):`
@@ -755,24 +667,12 @@ function writeReview(transactionId, movieTitle) {
       alert(
         `Terima kasih! Review Anda untuk "${movieTitle}" telah disimpan: ${rating}/5 bintang.`
       );
-      // Di sini bisa diimplementasikan AJAX untuk save review
     } else {
       alert("Harap beri rating 1-5 bintang!");
     }
   }
 }
 
-// Download Receipt
-function downloadReceipt(bookingCode) {
-  alert(
-    `Download struk untuk kode: ${bookingCode}\nStruk akan diunduh dalam format PDF.`
-  );
-  // Di sini bisa diimplementasikan AJAX untuk generate PDF receipt
-}
-
-// ================= 7. EDIT PROFILE FUNCTIONS =================
-
-// Password toggle
 function setupPasswordToggle() {
   const toggleButtons = document.querySelectorAll(".toggle-password");
   toggleButtons.forEach((button) => {
@@ -789,7 +689,6 @@ function setupPasswordToggle() {
   });
 }
 
-// Form validation for profile
 function setupProfileValidation() {
   const profileForm = document.getElementById("profileForm");
   const passwordForm = document.getElementById("passwordForm");
@@ -800,7 +699,6 @@ function setupProfileValidation() {
       const emailInput = this.querySelector('input[name="email"]');
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-      // Validasi username
       if (usernameInput.value.trim().length < 3) {
         e.preventDefault();
         alert("Username minimal 3 karakter!");
@@ -808,7 +706,6 @@ function setupProfileValidation() {
         return;
       }
 
-      // Validasi email
       if (!emailRegex.test(emailInput.value)) {
         e.preventDefault();
         alert("Format email tidak valid!");
@@ -816,14 +713,12 @@ function setupProfileValidation() {
         return;
       }
 
-      // Tampilkan loading
       const submitBtn = this.querySelector('button[type="submit"]');
       submitBtn.innerHTML =
         '<i class="ph ph-circle-notch ph-spin"></i> Menyimpan...';
       submitBtn.disabled = true;
     });
 
-    // Real-time username validation
     const usernameInput = document.querySelector('input[name="username"]');
     if (usernameInput) {
       usernameInput.addEventListener("input", function () {
@@ -845,7 +740,6 @@ function setupProfileValidation() {
       });
     }
 
-    // Real-time email validation
     const emailInput = document.querySelector('input[name="email"]');
     if (emailInput) {
       emailInput.addEventListener("input", function () {
@@ -872,7 +766,6 @@ function setupProfileValidation() {
       const newPass = this.querySelector('input[name="new_password"]');
       const confirmPass = this.querySelector('input[name="confirm_password"]');
 
-      // Validasi panjang password baru
       if (newPass.value.length < 6) {
         e.preventDefault();
         alert("Password baru minimal 6 karakter!");
@@ -880,7 +773,6 @@ function setupProfileValidation() {
         return;
       }
 
-      // Validasi konfirmasi password
       if (newPass.value !== confirmPass.value) {
         e.preventDefault();
         alert("Password baru tidak cocok!");
@@ -888,7 +780,6 @@ function setupProfileValidation() {
         return;
       }
 
-      // Validasi password saat ini tidak boleh sama dengan yang baru
       if (currentPass.value === newPass.value) {
         e.preventDefault();
         alert("Password baru tidak boleh sama dengan password saat ini!");
@@ -896,14 +787,12 @@ function setupProfileValidation() {
         return;
       }
 
-      // Tampilkan loading
       const submitBtn = this.querySelector('button[type="submit"]');
       submitBtn.innerHTML =
         '<i class="ph ph-circle-notch ph-spin"></i> Mengubah...';
       submitBtn.disabled = true;
     });
 
-    // Real-time password strength checker
     const newPasswordInput = document.querySelector(
       'input[name="new_password"]'
     );
@@ -929,7 +818,6 @@ function setupProfileValidation() {
           strengthSpan.style.color = "#28a745";
         }
 
-        // Cek match dengan konfirmasi password
         checkPasswordMatch();
       });
 
@@ -956,7 +844,6 @@ function setupProfileValidation() {
   }
 }
 
-// ================= 8. HOVER EFFECTS FOR TICKETS & HISTORY =================
 function setupTicketHoverEffects() {
   const ticketItems = document.querySelectorAll(".ticket-item, .history-item");
   ticketItems.forEach((item) => {
@@ -972,7 +859,6 @@ function setupTicketHoverEffects() {
   });
 }
 
-// ================= 9. SEARCH FUNCTIONALITY =================
 function setupSearch() {
   const searchInput = document.getElementById("searchInput");
   if (searchInput) {
@@ -1008,30 +894,23 @@ function setupSearch() {
   }
 }
 
-// ================= 10. INITIALIZE ALL FEATURES =================
 document.addEventListener("DOMContentLoaded", function () {
-  // Profile dropdown untuk semua halaman
   setupProfileDropdown();
 
-  // Search functionality
   setupSearch();
 
-  // Ticket/history hover effects
   setupTicketHoverEffects();
 
-  // Profile page specific
   if (document.getElementById("profileForm")) {
     setupPasswordToggle();
     setupProfileValidation();
   }
 
-  // Booking flow (jika ada di halaman)
   if (document.querySelector(".seat")) {
     initializeSeatSelection();
   }
 });
 
-// ================= 11. PROFILE DROPDOWN HANDLER =================
 function setupProfileDropdown() {
   const profileTrigger = document.querySelector(".profile-trigger");
   if (profileTrigger) {
@@ -1048,14 +927,12 @@ function setupProfileDropdown() {
     });
   }
 
-  // Close dropdown ketika klik di luar
   document.addEventListener("click", function () {
     document.querySelectorAll(".dropdown-menu").forEach((dropdown) => {
       dropdown.style.display = "none";
     });
   });
 
-  // Prevent dropdown close ketika klik di dalam dropdown
   document.querySelectorAll(".dropdown-menu").forEach((dropdown) => {
     dropdown.addEventListener("click", function (e) {
       e.stopPropagation();

@@ -2,10 +2,10 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Dec 19, 2025 at 03:38 PM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Host: 127.0.0.1
+-- Generation Time: Dec 20, 2025 at 06:41 AM
+-- Server version: 10.4.32-MariaDB
+-- PHP Version: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -66,7 +66,12 @@ INSERT INTO `booked_seats` (`id`, `transaction_id`, `movie_id`, `show_date`, `sh
 (44, 28, 6, '2025-12-19', '10:00', 'D3'),
 (45, 28, 6, '2025-12-19', '10:00', 'D4'),
 (46, 29, 7, '2025-12-20', '10:00', 'D2'),
-(47, 29, 7, '2025-12-20', '10:00', 'D4');
+(47, 29, 7, '2025-12-20', '10:00', 'D4'),
+(48, 30, 7, '2025-12-20', '10:00', 'D5'),
+(49, 30, 7, '2025-12-20', '10:00', 'D6'),
+(50, 31, 14, '2025-12-20', '10:00', 'A1'),
+(51, 32, 14, '2025-12-20', '10:00', 'A2'),
+(61, 41, 13, '2025-12-20', '14:00', 'A1');
 
 -- --------------------------------------------------------
 
@@ -119,7 +124,7 @@ CREATE TABLE `transactions` (
   `show_date` date NOT NULL,
   `show_time` varchar(10) NOT NULL,
   `total_price` int(11) NOT NULL,
-  `payment_status` enum('paid','pending','cancelled') DEFAULT 'paid'
+  `payment_status` enum('pending','paid','cancelled') DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -136,7 +141,11 @@ INSERT INTO `transactions` (`id`, `user_id`, `movie_id`, `booking_code`, `transa
 (26, 9, 8, 'BKG-0AC5538F', '2025-12-18 12:09:14', '2025-12-18', '14:00', 100000, 'paid'),
 (27, 9, 8, 'BKG-6B8052A6', '2025-12-18 23:25:09', '2025-12-19', '19:30', 100000, 'paid'),
 (28, 9, 6, 'BKG-9B84539D', '2025-12-18 23:25:50', '2025-12-19', '10:00', 200000, 'paid'),
-(29, 13, 7, 'BKG-847606FB', '2025-12-19 21:23:42', '2025-12-20', '10:00', 100000, 'paid');
+(29, 13, 7, 'BKG-847606FB', '2025-12-19 21:23:42', '2025-12-20', '10:00', 100000, 'paid'),
+(30, 13, 7, 'BKG-9DF36B67', '2025-12-19 22:23:56', '2025-12-20', '10:00', 100000, 'paid'),
+(31, 13, 14, 'BKG-1D1BBF47', '2025-12-19 22:25:13', '2025-12-20', '10:00', 50000, 'paid'),
+(32, 13, 14, 'BKG-76547544', '2025-12-19 22:29:07', '2025-12-20', '10:00', 50000, 'paid'),
+(41, 13, 13, 'BKG-9BE609EA', '2025-12-20 11:53:15', '2025-12-20', '14:00', 50000, 'paid');
 
 -- --------------------------------------------------------
 
@@ -221,7 +230,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `booked_seats`
 --
 ALTER TABLE `booked_seats`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
 
 --
 -- AUTO_INCREMENT for table `movies`
@@ -233,7 +242,7 @@ ALTER TABLE `movies`
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
 
 --
 -- AUTO_INCREMENT for table `users`

@@ -1,4 +1,3 @@
-/* ================= CONFIGURATION & VARIABLES ================= */
 :root {
     --bg-dark: #1F1514;
     --bg-card: #2C1E1C;
@@ -15,9 +14,7 @@
     --primary-orange: #FF9800;
     --primary-dark: #F57C00;
 }
-/* ================= PROFILE DROPDOWN ENHANCEMENT ================= */
 
-/* Profile Header di Dropdown */
 .profile-header {
     padding: 15px 20px;
     display: flex;
@@ -73,7 +70,6 @@
     border: 1px solid rgba(228, 143, 111, 0.3);
 }
 
-/* Dropdown Menu Items Enhancement */
 .dropdown-menu a {
     color: var(--text-cream);
     padding: 12px 20px;
@@ -105,7 +101,6 @@
     color: var(--accent-salmon);
 }
 
-/* Logout Button Styling */
 .logout-btn {
     color: #ff6b6b !important;
     border-top: 1px solid rgba(255,255,255,0.1) !important;
@@ -117,7 +112,6 @@
     color: #ff5252 !important;
 }
 
-/* Icons Styling in Dropdown */
 .dropdown-menu a i {
     font-size: 1.1rem;
     width: 20px;
@@ -129,14 +123,12 @@
     color: var(--accent-salmon);
 }
 
-/* Divider Enhancement */
 .divider-mini {
     height: 1px;
     background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
     margin: 8px 0;
 }
 
-/* Profile Trigger Enhancement */
 .profile-trigger {
     display: flex;
     align-items: center;
@@ -163,7 +155,6 @@ body {
     overflow-x: hidden;
 }
 
-/* Noise Texture Overlay */
 body::before {
     content: "";
     position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -171,7 +162,6 @@ body::before {
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
 }
 
-/* ================= HEADER & NAV ================= */
 header {
     position: fixed; top: 0; width: 100%; padding: 15px 50px;
     display: flex; justify-content: space-between; align-items: center;
@@ -204,7 +194,6 @@ header {
     flex: 1; display: flex; justify-content: flex-end; align-items: center; gap: 15px;
 }
 
-/* SEARCH BOX */
 .search-box input {
     background: transparent;
     border: 1px solid rgba(243, 239, 224, 0.3);
@@ -225,7 +214,6 @@ header {
     background: var(--accent-salmon); border-color: var(--accent-salmon); color: var(--bg-dark);
 }
 
-/* DROPDOWN MENU */
 .profile-dropdown { 
     position: relative; 
     cursor: pointer; 
@@ -299,7 +287,6 @@ header {
     margin: 5px 0; 
 }
 
-/* ================= HERO SECTION ================= */
 .hero {
     min-height: 100vh; 
     display: flex; 
@@ -401,7 +388,6 @@ header {
     filter: sepia(0%);
 }
 
-/* DIVIDER & SLIDER */
 .divider { 
     height: 80px; 
     background: var(--bg-card); 
@@ -480,10 +466,8 @@ header {
 }
 
 .movie-card {
-    /* UBAH INI: Pakai width tetap, bukan min-width */
     width: 240px;
-    flex-shrink: 0; /* Agar tidak tergencet slider */
-    
+    flex-shrink: 0; 
     cursor: pointer;
     transition: all 0.3s ease;
     position: relative;
@@ -491,8 +475,6 @@ header {
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    
-    /* Tambahan agar tinggi kartu sama rata */
     display: flex;
     flex-direction: column;
 }
@@ -507,20 +489,14 @@ header {
     box-shadow: 0 10px 20px rgba(0,0,0,0.5);
     overflow: hidden;
     position: relative;
-    
-    /* UBAH INI: Tinggi Poster harus dikunci */
     height: 360px; 
     width: 100%;
 }
 
 .movie-card img {
-    /* Pastikan gambar memenuhi kotak */
     width: 100%;
     height: 100%;
-    
-    /* KUNCI: Gambar akan dicrop otomatis agar pas (tidak gepeng) */
     object-fit: cover; 
-    
     display: block;
     filter: grayscale(30%);
     transition: all 0.5s ease;
@@ -534,22 +510,27 @@ header {
 .movie-card h3 {
     text-align: center;
     font-family: var(--font-head);
-    font-size: 1.3rem;
-    margin: 15px 10px 5px 10px;
-    letter-spacing: 1px;
     color: var(--text-cream);
-    
-    /* UBAH INI: Batasi tinggi judul agar kartu rata */
-    height: 3.2rem; /* Cukup untuk 2 baris */
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2; /* Maksimal 2 baris, sisanya ... */
-    -webkit-box-orient: vertical;
-    
-    /* Tenterahkan teks secara vertikal */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    margin: 25px 10px 10px 10px !important; 
+    letter-spacing: 1px;
+    word-break: break-word;
+    font-size: 1.4rem !important; 
+    line-height: 1.3 !important;
+    height: 2.6em !important; 
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-box-pack: center !important; 
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-height: 0 !important;
+}
+
+.movie-card h3.title-small {
+    font-size: 1rem !important; 
+    line-height: 1.2 !important;
+    height: 2.4em !important; 
+    margin-bottom: 12px !important; 
 }
 
 .movie-card small { 
@@ -560,88 +541,69 @@ header {
     font-size: 0.9rem; 
 }
 
-/* ============================================================
-   ADMIN DASHBOARD THEME (DARK BROWN & ELEGANT)
-   Tambahkan ini di bagian paling bawah ui_style.css
-   ============================================================ */
-
-/* 1. Background Utama Dashboard Admin */
 #admin-dashboard {
-    background-color: #1a1210; /* Dark Espresso */
+    background-color: #1a1210; 
     background-image: 
         linear-gradient(to bottom, rgba(0,0,0,0.8), rgba(26, 18, 16, 0.95)),
-        url('https://www.transparenttextures.com/patterns/wood-pattern.png'); /* Tekstur Kayu Halus */
+        url('https://www.transparenttextures.com/patterns/wood-pattern.png'); 
     min-height: 100vh;
-    color: #e0d0c0; /* Cream Text */
+    color: #e0d0c0; 
 }
 
-/* 2. Header Section Admin */
 #admin-dashboard .section-header h2 {
-    color: #d4a373; /* Gold/Bronze */
+    color: #d4a373; 
     text-shadow: 2px 2px 0px #000;
 }
 #admin-dashboard .section-header span {
-    color: #a67b5b; /* Muted Brown */
+    color: #a67b5b; 
 }
 
-/* 3. Kartu-Kartu (Profile, Stats, Quick Actions) */
-/* Menimpa background putih default dengan style Dark Leather */
 #admin-dashboard div[style*="background: white"],
 #admin-dashboard div[style*="background: #fff"],
 #admin-dashboard .admin-card {
-    background: #2d2420 !important; /* Dark Walnut */
+    background: #2d2420 !important; 
     border: 1px solid #4a3b32;
     box-shadow: 0 10px 30px rgba(0,0,0,0.6) !important;
     color: #e0d0c0 !important;
 }
 
-/* 4. Profile Header di Admin */
 #admin-dashboard h3, 
 #admin-dashboard h4, 
 #admin-dashboard p {
     color: #e0d0c0 !important;
 }
 #admin-dashboard p span[style*="background"] {
-    background: #5c4033 !important; /* Dark Leather Badge */
+    background: #5c4033 !important; 
     border: 1px solid #d4a373;
     color: #d4a373 !important;
 }
 
-/* 5. Statistik Cards (Override Gradient Warna-warni menjadi Nuansa Coklat) */
-/* Kita gunakan selector nth-of-type untuk memberi variasi warna coklat */
-
-/* Card 1 (Total Movies) - Deep Bronze */
 #admin-dashboard div[style*="grid-template-columns"] > div:nth-child(1) {
     background: linear-gradient(135deg, #5D4037, #3E2723) !important;
     border: 1px solid #8D6E63;
 }
-/* Card 2 (Bookings) - Metallic Copper */
 #admin-dashboard div[style*="grid-template-columns"] > div:nth-child(2) {
     background: linear-gradient(135deg, #8D6E63, #5D4037) !important;
     border: 1px solid #A1887F;
 }
-/* Card 3 (Revenue) - Gold Brown (Money) */
 #admin-dashboard div[style*="grid-template-columns"] > div:nth-child(3) {
     background: linear-gradient(135deg, #6D4C41, #4E342E) !important;
     border: 1px solid #8D6E63;
 }
-/* Card 4 (Users) - Dark Coffee */
 #admin-dashboard div[style*="grid-template-columns"] > div:nth-child(4) {
     background: linear-gradient(135deg, #4E342E, #3E2723) !important;
     border: 1px solid #6D4C41;
 }
 
-/* Ikon di dalam Stats Card */
 #admin-dashboard div[style*="grid-template-columns"] > div .ph {
     color: #fff !important;
     opacity: 0.9;
 }
 #admin-dashboard div[style*="background: rgba(255,255,255,0.2)"] {
-    background: rgba(0,0,0,0.2) !important; /* Gelapkan background icon */
+    background: rgba(0,0,0,0.2) !important; 
     border: 1px solid rgba(255,255,255,0.1);
 }
 
-/* 6. Quick Action Buttons */
 #admin-dashboard .btn-primary {
     background: #3e2723 !important;
     border: 1px solid #5d4037 !important;
@@ -652,18 +614,16 @@ header {
     background: #5d4037 !important;
     color: #fff !important;
     transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(212, 163, 115, 0.2); /* Gold glow */
+    box-shadow: 0 6px 12px rgba(212, 163, 115, 0.2); 
 }
 #admin-dashboard .btn-primary i {
     color: #d4a373 !important;
 }
 
-/* 7. Movie Database Table */
 #admin-dashboard table {
     border-color: #4a3b32 !important;
 }
 
-/* Header Tabel */
 #admin-dashboard thead tr {
     background: linear-gradient(135deg, #3E2723, #281A16) !important;
     border-bottom: 2px solid #d4a373 !important;
@@ -674,32 +634,29 @@ header {
     letter-spacing: 1px;
 }
 
-/* Isi Tabel */
 #admin-dashboard tbody tr {
     border-bottom: 1px solid #3e2723 !important;
     background: transparent !important;
     transition: background 0.2s;
 }
 #admin-dashboard tbody tr:hover {
-    background: rgba(212, 163, 115, 0.05) !important; /* Slight gold highlight */
+    background: rgba(212, 163, 115, 0.05) !important; 
 }
 #admin-dashboard td {
     color: #ccbfae !important;
 }
 #admin-dashboard td span[style*="color: #333"] {
-    color: #fff !important; /* Judul Film */
+    color: #fff !important; 
 }
 #admin-dashboard td strong, 
 #admin-dashboard td b {
-    color: #d4a373 !important; /* Harga */
+    color: #d4a373 !important; 
 }
 
-/* 8. Action Buttons di Tabel (Edit/Delete) */
 #admin-dashboard td button {
     opacity: 0.9;
 }
 
-/* 9. Upload Area (Dashed Box) */
 #admin-dashboard div[style*="border: 2px dashed"] {
     border-color: #5d4037 !important;
     background: rgba(0,0,0,0.2) !important;
@@ -708,13 +665,11 @@ header {
     color: #8d6e63 !important;
 }
 
-/* 10. Footer Admin */
 #admin-dashboard div[style*="text-align: center; padding: 20px"] {
     background: #231916 !important;
     border-top: 1px solid #4a3b32;
 }
 
-/* Scrollbar Admin khusus (Chrome/Safari) */
 #admin-dashboard ::-webkit-scrollbar {
     width: 10px;
 }
@@ -729,7 +684,6 @@ header {
     background: #8d6e63;
 }
 
-/* MODAL & BOOKING FLOW */
 .modal-overlay {
     position: fixed; 
     top: 0; 
@@ -756,7 +710,7 @@ header {
     position: relative;
     clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 45%, 2% 50%, 0% 55%);
     box-shadow: 0 0 50px rgba(228, 143, 111, 0.2); 
-    width: 400px; /* Default Login */
+    width: 400px; 
     animation: slideUp 0.4s ease;
 }
 @keyframes slideUp {
@@ -770,7 +724,6 @@ header {
     }
 }
 
-/* Modal Wide for Booking */
 .booking-modal-wide { 
     width: 750px; 
     max-width: 95%; 
@@ -792,15 +745,14 @@ header {
     color: var(--accent-salmon); 
 }
 
-/* --- FIX MODAL LAYOUT --- */
 .movie-info-layout {
-    display: flex; /* Wajib Flex agar poster & teks jejer ke samping */
+    display: flex; 
     gap: 25px;
     align-items: flex-start;
 }
 
 .info-poster {
-    width: 180px; /* Lebar tetap poster di modal */
+    width: 180px; 
     flex-shrink: 0;
 }
 
@@ -808,49 +760,43 @@ header {
     width: 100%;
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    display: block; /* Hapus gap bawah image */
+    display: block; 
 }
 
 .info-text {
-    flex: 1; /* Teks ambil sisa ruang */
+    flex: 1; 
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
 
-/* Rating Style */
-/* --- RATING BADGE ON POSTER (TOP LEFT) --- */
-/* Update class ini agar teks rata tengah sempurna */
 .rating-badge-poster {
     position: absolute;
     top: 10px;
     left: 10px;
     
-    /* Styling Kotak Hitam */
-    background: rgba(0, 0, 0, 0.85); /* Sedikit lebih gelap */
-    color: #FFD700; /* Warna Emas */
-    border: 1px solid rgba(255, 215, 0, 0.3); /* Border tipis emas biar elegan */
+    background: rgba(0, 0, 0, 0.85); 
+    color: #FFD700; 
+    border: 1px solid rgba(255, 215, 0, 0.3); 
     padding: 5px 12px;
     border-radius: 8px;
     font-weight: 700;
     font-size: 0.95rem;
     z-index: 10;
     
-    /* --- KOENTJI RATA TENGAH --- */
     display: flex;
-    align-items: center;     /* Tengah secara vertikal */
-    justify-content: center; /* Tengah secara horizontal */
-    gap: 6px;                /* Jarak antara bintang dan angka */
-    min-width: 65px;         /* Lebar minimum agar kotak tidak gepeng */
-    height: 32px;            /* Tinggi fix */
+    align-items: center;     
+    justify-content: center; 
+    gap: 6px;                
+    min-width: 65px;        
+    height: 32px;         
     
     box-shadow: 0 4px 10px rgba(0,0,0,0.5);
 }
 
-/* Pastikan icon bintang tidak geser */
 .rating-badge-poster i {
     font-size: 1rem;
-    margin-bottom: 2px; /* Koreksi optik sedikit */
+    margin-bottom: 2px; 
 }
 
 .info-text h2 { 
@@ -867,13 +813,11 @@ header {
     color: #444; 
 }
 
-/* Sembunyikan gambar apa pun di dalam elemen durasi */
 #modalDuration img, 
 #modalDuration svg {
     display: none !important;
 }
 
-/* Date & Time Picker */
 .date-picker-wrapper { 
     display: flex; 
     gap: 10px; 
@@ -944,7 +888,6 @@ header {
     transform: translateY(-2px);
 }
 
-/* Seat Map 3D */
 .seat-container { 
     perspective: 1000px; 
     margin: 20px 0; 
@@ -975,8 +918,6 @@ header {
     margin-bottom: 8px;
 }
 
-/* ================= MOVIE CARD ENHANCEMENT ================= */
-
 .movie-card {
     min-width: 220px;
     cursor: pointer;
@@ -1002,7 +943,6 @@ header {
     height: 320px;
 }
 
-/* Poster Overlay for Book Now Button */
 .poster-overlay {
     position: absolute;
     top: 0;
@@ -1022,7 +962,6 @@ header {
     opacity: 1;
 }
 
-/* Book Now Button */
 .btn-book-now {
     background: linear-gradient(135deg, var(--accent-salmon), #FF9800);
     color: var(--bg-dark);
@@ -1056,7 +995,6 @@ header {
     transform: scale(0.98);
 }
 
-/* Movie Card Footer */
 .movie-card-footer {
     display: flex;
     justify-content: space-between;
@@ -1083,20 +1021,6 @@ header {
     border-radius: 12px;
 }
 
-/* Movie Card Title */
-.movie-card h3 {
-    text-align: center;
-    font-family: var(--font-head);
-    font-size: 1.3rem;
-    margin: 15px 10px 5px 10px;
-    letter-spacing: 1px;
-    color: var(--text-cream);
-    min-height: 45px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 .movie-card small {
     display: block;
     text-align: center;
@@ -1107,7 +1031,6 @@ header {
     padding: 0 10px;
 }
 
-/* Responsive adjustments */
 @media (max-width: 768px) {
     .poster-frame {
         height: 280px;
@@ -1147,9 +1070,6 @@ header {
     }
 }
 
-/* ================= SEAT SELECTION STYLES (SIMPLE VERSION) ================= */
-
-/* Available seats (green) */
 .seat {
     background: linear-gradient(135deg, var(--success-green), var(--success-dark));
     color: white;
@@ -1168,13 +1088,11 @@ header {
     position: relative;
 }
 
-/* Hover effect for available seats */
 .seat:not(.occupied):not(.selected):hover {
     transform: scale(1.1);
     box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
 }
 
-/* Selected seats (orange) */
 .seat.selected {
     background: linear-gradient(135deg, var(--primary-orange), var(--primary-dark));
     color: white;
@@ -1182,7 +1100,6 @@ header {
     box-shadow: 0 0 10px rgba(255, 152, 0, 0.5);
 }
 
-/* Occupied seats (red) */
 .seat.occupied {
     background: linear-gradient(135deg, var(--warning-red), var(--warning-dark));
     color: white;
@@ -1191,12 +1108,10 @@ header {
     transform: none !important;
 }
 
-/* Aisle spacing */
 .seat:nth-of-type(4) {
     margin-right: 25px;
 }
 
-/* Simple seat instructions */
 .seat-instructions {
     background: #f5f5f5;
     border: 1px solid #ddd;
@@ -1234,7 +1149,6 @@ header {
     background: linear-gradient(135deg, var(--warning-red), var(--warning-dark));
 }
 
-/* Qty Control */
 .qty-control { 
     display: flex; 
     align-items: center; 
@@ -1263,7 +1177,6 @@ header {
     transform: scale(1.1); 
 }
 
-/* ================= ENHANCED CONFIRMATION STEP ================= */
 #step-confirm {
     text-align: center;
     animation: fadeIn 0.5s ease;
@@ -1291,7 +1204,6 @@ header {
     border-radius: 2px;
 }
 
-/* Enhanced Confirm Box */
 .confirm-box {
     background: linear-gradient(135deg, #f9f3e9, #fff5ec);
     padding: 25px 30px;
@@ -1314,7 +1226,6 @@ header {
     background: linear-gradient(to bottom, var(--accent-salmon), var(--primary-orange));
 }
 
-/* Movie Title in Confirmation */
 #confMovie {
     font-family: var(--font-head);
     font-size: 1.8rem;
@@ -1325,7 +1236,6 @@ header {
     letter-spacing: 1px;
 }
 
-/* Confirmation Details */
 .confirm-box p {
     margin: 12px 0;
     font-family: var(--font-body);
@@ -1364,7 +1274,6 @@ header {
     margin-left: 10px;
 }
 
-/* Icon styling in confirmation */
 .confirm-box p::before {
     margin-right: 10px;
     font-size: 1.1rem;
@@ -1383,7 +1292,6 @@ header {
     content: '💰';
 }
 
-/* Confirmation Buttons Container */
 .confirm-buttons {
     display: flex;
     gap: 15px;
@@ -1392,7 +1300,6 @@ header {
     flex-wrap: wrap;
 }
 
-/* Enhanced Cancel Button */
 .btn-cancel {
     background: transparent;
     border: 2px solid #dc3545;
@@ -1439,7 +1346,6 @@ header {
     transform: translateY(-1px);
 }
 
-/* Enhanced Pay Now Button */
 .btn-pay-now {
     background: linear-gradient(135deg, var(--success-green), var(--success-dark));
     color: white;
@@ -1485,12 +1391,10 @@ header {
     transform: translateY(-1px);
 }
 
-/* Button Icons */
 .btn-cancel i, .btn-pay-now i {
     font-size: 1.3rem;
 }
 
-/* Success Animation */
 @keyframes successPulse {
     0% { transform: scale(1); }
     50% { transform: scale(1.05); }
@@ -1501,7 +1405,6 @@ header {
     animation: successPulse 0.5s ease 3;
 }
 
-/* Responsive Confirmation */
 @media (max-width: 768px) {
     #step-confirm h2 {
         font-size: 2rem;
@@ -1556,14 +1459,12 @@ header {
     }
 }
 
-/* Additional utility classes */
 .text-center { text-align: center; }
 .mt-10 { margin-top: 10px; }
 .mt-20 { margin-top: 20px; }
 .mb-10 { margin-bottom: 10px; }
 .mb-20 { margin-bottom: 20px; }
 
-/* Movie duration styling */
 .movie-duration {
     font-family: var(--font-head);
     font-size: 1.2rem;
@@ -1579,7 +1480,6 @@ header {
     font-size: 1rem;
 }
 
-/* Responsive Design */
 @media (max-width: 1200px) {
     .hero-title { font-size: 6rem; }
     .hero-poster { flex: 0 0 300px; }
@@ -1648,20 +1548,13 @@ header {
     }
 }
 
-/* ==========================================
-   STYLE UNTUK MY_TICKETS, TRANSACTION_HISTORY, EDIT_PROFILE
-   (NAVBAR MINIMALIS - NON-HOME PAGES)
-   ========================================== */
-
-/* ================= TIKET SAYA STYLES ================= */
 .tickets-container, .history-container, .profile-container {
     max-width: 1400px;
-    margin: 90px auto 50px; /* Margin top dikurangi untuk navbar minimalis */
+    margin: 90px auto 50px; 
     padding: 0 50px;
     min-height: 70vh;
 }
 
-/* Header Umum untuk ketiga halaman */
 .page-header {
     text-align: center;
     margin-bottom: 60px;
@@ -1705,7 +1598,6 @@ header {
     letter-spacing: 1px;
 }
 
-/* Stat Cards (umum untuk tickets & history) */
 .stat-card, .history-stat-card {
     background: var(--bg-card);
     padding: 25px;
@@ -1739,7 +1631,6 @@ header {
     letter-spacing: 1.5px;
 }
 
-/* Stat Grid */
 .ticket-stats, .history-stats {
     display: flex;
     justify-content: center;
@@ -1748,7 +1639,6 @@ header {
     flex-wrap: wrap;
 }
 
-/* ================= TIKET LIST STYLES ================= */
 .tickets-list, .history-list {
     display: flex;
     flex-direction: column;
@@ -1765,12 +1655,10 @@ header {
     position: relative;
 }
 
-/* Ticket - border kiri oranye */
 .ticket-item {
     border-left: 5px solid var(--accent-salmon);
 }
 
-/* History - border kiri abu-abu */
 .history-item {
     border-left: 5px solid #6c757d;
     opacity: 0.9;
@@ -1785,7 +1673,6 @@ header {
     opacity: 1;
 }
 
-/* Header Item */
 .ticket-header, .history-item-header {
     padding: 20px 30px;
     display: flex;
@@ -1805,7 +1692,6 @@ header {
     color: var(--text-cream);
 }
 
-/* Kode Tiket */
 .ticket-code, .history-code {
     font-family: 'Courier New', monospace;
     font-size: 1.3rem;
@@ -1817,7 +1703,6 @@ header {
     border: 1px solid rgba(0,0,0,0.3);
 }
 
-/* Status Badge */
 .ticket-status, .history-status {
     padding: 8px 20px;
     border-radius: 25px;
@@ -1844,7 +1729,6 @@ header {
     color: var(--bg-dark);
 }
 
-/* Watched Badge untuk History */
 .watched-badge {
     position: absolute;
     top: 20px;
@@ -1862,7 +1746,6 @@ header {
     box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-/* Content Area */
 .ticket-content, .history-content {
     display: flex;
     padding: 30px;
@@ -1870,7 +1753,6 @@ header {
     align-items: flex-start;
 }
 
-/* Poster */
 .ticket-poster, .history-poster {
     width: 180px;
     height: 270px;
@@ -1897,7 +1779,6 @@ header {
     filter: grayscale(0%);
 }
 
-/* Details */
 .ticket-details, .history-details {
     flex-grow: 1;
 }
@@ -1910,7 +1791,6 @@ header {
     letter-spacing: 1.5px;
 }
 
-/* Meta Info */
 .movie-meta, .history-meta {
     display: flex;
     align-items: center;
@@ -1937,7 +1817,6 @@ header {
     color: #FFD700;
 }
 
-/* Stars */
 .stars {
     display: flex;
     gap: 2px;
@@ -1951,7 +1830,6 @@ header {
     color: rgba(255, 215, 0, 0.3);
 }
 
-/* Detail Grid */
 .detail-grid, .history-timeline {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1984,7 +1862,6 @@ header {
     letter-spacing: 1px;
 }
 
-/* Time Difference untuk History */
 .time-difference {
     font-size: 0.9rem;
     color: #6c757d;
@@ -1993,7 +1870,6 @@ header {
     display: block;
 }
 
-/* Price Display */
 .price-display {
     background: linear-gradient(135deg, rgba(31, 21, 20, 0.9), rgba(44, 30, 28, 0.9));
     padding: 20px 30px;
@@ -2017,7 +1893,6 @@ header {
     letter-spacing: 2px;
 }
 
-/* Actions */
 .ticket-actions, .history-actions {
     display: flex;
     justify-content: flex-end;
@@ -2027,7 +1902,6 @@ header {
     border-top: 1px solid rgba(255,255,255,0.1);
 }
 
-/* Button Styles Umum */
 .btn-action, .history-btn {
     padding: 12px 25px;
     border-radius: 6px;
@@ -2043,37 +1917,27 @@ header {
     font-family: var(--font-head);
     letter-spacing: 1px;
 }
-.btn-download, .btn-browse, .btn-back, .btn-save,
-.btn-print, .btn-cancel, .btn-review, .btn-receipt {
-    /* Properti dasar */
+.btn-back, .btn-save, .btn-cancel, .btn-review, .btn-receipt {
     display: inline-block;
     padding: 12px 24px;
     border: none;
-    border-radius: 8px; /* Sudut sedikit melengkung untuk tampilan modern */
+    border-radius: 8px; 
     font-size: 16px;
     font-weight: 600;
     text-align: center;
     text-decoration: none;
     cursor: pointer;
     transition: all 0.3s ease;
-    min-width: 140px; /* Lebar minimum tetap */
+    min-width: 140px; 
     box-sizing: border-box;
-    
-    /* Properti tambahan untuk konsistensi */
     line-height: 1.5;
     position: relative;
     overflow: hidden;
 }
 
-/* Gaya khusus untuk setiap jenis tombol */
-.btn-download, .btn-browse, .btn-back, .btn-save {
+.btn-back, .btn-save {
     background: linear-gradient(135deg, var(--accent-salmon), var(--primary-orange));
     color: var(--bg-dark);
-}
-
-.btn-print {
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: white;
 }
 
 .btn-cancel {
@@ -2091,17 +1955,10 @@ header {
     color: white;
 }
 
-/* Efek hover */
-.btn-download:hover, .btn-browse:hover, .btn-back:hover, .btn-save:hover {
+.btn-back:hover, .btn-save:hover {
     background: linear-gradient(135deg, var(--primary-orange), var(--accent-salmon));
     transform: translateY(-3px);
     box-shadow: 0 5px 15px rgba(228, 143, 111, 0.4);
-}
-
-.btn-print:hover {
-    background: linear-gradient(135deg, #2980b9, #3498db);
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
 }
 
 .btn-cancel:hover {
@@ -2122,11 +1979,6 @@ header {
     box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
 }
 
-/* Variasi bentuk yang lebih kotak (jika ingin sangat kotak) */
-/* Jika ingin bentuk benar-benar kotak (siku-siku), ganti border-radius: 0px; */
-/* Jika ingin sedikit melengkung, pertahankan border-radius: 8px; */
-
-/* Opsi tambahan: tombol dengan bentuk persegi panjang yang seragam */
 .btn-fixed-size {
     width: 180px;
     height: 50px;
@@ -2135,7 +1987,6 @@ header {
     justify-content: center;
 }
 
-/* Footer Tiket */
 .ticket-footer {
     display: flex;
     justify-content: space-between;
@@ -2147,7 +1998,6 @@ header {
     color: rgba(243, 239, 224, 0.7);
 }
 
-/* ================= EDIT PROFILE STYLES ================= */
 .profile-content {
     background: var(--bg-card);
     border-radius: 15px;
@@ -2202,7 +2052,6 @@ header {
     border: 1px solid rgba(228, 143, 111, 0.3);
 }
 
-/* Section Titles */
 .section-title {
     color: var(--text-cream);
     font-family: var(--font-head);
@@ -2220,7 +2069,6 @@ header {
     color: var(--accent-salmon);
 }
 
-/* Form Styles */
 .form-group {
     margin-bottom: 25px;
 }
@@ -2262,7 +2110,6 @@ header {
     color: rgba(243, 239, 224, 0.5);
 }
 
-/* Password Input */
 .password-wrapper {
     position: relative;
 }
@@ -2285,7 +2132,6 @@ header {
     justify-content: center;
 }
 
-/* Form Actions */
 .form-actions {
     display: flex;
     gap: 15px;
@@ -2315,7 +2161,6 @@ header {
     color: var(--accent-salmon);
 }
 
-/* Messages */
 .message {
     padding: 15px 20px;
     border-radius: 8px;
@@ -2349,7 +2194,6 @@ header {
     }
 }
 
-/* ================= NO DATA STYLES ================= */
 .no-tickets, .no-history {
     text-align: center;
     padding: 80px 20px;
@@ -2384,7 +2228,6 @@ header {
     font-size: 1.1rem;
 }
 
-/* ================= FILTER CONTROLS ================= */
 .filter-controls {
     display: flex;
     justify-content: center;
@@ -2415,7 +2258,6 @@ header {
     color: var(--bg-dark);
 }
 
-/* ================= FOOTER STYLES ================= */
 .minimal-footer {
     background: var(--bg-card);
     color: var(--text-cream);
@@ -2430,8 +2272,6 @@ header {
     color: rgba(243, 239, 224, 0.7);
     font-size: 0.9rem;
 }
-
-/* ================= RESPONSIVE DESIGN ================= */
 @media (max-width: 1200px) {
     .tickets-container, .history-container, .profile-container {
         padding: 0 30px;
@@ -2538,7 +2378,6 @@ header {
         font-size: 2rem;
     }
 }
-/* ================= ACCORDION STYLES ================= */
 .accordion {
     margin: 20px 0;
     border: 1px solid rgba(255,255,255,0.1);
@@ -2585,7 +2424,6 @@ header {
     max-height: 1000px;
 }
 
-/* Image Preview */
 .image-preview {
     margin-top: 15px;
     animation: fadeIn 0.3s ease;
@@ -2637,7 +2475,6 @@ header {
     gap: 8px;
 }
 
-/* Upload Area */
 .upload-area {
     background: rgba(255,255,255,0.05);
     border: 2px dashed #b0bec5;
@@ -2689,14 +2526,12 @@ header {
     display: none;
 }
 
-/* Required field indicator */
 .form-label.required::after {
     content: ' *';
     color: #f44336;
     font-weight: bold;
 }
 
-/* Form hint */
 .form-hint {
     color: rgba(243, 239, 224, 0.6);
     font-size: 0.85rem;
@@ -2705,7 +2540,6 @@ header {
     align-items: center;
     gap: 5px;
 }
-/* ================= ACCORDION STYLES ================= */
 .accordion {
     margin: 20px 0;
     border: 1px solid rgba(255,255,255,0.1);
@@ -2752,7 +2586,6 @@ header {
     max-height: 1000px;
 }
 
-/* Image Preview */
 .image-preview {
     margin-top: 15px;
     animation: fadeIn 0.3s ease;
@@ -2804,7 +2637,6 @@ header {
     gap: 8px;
 }
 
-/* Upload Area */
 .upload-area {
     background: rgba(255,255,255,0.05);
     border: 2px dashed #b0bec5;
@@ -2856,14 +2688,12 @@ header {
     display: none;
 }
 
-/* Required field indicator */
 .form-label.required::after {
     content: ' *';
     color: #f44336;
     font-weight: bold;
 }
 
-/* Form hint */
 .form-hint {
     color: rgba(243, 239, 224, 0.6);
     font-size: 0.85rem;
@@ -2873,7 +2703,6 @@ header {
     gap: 5px;
 }
 
-/* ================= MODAL STYLES ================= */
  .modal-content {
      background: white;
      border-radius: 12px;
@@ -2908,7 +2737,6 @@ header {
  .close-modal:hover {
      color: #333;
  }
- /* Modal Header */
  .modal-header {
      padding: 25px 30px 15px;
      text-align: center;
@@ -2944,11 +2772,9 @@ header {
      font-size: 0.9rem;
      margin: 0;
  }
- /* Modal Body */
  .modal-body {
      padding: 20px 30px;
  }
- /* Form Elements - DIPERKECIL */
  .input-group {
      margin-bottom: 16px;
  }
@@ -2980,7 +2806,6 @@ header {
      color: #999;
      font-weight: 300;
  }
- /* Password Toggle */
  .password-toggle {
      position: absolute;
      right: 12px;
@@ -2995,7 +2820,6 @@ header {
  .password-wrapper {
      position: relative;
  }
- /* Buttons - DIPERKECIL */
  .btn-submit {
      width: 100%;
      padding: 12px;
@@ -3041,7 +2865,6 @@ header {
      background: #f5f5f5;
      border-color: #ccc;
  }
- /* Terms Checkbox */
  .terms-checkbox {
      display: flex;
      align-items: flex-start;
@@ -3061,7 +2884,6 @@ header {
  .terms-checkbox a:hover {
      text-decoration: underline;
  }
- /* Error Messages */
  .error-message {
      background: #ffebee;
      color: #c62828;
@@ -3074,7 +2896,6 @@ header {
      align-items: center;
      gap: 8px;
  }
- /* Divider */
  .modal-divider {
      display: flex;
      align-items: center;
@@ -3092,7 +2913,6 @@ header {
  .modal-divider span {
      padding: 0 12px;
  }
- /* Switch Form Text */
  .switch-form {
      text-align: center;
      font-size: 0.85rem;
@@ -3108,7 +2928,6 @@ header {
  .switch-form a:hover {
      text-decoration: underline;
  }
- /* Responsive */
  @media (max-width: 480px) {
      .modal-content {
          max-width: 95%;
@@ -3137,7 +2956,6 @@ header {
          font-size: 0.95rem;
      }
  }
- /* Loading Spinner */
  .ph-spin {
      animation: spin 1s linear infinite;
  }
@@ -3145,7 +2963,6 @@ header {
      from { transform: rotate(0deg); }
      to { transform: rotate(360deg); }
  }
- /* Success Message */
  .success-message {
      background: #e8f5e9;
      color: #2e7d32;
