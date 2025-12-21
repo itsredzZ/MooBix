@@ -45,14 +45,16 @@
 }
 
 .profile-info h4 {
-    margin: 0 0 5px 0;
-    color: var(--text-cream);
-    font-family: var(--font-head);
-    font-size: 1.2rem;
-    letter-spacing: 0.5px;
+    white-space: normal !important;       /* Izinkan turun baris */
+    word-wrap: break-word !important;     /* Support browser lama */
+    word-break: break-word !important;    /* Paksa patah jika kata terlalu panjang */
+    margin: 0;
 }
 
 .profile-info p {
+    white-space: normal !important;       /* Izinkan turun baris */
+    word-wrap: break-word !important;     /* Support browser lama */
+    word-break: break-word !important;    /* Paksa patah jika kata terlalu panjang */
     margin: 0 0 8px 0;
     color: rgba(243, 239, 224, 0.7);
     font-size: 0.8rem;
@@ -570,7 +572,7 @@ header {
 #admin-dashboard h3, 
 #admin-dashboard h4, 
 #admin-dashboard p {
-    color: #e0d0c0 !important;
+    color: #ffffff !important;
 }
 #admin-dashboard p span[style*="background"] {
     background: #5c4033 !important; 

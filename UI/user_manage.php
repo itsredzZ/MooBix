@@ -132,12 +132,6 @@ function getStatusColor($status)
             letter-spacing: 1px;
         }
 
-        .section-header span {
-            font-family: 'Dancing Script', cursive;
-            font-size: 1.5rem;
-            color: #d32f2f;
-        }
-
         .search-container {
             position: relative;
             margin-right: 15px;
@@ -149,7 +143,7 @@ function getStatusColor($status)
 
     <?php
     $isHomePage = false;
-    include 'navbar.php'; //
+    include 'navbar.php';
     ?>
 
     <main id="admin-dashboard" style="padding-top: 100px;">

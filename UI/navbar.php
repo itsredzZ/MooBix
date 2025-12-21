@@ -1,32 +1,40 @@
 <?php
-$isHomePage = isset($isHomePage) ? $isHomePage : false;
+// Pastikan session dimulai jika belum
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 1. GUNAKAN LOGIKA YANG SAMA DENGAN functions.php AGAR KONSISTEN
+// (Atau lebih baik lagi jika Anda include 'functions.php' di sini)
+$rawRole = $_SESSION['user_role'] ?? '';
+$cleanRole = strtolower(trim($rawRole));
 
 $userName = $_SESSION['user_name'] ?? '';
 $userEmail = $_SESSION['user_email'] ?? '';
-$userRole = $_SESSION['user_role'] ?? 'user';
-$isAdmin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin');
+$isAdmin = ($cleanRole === 'admin'); // Logic Admin yang kuat
 $isLoggedIn = isset($_SESSION['user_id']);
-$currentPage = basename($_SERVER['PHP_SELF']);
+
+// Default isHomePage ke false jika tidak diset
+$isHomePage = isset($isHomePage) ? $isHomePage : false;
 ?>
 
 <header id="navbar">
-    <div class="logo" onclick="window.location.href='<?php echo $isAdmin ? 'admin_panel.php' : 'ui_index.php'; ?>'" style="cursor:pointer;">
+    <div class="logo" onclick="window.location.href='ui_index.php'" style="cursor:pointer;">
         MOOBIX THEATER
     </div>
 
     <nav class="main-nav">
-        <?php if ($isHomePage && !$isAdmin): ?>
-            <a href="#hero-section">NEWEST HIT</a>
-            <a href="#schedule-section">MORE FILMS</a>
+        <?php if (!$isAdmin): ?>
+            <?php if ($isHomePage): ?>
+                <a href="#hero-section">NEWEST HIT</a>
+                <a href="#schedule-section">MORE FILMS</a>
+            <?php else: ?>
+                <a href="ui_index.php#hero-section">NEWEST HIT</a>
+                <a href="ui_index.php#schedule-section">MORE FILMS</a>
+            <?php endif; ?>
         <?php endif; ?>
-
-        <?php if ($isAdmin): ?>
-            <a href="admin_panel.php" class="<?php echo ($currentPage == 'admin_panel.php') ? 'active' : ''; ?>">Dashboard</a>
-            <a href="manage_movies.php" class="<?php echo ($currentPage == 'manage_movies.php') ? 'active' : ''; ?>">Movies</a>
-            <a href="manage_schedules.php" class="<?php echo ($currentPage == 'manage_schedules.php') ? 'active' : ''; ?>">Schedules</a>
-            <a href="manage_bookings.php" class="<?php echo ($currentPage == 'manage_bookings.php') ? 'active' : ''; ?>">Bookings</a>
-        <?php endif; ?>
-    </nav>
+        
+        </nav>
 
     <div class="login-area">
         <?php if (!$isAdmin && $isHomePage): ?>
@@ -58,21 +66,22 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                     <div class="divider-mini"></div>
 
                     <?php if ($isAdmin): ?>
-                        <div class="admin-section-label" style="padding: 5px 15px; font-size: 10px; color: #888;">ADMIN MANAGEMENT</div>
-                        <a href="ui_index.php"><i class="ph ph-gear"></i> Admin Panel</a>
+                        <div style="padding: 5px 20px; font-size: 10px; color: #888; font-weight:bold; letter-spacing:1px;">ADMIN TOOLS</div>
+                        
+                        <a href="ui_index.php"><i class="ph ph-gear"></i> Dashboard</a> 
+                        
                         <a href="user_manage.php"><i class="ph ph-users"></i> Manage Users</a>
-                        <a href="manage_bookings.php"><i class="ph ph-calendar-check"></i>Bookings</a>
-
+                        <a href="manage_bookings.php"><i class="ph ph-calendar-check"></i> Manage Bookings</a>
                         <div class="divider-mini"></div>
                         <a href="../Authentication/logout.php" class="logout-btn">
                             <i class="ph ph-sign-out"></i> Logout
                         </a>
 
                     <?php else: ?>
-                        <a href="ui_index.php"><i class="ph ph-user-circle"></i> Home/Beranda</a>
+                        <a href="ui_index.php"><i class="ph ph-house"></i> Home/Beranda</a>
                         <a href="my_tickets.php"><i class="ph ph-ticket"></i> My Tickets</a>
-                        <a href="transaction_history.php"><i class="ph ph-credit-card"></i> Transaction History</a>
-                        <a href="edit_profile.php"><i class="ph ph-user"></i> Edit Profile</a>
+                        <a href="transaction_history.php"><i class="ph ph-clock-counter-clockwise"></i> History</a>
+                        <a href="edit_profile.php"><i class="ph ph-pencil-simple"></i> Edit Profile</a>
 
                         <div class="divider-mini"></div>
                         <a href="../Authentication/logout.php" class="logout-btn">
@@ -82,7 +91,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
                 </div>
             </div>
         <?php else: ?>
-            <button class="login-btn" onclick="window.location.href='login.php'">LOGIN</button>
+            <button class="login-btn" onclick="showModal('loginModal')">LOGIN</button>
         <?php endif; ?>
     </div>
 </header>

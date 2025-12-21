@@ -68,9 +68,9 @@ try {
 if (!function_exists('getPoster')) {
     function getPoster($filename)
     {
-        if (empty($filename)) return 'https://via.placeholder.com/400x600?text=No+Image';
+        if (empty($filename)) return 'https://dummyimage.com/400x600/ffffff/fff';
         if (strpos($filename, 'http') === 0) return $filename;
-        return 'UI/uploads/' . $filename; // Sesuaikan path ini
+        return 'uploads/' . $filename; // Sesuaikan path ini
     }
 }
 
@@ -100,7 +100,6 @@ if (!function_exists('safe')) {
             </div>
             <div style="text-align: right;">
                 <p style="margin: 0; color: #666; font-size: 14px;">Role: <span style="background: linear-gradient(135deg, #aa2b2b, #d32f2f); color: white; padding: 5px 15px; border-radius: 20px; font-size: 14px; font-weight: bold;">ADMINISTRATOR</span></p>
-                <a href="?logout=true" style="display: inline-block; margin-top: 10px; color: #aa2b2b; text-decoration: none; font-weight: bold;"><i class="ph ph-sign-out"></i> Logout</a>
             </div>
         </div>
 
@@ -184,9 +183,9 @@ if (!function_exists('safe')) {
                 </div>
             </div>
 
-            <div style="background: linear-gradient(135deg, #fff5f5, #ffebee); border-radius: 12px; padding: 20px; margin-bottom: 25px; border-left: 5px solid #aa2b2b;">
+            <div style="background: linear-gradient(135deg, #0e0000ff, #ceb1b5ff); border-radius: 12px; padding: 20px; margin-bottom: 25px; border-left: 5px solid #aa2b2b;">
                 <div style="display: flex; align-items: center; gap: 20px;">
-                    <img src="<?php echo getPoster(safe($heroMovie, 'poster')); ?>" alt="Featured" style="width: 80px; height: 120px; object-fit: cover; border-radius: 8px; border: 3px solid #aa2b2b;" onerror="this.src='https://via.placeholder.com/80x120?text=No+Image'">
+                    <img src="<?php echo getPoster(safe($heroMovie, 'poster')); ?>" alt="Featured" style="width: 80px; height: 120px; object-fit: cover; border-radius: 8px; border: 3px solid #aa2b2b;" onerror="this.src='https://dummyimage.com/400x600/ffffff/fff'">
                     <div style="flex: 1;">
                         <h4 style="margin: 0 0 5px 0; color: #000000ff; font-size: 20px;"><?php echo safe($heroMovie, 'title'); ?> <span style="background: #aa2b2b; color: white; padding: 3px 10px; border-radius: 12px; font-size: 12px; margin-left: 10px;">FEATURED</span></h4>
                         <p style="margin: 0 0 5px 0; color: #000000ff; font-size: 14px;">Genre: <?php echo safe($heroMovie, 'genre'); ?> | Duration: <?php echo safe($heroMovie, 'duration', '2h 0min'); ?> | Price: Rp <?php echo number_format((int)safe($heroMovie, 'price', 0), 0, ',', '.'); ?></p>
@@ -200,10 +199,10 @@ if (!function_exists('safe')) {
                     <thead>
                         <tr style="background: linear-gradient(135deg, #2C1E1C, #1F1514); color: white;">
                             <th style="padding: 15px; text-align: left; border-bottom: 2px solid #444; width: 50px;">ID</th>
-                            <th style="padding: 15px; text-align: left; border-bottom: 2px solid #444;">Movie Title</th>
+                            <th style="padding: 15px; text-align: left; border-bottom: 2px solid #444; width: 400px;">Movie Title</th>
                             <th style="padding: 15px; text-align: left; border-bottom: 2px solid #444;">Genre</th>
                             <th style="padding: 15px; text-align: left; border-bottom: 2px solid #444;">Price</th>
-                            <th style="padding: 15px; text-align: left; border-bottom: 2px solid #444;">Status</th>
+                            <th style="padding: 15px; text-align: left; border-bottom: 2px solid #444; width: 150px;">Status</th>
                             <th style="padding: 15px; text-align: left; border-bottom: 2px solid #444; width: 150px;">Actions</th>
                         </tr>
                     </thead>
@@ -219,7 +218,7 @@ if (!function_exists('safe')) {
                                         <td style="padding: 15px; color: #000000ff; font-weight: bold;"><?php echo safe($movie, 'id'); ?></td>
                                         <td style="padding: 15px;">
                                             <div style="display: flex; align-items: center; gap: 10px;">
-                                                <img src="<?php echo getPoster(safe($movie, 'poster')); ?>" alt="Poster" style="width: 40px; height: 60px; object-fit: cover; border-radius: 4px;" onerror="this.src='https://via.placeholder.com/40x60?text=No+Image'">
+                                                <img src="<?php echo getPoster(safe($movie, 'poster')); ?>" alt="Poster" style="width: 40px; height: 60px; object-fit: cover; border-radius: 4px;" onerror="this.src='https://dummyimage.com/400x600/ffffff/fff'">
                                                 <span style="font-weight: 500; color: #333;"><?php echo safe($movie, 'title'); ?></span>
                                             </div>
                                         </td>
@@ -289,7 +288,7 @@ if (!function_exists('safe')) {
             <div style="flex: 1; min-width: 250px;">
                 <div style="background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(170, 43, 43, 0.08); border: 1px solid #e0e0e0;">
                     <div style="position: relative; margin-bottom: 25px;">
-                        <img id="addMoviePosterPreview" src="https://via.placeholder.com/300x450?text=Upload+Poster" alt="Movie Poster Preview" style="width: 100%; height: 300px; object-fit: cover; border-radius: 12px; box-shadow: 0 8px 25px rgba(170, 43, 43, 0.15);">
+                        <img id="addMoviePosterPreview" src="https://dummyimage.com/400x600/ffffff/fff" alt="Movie Poster Preview" style="width: 100%; height: 300px; object-fit: cover; border-radius: 12px; box-shadow: 0 8px 25px rgba(170, 43, 43, 0.15);">
                         <div style="position: absolute; bottom: 15px; left: 15px; background: rgba(76, 175, 80, 0.7); color: white; padding: 8px 15px; border-radius: 20px; font-size: 14px; backdrop-filter: blur(5px);">
                             <i class="ph ph-image"></i> Poster Preview
                         </div>
@@ -455,7 +454,7 @@ if (!function_exists('safe')) {
             </button>
         </div>
 
-        <div style="position: absolute; top: -15px; right: 30px; background: #d32f2f; color: white; padding: 8px 16px; border-radius: 25px; font-weight: bold; font-size: 14px; box-shadow: 0 5px 15px rgba(211, 47, 47, 0.3);">
+        <div style="position: absolute; top: 15px; right: 70px; background: #d32f2f; color: white; padding: 8px 16px; border-radius: 25px; font-weight: bold; font-size: 14px; box-shadow: 0 5px 15px rgba(211, 47, 47, 0.3);">
             Movie ID: <span id="editMovieIdValue"></span>
         </div>
 
@@ -638,7 +637,7 @@ if (!function_exists('safe')) {
 <div id="deleteMovieModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1001; align-items: center; justify-content: center; animation: fadeIn 0.3s ease;">
     <div style="background: linear-gradient(145deg, #ffffff, #f5f5f5); width: 90%; max-width: 500px; border-radius: 20px; padding: 0; overflow: hidden; box-shadow: 0 25px 50px rgba(170, 43, 43, 0.3); border: 1px solid rgba(255,255,255,0.1);">
         <div style="background: linear-gradient(135deg, #c62828, #b71c1c); padding: 30px; text-align: center; position: relative;">
-            <div style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); background: #c62828; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(198, 40, 40, 0.4);">
+            <div style="position: absolute; top: 5px; left: 50%; transform: translateX(-50%); background: #c62828; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(198, 40, 40, 0.4);">
                 <i class="ph ph-warning-circle" style="font-size: 24px; color: white;"></i>
             </div>
             <h2 style="color: white; margin: 20px 0 10px 0; font-size: 26px;">Confirm Deletion</h2>
@@ -662,12 +661,12 @@ if (!function_exists('safe')) {
             </div>
 
             <div style="background: #ffebee; border-radius: 12px; padding: 20px; margin-bottom: 30px; text-align: left;">
-                <div style="display: flex; align-items: flex-start; gap: 12px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
                     <div style="color: #c62828; font-size: 20px; margin-top: 2px;">
                         <i class="ph ph-info"></i>
                     </div>
                     <div>
-                        <h4 style="color: #c62828; margin: 0 0 8px 0; font-size: 15px;">Confirm Deletion?</h4>
+                        <h4 style="color: #c62828; margin: 0; font-size: 15px;">Confirm Deletion?</h4>
                     </div>
                 </div>
             </div>
@@ -818,131 +817,81 @@ if (!function_exists('safe')) {
     </div>
 </div>
 
-<div id="featureMovieModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1001; align-items: center; justify-content: center; animation: fadeIn 0.3s ease;">
-    <div style="background: linear-gradient(145deg, #ffffff, #f5f5f5); width: 90%; max-width: 600px; border-radius: 20px; padding: 0; overflow: hidden; box-shadow: 0 25px 50px rgba(170, 43, 43, 0.3); border: 1px solid rgba(255,255,255,0.1);">
+<div id="featureMovieModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center; animation: fadeIn 0.3s ease;">
+    
+    <div style="background: linear-gradient(145deg, #ffffff, #f5f5f5); width: 95%; max-width: 750px; border-radius: 15px; overflow: hidden; box-shadow: 0 25px 50px rgba(170, 43, 43, 0.3); border: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column;">
 
-        <div style="background: linear-gradient(135deg, #ff9800, #ff5722); padding: 30px; text-align: center; position: relative;">
-            <div style="position: absolute; top: -25px; left: 50%; transform: translateX(-50%); background: #ff9800; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(255, 152, 0, 0.4);">
-                <i class="ph ph-crown-simple" style="font-size: 24px; color: white;"></i>
+        <div style="background: linear-gradient(135deg, #ff9800, #ff5722); padding: 15px 20px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <div style="background: rgba(255,255,255,0.2); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    <i class="ph ph-crown-simple" style="font-size: 20px; color: white;"></i>
+                </div>
+                <div>
+                    <h2 style="color: white; margin: 0; font-size: 20px; font-weight: bold;">Feature Movie</h2>
+                    <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 13px;">Promote to main spotlight</p>
+                </div>
             </div>
-            <h2 style="color: white; margin: 20px 0 10px 0; font-size: 26px;">Feature Movie</h2>
-            <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 15px;">Promote to main spotlight</p>
+            <button onclick="closeModal('featureMovieModal')" style="background: rgba(255,255,255,0.2); border: none; width: 32px; height: 32px; border-radius: 8px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <i class="ph ph-x" style="font-size: 18px;"></i>
+            </button>
         </div>
 
-        <div style="padding: 40px 30px 30px;">
-            <div style="background: white; border-radius: 15px; padding: 25px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(255, 152, 0, 0.08); border: 2px solid #ffe0b2; position: relative;">
-                <div style="position: absolute; top: -12px; left: 20px; background: #ff9800; color: white; padding: 6px 15px; border-radius: 20px; font-size: 12px; font-weight: bold;">
-                    <i class="ph ph-star"></i> TO BE FEATURED
-                </div>
+        <div style="padding: 25px; display: flex; flex-wrap: wrap; gap: 25px;">
 
-                <div style="display: flex; align-items: center; gap: 20px;">
-                    <div style="width: 100px; height: 150px; background: #f5f5f5; border-radius: 10px; overflow: hidden;">
-                        <img id="featureMoviePoster" src="" alt="Poster" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://via.placeholder.com/100x150?text=No+Image'">
-                    </div>
-                    <div style="flex: 1;">
-                        <h4 id="featureMovieTitle" style="color: #333; margin: 0 0 10px 0; font-size: 20px; font-weight: 600;"></h4>
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
-                            <span id="featureMovieGenre" style="background: #fff3e0; color: #ff9800; padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: 500;"></span>
-                            <span id="featureMovieDuration" style="background: #fff3e0; color: #ff9800; padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: 500;"></span>
-                        </div>
-                        <p style="color: #666; margin: 0 0 5px 0; font-size: 14px;">
-                            Movie ID: <span id="featureMovieId" style="font-weight: bold; color: #ff9800;"></span>
-                        </p>
-                        <p id="featureMoviePrice" style="color: #d32f2f; margin: 0; font-size: 14px; font-weight: bold;"></p>
-                    </div>
-                </div>
-            </div>
-
-            <div style="background: #fff3e0; border-radius: 12px; padding: 25px; margin-bottom: 30px;">
-                <div style="display: flex; align-items: flex-start; gap: 15px; margin-bottom: 20px;">
-                    <div style="background: #ff9800; color: white; width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                        <i class="ph ph-info" style="font-size: 20px;"></i>
-                    </div>
-                    <div>
-                        <h4 style="color: #333; margin: 0 0 10px 0; font-size: 18px;">Feature this movie?</h4>
-                        <p style="color: #666; margin: 0; font-size: 14px; line-height: 1.6;">
-                            Featured movies appear on the homepage hero section and get priority visibility.
-                            This will replace the currently featured movie.
-                        </p>
-                    </div>
-                </div>
-
-                <div style="background: white; border-radius: 10px; padding: 20px; margin-top: 20px;">
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
-                        <div style="color: #4caf50; font-size: 20px; flex-shrink: 0;">
-                            <i class="ph ph-check-circle"></i>
-                        </div>
-                        <div>
-                            <span style="color: #333; font-weight: 500; font-size: 14px;">Homepage Hero Section</span>
-                            <p style="color: #666; margin: 5px 0 0 0; font-size: 13px;">Appears prominently on the main page</p>
-                        </div>
+            <div style="flex: 1; min-width: 260px;">
+                <div style="background: white; border-radius: 15px; padding: 20px; border: 2px solid #ffe0b2; position: relative; height: 100%; box-sizing: border-box; text-align: center;">
+                    
+                    <div style="position: absolute; top: -10px; left: 15px; background: #ff9800; color: white; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold;">
+                        <i class="ph ph-star"></i> PREVIEW
                     </div>
 
-                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 15px;">
-                        <div style="color: #4caf50; font-size: 20px; flex-shrink: 0;">
-                            <i class="ph ph-check-circle"></i>
-                        </div>
-                        <div>
-                            <span style="color: #333; font-weight: 500; font-size: 14px;">Priority Visibility</span>
-                            <p style="color: #666; margin: 5px 0 0 0; font-size: 13px;">Shown first in movie listings</p>
-                        </div>
+                    <div style="width: 110px; height: 160px; background: #f5f5f5; border-radius: 10px; overflow: hidden; margin: 10px auto 15px auto; box-shadow: 0 5px 15px rgba(0,0,0,0.2);">
+                        <img id="featureMoviePoster" src="" alt="Poster" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://dummyimage.com/400x600/ffffff/fff'">
                     </div>
 
-                    <div style="display: flex; align-items: center; gap: 12px;">
-                        <div style="color: #ff9800; font-size: 20px; flex-shrink: 0;">
-                            <i class="ph ph-arrow-clockwise"></i>
-                        </div>
-                        <div>
-                            <span style="color: #333; font-weight: 500; font-size: 14px;">Replaces Current Featured</span>
-                            <p style="color: #666; margin: 5px 0 0 0; font-size: 13px;">
-                                Current: <span id="currentFeaturedMovie" style="font-weight: bold; color: #ff9800;"><?php echo safe($heroMovie, 'title'); ?></span>
-                            </p>
-                        </div>
+                    <h4 id="featureMovieTitle" style="color: #333; margin: 0 0 8px 0; font-size: 18px; font-weight: 600; line-height: 1.3;"></h4>
+                    
+                    <div style="display: flex; justify-content: center; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;">
+                        <span id="featureMovieGenre" style="background: #fff3e0; color: #ff9800; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 500;"></span>
+                        <span id="featureMovieDuration" style="background: #fff3e0; color: #ff9800; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 500;"></span>
+                    </div>
+
+                    <div style="border-top: 1px dashed #ddd; padding-top: 10px; margin-top: 10px; font-size: 13px;">
+                        <p style="color: #666; margin: 0 0 5px 0;">ID: <span id="featureMovieId" style="font-weight: bold; color: #ff9800;"></span></p>
+                        <p id="featureMoviePrice" style="color: #d32f2f; margin: 0; font-weight: bold;"></p>
                     </div>
                 </div>
             </div>
 
-            <div style="background: white; border-radius: 12px; padding: 20px; margin-bottom: 30px; border: 1px solid #e0e0e0;">
-                <h4 style="color: #333; margin: 0 0 15px 0; font-size: 16px; display: flex; align-items: center; gap: 10px;">
-                    <div style="background: #fff3e0; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #ff9800;">
-                        <i class="ph ph-calendar"></i>
+            <div style="flex: 1.3; min-width: 280px; display: flex; flex-direction: column; gap: 20px;">
+
+                <div>
+                    <h4 style="color: #333; margin: 0 0 10px 0; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+                        <i class="ph ph-calendar" style="color: #ff9800;"></i> Select Duration
+                    </h4>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        <button class="feature-period-btn active" data-days="7" onclick="selectFeaturePeriod(this, 7)" style="background: linear-gradient(135deg, #ff9800, #ff5722); color: white; border: none; padding: 12px 5px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 13px;">7 Days</button>
+                        <button class="feature-period-btn" data-days="14" onclick="selectFeaturePeriod(this, 14)" style="background: #f5f5f5; color: #666; border: 1px solid #ddd; padding: 12px 5px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 13px;">14 Days</button>
+                        <button class="feature-period-btn" data-days="30" onclick="selectFeaturePeriod(this, 30)" style="background: #f5f5f5; color: #666; border: 1px solid #ddd; padding: 12px 5px; border-radius: 8px; cursor: pointer; font-weight: 500; font-size: 13px;">30 Days</button>
                     </div>
-                    Feature Period
-                </h4>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                    <button class="feature-period-btn active" data-days="7" onclick="selectFeaturePeriod(this, 7)"
-                        style="background: linear-gradient(135deg, #ff9800, #ff5722); color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s;">
-                        7 Days
-                    </button>
-                    <button class="feature-period-btn" data-days="14" onclick="selectFeaturePeriod(this, 14)"
-                        style="background: #f5f5f5; color: #666; border: 1px solid #ddd; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s;">
-                        14 Days
-                    </button>
-                    <button class="feature-period-btn" data-days="30" onclick="selectFeaturePeriod(this, 30)"
-                        style="background: #f5f5f5; color: #666; border: 1px solid #ddd; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s;">
-                        30 Days
+                </div>
+
+                <div style="background: #fff8e1; border-radius: 12px; padding: 15px;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <i class="ph ph-check-circle" style="color: #4caf50; font-size: 18px;"></i>
+                        <div>
+                            <span style="font-size: 13px; font-weight: 600; color: #333;">Homepage Hero Section</span>
+                            <div style="font-size: 12px; color: #666;">Will replace: <span id="currentFeaturedMovie" style="font-weight: bold; color: #e65100;"><?php echo safe($heroMovie, 'title'); ?></span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: auto;">
+                    <button onclick="processFeature()" style="width: 100%; background: linear-gradient(135deg, #ff9800, #ff5722); color: white; border: none; padding: 14px; border-radius: 10px; cursor: pointer; font-weight: 600; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3);">
+                        <i class="ph ph-crown-simple" style="font-size: 18px;"></i>
+                        Feature This Movie
                     </button>
                 </div>
-                <p style="color: #666; font-size: 12px; margin-top: 10px; text-align: center;">
-                    <i class="ph ph-info"></i> Featured movies get 3x more views on average
-                </p>
-            </div>
-
-            <div style="display: flex; justify-content: center; gap: 15px;">
-                <button onclick="closeModal('featureMovieModal')"
-                    style="background: linear-gradient(135deg, #f5f5f5, #e0e0e0); color: #666; border: none; padding: 12px 28px; border-radius: 10px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s;"
-                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 15px rgba(0,0,0,0.1)'"
-                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                    <i class="ph ph-x-circle"></i>
-                    Cancel
-                </button>
-                <button onclick="processFeature()"
-                    style="background: linear-gradient(135deg, #ff9800, #ff5722); color: white; border: none; padding: 12px 28px; border-radius: 10px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s;"
-                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 20px rgba(255, 152, 0, 0.4)'"
-                    onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
-                    <i class="ph ph-crown-simple"></i>
-                    Feature This Movie
-                </button>
             </div>
         </div>
     </div>
@@ -1030,7 +979,7 @@ if (!function_exists('safe')) {
     function openAddMovieModal() {
         // Reset form
         document.getElementById('addMovieForm').reset();
-        document.getElementById('addMoviePosterPreview').src = 'https://via.placeholder.com/300x450?text=Upload+Poster';
+        document.getElementById('addMoviePosterPreview').src = 'https://dummyimage.com/400x600/ffffff/fff';
         document.getElementById('addPosterUrl').value = '';
 
         const modal = document.getElementById('addMovieModal');
@@ -1278,7 +1227,7 @@ if (!function_exists('safe')) {
         const posterSrc = getPoster(movie.poster || '');
         document.getElementById('featureMoviePoster').src = posterSrc;
         document.getElementById('featureMoviePoster').onerror = function() {
-            this.src = 'https://via.placeholder.com/100x150?text=No+Image';
+            this.src = 'https://dummyimage.com/400x600/ffffff/fff';
         };
 
         document.querySelectorAll('.feature-period-btn').forEach(btn => {
@@ -1365,9 +1314,9 @@ if (!function_exists('safe')) {
     }
 
     function getPoster(filename) {
-        if (!filename) return 'https://via.placeholder.com/300x450?text=No+Poster';
+        if (!filename) return 'https://dummyimage.com/400x600/ffffff/fff';
         if (filename.startsWith('http')) return filename;
-        return 'UI/uploads/' + filename;
+        return 'uploads/' + filename;
     }
 
     function refreshMovies() {

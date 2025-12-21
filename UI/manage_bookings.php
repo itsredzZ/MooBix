@@ -101,7 +101,7 @@ try {
 function getPoster($filename)
 {
     $local_path = 'uploads/';
-    if (empty($filename)) return 'https://via.placeholder.com/400x600?text=No+Image';
+    if (empty($filename)) return 'https://dummyimage.com/400x600/ffffff/fff';
     return (strpos($filename, 'http') === 0) ? $filename : $local_path . $filename;
 }
 
@@ -140,6 +140,7 @@ function getStatusBg($status)
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="ui_style.css">
+    <script src="ui_script.js"></script>
 
     <style>
         .admin-container {
@@ -192,14 +193,6 @@ function getStatusBg($status)
             transform: translateY(-5px);
             border-color: rgba(255, 215, 0, 0.3);
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-        }
-
-        .stat-number {
-            font-family: 'Oswald', sans-serif;
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #FFD700;
-            margin-bottom: 5px;
         }
 
         .stat-label {
@@ -329,23 +322,6 @@ function getStatusBg($status)
             gap: 15px;
         }
 
-        .movie-title {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 1.8rem;
-            color: #FFD700;
-            letter-spacing: 0.5px;
-            margin: 0;
-        }
-
-        .customer-info h4 {
-            color: #FFD700;
-            margin: 0 0 5px 0;
-            font-size: 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
         .customer-info p {
             margin: 0;
             font-size: 0.85rem;
@@ -395,7 +371,7 @@ function getStatusBg($status)
             font-family: 'Oswald', sans-serif;
             font-size: 1.5rem;
             font-weight: 700;
-            color: #FFD700;
+            color: #ffffffff;
             text-align: center;
         }
 
@@ -443,9 +419,19 @@ function getStatusBg($status)
         }
 
         .empty-state i {
-            font-size: 4rem;
             color: #e50914;
             margin-bottom: 20px;
+        }
+
+        /* Icon Tiket (Besar)*/
+        .empty-state i.ph-ticket {
+            font-size: 4rem; 
+        }
+
+        /* Icon Reset/Reload (Kecil)*/
+        .empty-state i.ph-arrow-clockwise {
+            font-size: 1rem; 
+            margin-bottom: 0; 
         }
 
         .empty-state p {
@@ -453,6 +439,12 @@ function getStatusBg($status)
             font-size: 1.2rem;
             margin: 0;
         }
+
+        a {
+            text-decoration: none !important; /* Hilangkan garis bawah */
+            color: inherit; /* Warna mengikuti teks di sekitarnya/parent */
+        }
+        
 
         @keyframes fadeIn {
             from {
@@ -506,10 +498,15 @@ function getStatusBg($status)
 
     <?php include 'navbar.php'; ?>
 
+    <div style="height: 30px; width: 100%; clear: both;"></div>
+
+    <main style="padding: 20px;">
+    
+
     <div class="admin-container">
-        <div class="page-header">
-            <h1><i class="ph ph-ticket"></i> Manage Bookings</h1>
-            <p>Kelola dan pantau seluruh transaksi pemesanan tiket</p>
+        <div class="section-header">
+            <span>👥 Admin Control Center</span>
+            <h2>USER MANAGEMENT PANEL</h2>    
         </div>
 
         <div class="stats-grid">

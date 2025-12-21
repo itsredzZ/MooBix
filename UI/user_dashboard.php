@@ -15,25 +15,42 @@
                 </div>
 
                 <?php
-                $heroSynopsis = preg_replace('/\s+/', ' ', safe($heroMovie, 'synopsis'));
-                $jsHeroSynopsis = addslashes($heroSynopsis);
+                // --- SOLUSI ANTI ERROR: SIAPKAN DATA DALAM ARRAY ---
+                // Kita bungkus semua data dalam array PHP, lalu ubah jadi JSON
+                // JSON otomatis menangani Enter, Kutip Dua, Kutip Satu, dll.
+                $heroData = [
+                    'id' => (int)$heroMovie['id'],
+                    'title' => safe($heroMovie, 'title'),
+                    'poster' => getPoster(safe($heroMovie, 'poster')),
+                    'synopsis' => safe($heroMovie, 'synopsis'),
+                    'price' => (int)safe($heroMovie, 'price', 0),
+                    'duration' => safe($heroMovie, 'duration'),
+                    'rating' => safe($heroMovie, 'rating')
+                ];
                 ?>
 
-                <button class="btn-primary" onclick="openBookingFlow(
-                    <?php echo (int)$heroMovie['id']; ?>, 
-                    '<?php echo addslashes(safe($heroMovie, 'title')); ?>', 
-                    '<?php echo addslashes(getPoster(safe($heroMovie, 'poster'))); ?>', 
-                    '<?php echo $jsHeroSynopsis; ?>', 
-                    <?php echo (int)safe($heroMovie, 'price', 0); ?>, 
-                    '<?php echo safe($heroMovie, 'duration'); ?>',
-                    '<?php echo safe($heroMovie, 'rating'); ?>'
-                )">
+                <script>
+                    var heroMovieData = <?php echo json_encode($heroData); ?>;
+                </script>
+
+                <button class="btn-primary" 
+                        style="position: relative; z-index: 100; cursor: pointer;"
+                        onclick="openBookingFlow(
+                            heroMovieData.id, 
+                            heroMovieData.title, 
+                            heroMovieData.poster, 
+                            heroMovieData.synopsis, 
+                            heroMovieData.price, 
+                            heroMovieData.duration, 
+                            heroMovieData.rating
+                        )">
                     <i class="ph ph-ticket"></i> GET TICKET
                 </button>
             </div>
+
             <div class="hero-poster">
                 <div class="poster-frame-hero">
-                    <img src="<?php echo getPoster(safe($heroMovie, 'poster')); ?>" alt="Poster" onerror="this.src='https://via.placeholder.com/400x600?text=No+Image'">
+                    <img src="<?php echo getPoster(safe($heroMovie, 'poster')); ?>" alt="Poster" onerror="this.src='https://dummyimage.com/400x600/ffffff/fff'">
                 </div>
             </div>
         </div>

@@ -12,7 +12,7 @@ function safe($array, $key, $default = '-')
 function getPoster($filename)
 {
     global $local_path;
-    if (empty($filename)) return 'https://via.placeholder.com/400x600?text=No+Image';
+    if (empty($filename)) return 'https://dummyimage.com/400x600/ffffff/fff';
 
     if (strpos($filename, 'http') === 0) {
         return $filename;
@@ -39,6 +39,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login_form'])) {
     $stmt->execute([$username, $username]);
 
     $user_login = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    try {
+        // Update kolom last_login dengan waktu sekarang (NOW())
+        $updateStmt = $pdo->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+        $updateStmt->execute([$user_login['id']]);
+    } catch (PDOException $e) {
+        // Biarkan lanjut login meski update gagal (silent fail agar user tidak terganggu)
+    }
 
     if ($user_login && password_verify($password, $user_login['password'])) {
         $_SESSION['user_id'] = $user_login['id'];
@@ -86,6 +94,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['register_form'])) {
                 $sql = "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([$fullname, $email, $hashed_password, $role]);
+
+                $newUserId = $pdo->lastInsertId(); 
+                $_SESSION['user_id'] = $newUserId; 
 
                 $_SESSION['user_name'] = $fullname;
                 $_SESSION['user_email'] = $email;
@@ -200,16 +211,16 @@ $userEmail = $_SESSION['user_email'] ?? '';
                         <div class="divider-mini"></div>
 
                         <?php if ($isAdmin): ?>
-                            <a href="ui_index.php"><i class="ph ph-gear"></i> Admin Panel</a>
+                            <a href="ui_index.php"><i class="ph ph-gear"></i> Dashboard</a>
                             <a href="user_manage.php"><i class="ph ph-users"></i> Manage Users</a>
-                            <a href="manage_bookings.php"><i class="ph ph-calendar-check"></i> Bookings</a>
+                            <a href="manage_bookings.php"><i class="ph ph-calendar-check"></i> Manage Bookings</a>
 
                             <div class="divider-mini"></div>
 
                         <?php else: ?>
-                            <a href="index.php" class="active"><i class="ph ph-house"></i> Home/Beranda</a>
-                            <a href="my_tickets.php"><i class="ph ph-ticket"></i> Tiket Saya</a>
-                            <a href="transaction_history.php"><i class="ph ph-clock-counter-clockwise"></i> Riwayat Transaksi</a>
+                            <a href="ui_index.php" class="active"><i class="ph ph-house"></i> Home/Beranda</a>
+                            <a href="my_tickets.php"><i class="ph ph-ticket"></i> My Ticket</a>
+                            <a href="transaction_history.php"><i class="ph ph-clock-counter-clockwise"></i> Transaction History</a>
                             <a href="edit_profile.php"><i class="ph ph-pencil-simple"></i> Edit Profil</a>
                         <?php endif; ?>
 
@@ -456,7 +467,7 @@ $userEmail = $_SESSION['user_email'] ?? '';
             <div id="step-info" class="booking-step">
                 <div class="movie-info-layout">
                     <div class="info-poster">
-                        <img id="modalPoster" src="" alt="Movie Poster" onerror="this.src='https://via.placeholder.com/300x450?text=No+Image'">
+                        <img id="modalPoster" src="" alt="Movie Poster" onerror="this.src='https://dummyimage.com/400x600/ffffff/fff'">
                     </div>
 
                     <div class="info-text">
