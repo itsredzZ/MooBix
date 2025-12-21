@@ -72,7 +72,7 @@ $isLoggedIn = isset($_SESSION['user_name']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Riwayat Transaksi - MooBix</title>
+    <title>History - MooBix</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -88,8 +88,8 @@ $isLoggedIn = isset($_SESSION['user_name']);
 
     <div class="history-container">
         <div class="page-header">
-            <h1><i class="ph ph-clock-counter-clockwise"></i> Riwayat Transaksi</h1>
-            <p>Histori tiket yang sudah ditonton</p>
+            <h1><i class="ph ph-clock-counter-clockwise"></i> History </h1>
+            <p>History of tickets that have been watched</p>
         </div>
 
         <?php if (count($transactions) > 0): ?>
@@ -267,10 +267,10 @@ $isLoggedIn = isset($_SESSION['user_name']);
                 <div class="no-history-icon">
                     <i class="ph ph-clock-counter-clockwise"></i>
                 </div>
-                <h3>Belum Ada Riwayat Nonton</h3>
-                <p>Anda belum memiliki riwayat menonton film. Pesan tiket dan nikmati pengalaman menonton di bioskop kami!</p>
+                <h3>No Viewing History Yet</h3>
+                <p>You don't have a movie history yet. Book your tickets and enjoy the cinema experience at our cinema!</p>
                 <a href="ui_index.php" class="btn-back">
-                    <i class="ph ph-ticket"></i> Pesan Tiket Sekarang
+                    <i class="ph ph-ticket"></i> Book Tickets Now
                 </a>
             </div>
         <?php endif; ?>

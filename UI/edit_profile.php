@@ -121,7 +121,7 @@ function safe($array, $key, $default = '')
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Profil - MooBix</title>
+    <title>Edit Profile - MooBix</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -137,8 +137,8 @@ function safe($array, $key, $default = '')
 
     <div class="profile-container">
         <div class="page-header">
-            <h1><i class="ph ph-user-circle"></i> Edit Profil</h1>
-            <p>Kelola informasi akun Anda</p>
+            <h1><i class="ph ph-user-circle"></i> Edit Profile</h1>
+            <p>Manage your account information</p>
         </div>
 
         <?php if ($error_message): ?>
@@ -169,7 +169,7 @@ function safe($array, $key, $default = '')
 
             <h2 class="section-title">
                 <i class="ph ph-user"></i>
-                Informasi Akun
+                Account Information
             </h2>
 
             <form method="POST" action="" id="profileForm">
@@ -185,14 +185,14 @@ function safe($array, $key, $default = '')
                         class="form-input"
                         value="<?php echo safe($user_data, 'name', $userName); ?>"
                         required
-                        placeholder="Masukkan username baru">
+                        placeholder="Enter a new username">
                     <span id="username-error" style="color:#ff6b6b; font-size:0.8rem; margin-top:5px; display:block;"></span>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">
                         <i class="ph ph-envelope"></i>
-                        Alamat Email
+                        Email Address
                     </label>
                     <input type="email"
                         name="email"
@@ -206,18 +206,18 @@ function safe($array, $key, $default = '')
                 <div class="form-actions">
                     <button type="submit" class="btn-save">
                         <i class="ph ph-floppy-disk"></i>
-                        Simpan Perubahan
+                        Save Changes
                     </button>
                     <button type="button" class="btn-cancel-form" onclick="window.location.href='ui_index.php'">
                         <i class="ph ph-x"></i>
-                        Batal
+                        Cancel
                     </button>
                 </div>
             </form>
 
             <h2 class="section-title">
                 <i class="ph ph-lock"></i>
-                Keamanan Akun
+                Account Privacy
             </h2>
 
             <form method="POST" action="" id="passwordForm">
@@ -226,13 +226,13 @@ function safe($array, $key, $default = '')
                 <div class="form-group">
                     <label class="form-label">
                         <i class="ph ph-lock-key"></i>
-                        Password Saat Ini
+                        Current Password
                     </label>
                     <div class="password-wrapper">
                         <input type="password"
                             name="current_password"
                             class="form-input"
-                            placeholder="Masukkan password saat ini"
+                            placeholder="Enter the current password"
                             required>
                         <button type="button" class="toggle-password">
                             <i class="ph ph-eye"></i>
@@ -243,13 +243,13 @@ function safe($array, $key, $default = '')
                 <div class="form-group">
                     <label class="form-label">
                         <i class="ph ph-lock-simple"></i>
-                        Password Baru
+                        New Password
                     </label>
                     <div class="password-wrapper">
                         <input type="password"
                             name="new_password"
                             class="form-input"
-                            placeholder="Minimal 6 karakter"
+                            placeholder="Minimum 6 characters"
                             required>
                         <button type="button" class="toggle-password">
                             <i class="ph ph-eye"></i>
@@ -261,13 +261,13 @@ function safe($array, $key, $default = '')
                 <div class="form-group">
                     <label class="form-label">
                         <i class="ph ph-lock-simple"></i>
-                        Konfirmasi Password
+                        Password Confirmation
                     </label>
                     <div class="password-wrapper">
                         <input type="password"
                             name="confirm_password"
                             class="form-input"
-                            placeholder="Ulangi password baru"
+                            placeholder="Repeat the new password"
                             required>
                         <button type="button" class="toggle-password">
                             <i class="ph ph-eye"></i>
@@ -279,7 +279,7 @@ function safe($array, $key, $default = '')
                 <div class="form-actions">
                     <button type="submit" class="btn-save">
                         <i class="ph ph-key"></i>
-                        Ubah Password
+                        Change Password
                     </button>
                 </div>
             </form>
@@ -287,7 +287,7 @@ function safe($array, $key, $default = '')
             <div style="margin-top: 40px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.1); text-align: center;">
                 <a href="ui_index.php" style="color: rgba(243, 239, 224, 0.7); text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 10px;">
                     <i class="ph ph-arrow-left"></i>
-                    <span>Kembali ke Beranda</span>
+                    <span>Return to Home</span>
                 </a>
             </div>
         </div>

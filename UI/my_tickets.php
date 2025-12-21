@@ -191,8 +191,8 @@ $isLoggedIn = isset($_SESSION['user_name']);
 
     <div class="tickets-container">
         <div class="page-header">
-            <h1><i class="ph ph-ticket"></i> Tiket Saya</h1>
-            <p>Tiket aktif yang akan datang</p>
+            <h1><i class="ph ph-ticket"></i> My Ticket</h1>
+            <p>Upcoming active tickets</p>
         </div>
 
         <?php if (count($tickets) > 0): ?>
@@ -213,15 +213,15 @@ $isLoggedIn = isset($_SESSION['user_name']);
             <div class="ticket-stats">
                 <div class="stat-card">
                     <div class="stat-number"><?php echo $total_tickets; ?></div>
-                    <div class="stat-label">Total Tiket</div>
+                    <div class="stat-label">Total Ticket</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number">Rp <?php echo number_format($total_spent, 0, ',', '.'); ?></div>
-                    <div class="stat-label">Total Pembelian</div>
+                    <div class="stat-label">Total Payment</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number"><?php echo $upcoming_count; ?></div>
-                    <div class="stat-label">Akan Datang</div>
+                    <div class="stat-label">Up Coming</div>
                 </div>
             </div>
 
@@ -262,7 +262,7 @@ $isLoggedIn = isset($_SESSION['user_name']);
                         <div class="ticket-header">
                             <div class="ticket-code"><?php echo htmlspecialchars($ticket['booking_code']); ?></div>
                             <div class="ticket-status status-paid">
-                                <i class="ph ph-check-circle"></i> Lunas
+                                <i class="ph ph-check-circle"></i> Paid
                             </div>
                         </div>
 
@@ -307,29 +307,29 @@ $isLoggedIn = isset($_SESSION['user_name']);
 
                                 <div class="detail-grid">
                                     <div class="detail-item">
-                                        <span class="detail-label"><i class="ph ph-calendar-blank"></i> Tanggal Tayang</span>
+                                        <span class="detail-label"><i class="ph ph-calendar-blank"></i> Showing Date</span>
                                         <span class="detail-value"><?php echo "$hari_show, $tanggal_show $bulan_show $tahun_show"; ?></span>
                                     </div>
 
                                     <div class="detail-item">
-                                        <span class="detail-label"><i class="ph ph-clock"></i> Jam Tayang</span>
+                                        <span class="detail-label"><i class="ph ph-clock"></i> Showtime</span>
                                         <span class="detail-value"><?php echo htmlspecialchars($ticket['show_time']); ?> WIB</span>
                                     </div>
 
                                     <div class="detail-item">
-                                        <span class="detail-label"><i class="ph ph-shopping-cart"></i> Pembelian</span>
+                                        <span class="detail-label"><i class="ph ph-shopping-cart"></i> Purchase</span>
                                         <span class="detail-value"><?php echo "$tanggal_trans $bulan_trans - $jam_trans"; ?></span>
                                     </div>
 
                                     <div class="detail-item">
-                                        <span class="detail-label"><i class="ph ph-tag"></i> Harga</span>
-                                        <span class="detail-value">Rp <?php echo $movie_price; ?>/tiket</span>
+                                        <span class="detail-label"><i class="ph ph-tag"></i> Price</span>
+                                        <span class="detail-value">Rp <?php echo $movie_price; ?>/ticket</span>
                                     </div>
                                 </div>
 
                                 <?php if (!empty($ticket['synopsis'])): ?>
                                     <div class="detail-item" style="grid-column: 1 / -1; margin-top: 15px;">
-                                        <span class="detail-label"><i class="ph ph-file-text"></i> Sinopsis</span>
+                                        <span class="detail-label"><i class="ph ph-file-text"></i> Synopsis</span>
                                         <span class="detail-value" style="font-size: 0.95rem; line-height: 1.6; font-family: var(--font-body);">
                                             <?php echo htmlspecialchars(substr($ticket['synopsis'], 0, 200)) . '...'; ?>
                                         </span>
@@ -339,7 +339,7 @@ $isLoggedIn = isset($_SESSION['user_name']);
                         </div>
 
                         <div class="price-display">
-                            <div class="price-label">Total Pembayaran</div>
+                            <div class="price-label">Total Payment</div>
                             <div class="price">Rp <?php echo $total_price; ?></div>
                         </div>
 
@@ -353,12 +353,12 @@ $isLoggedIn = isset($_SESSION['user_name']);
                             '<?php echo $ticket['show_time']; ?>',
                             '<?php echo safe($ticket, 'seat_numbers', '-'); ?>' 
                         )">
-                                <i class="ph ph-qr-code" style="font-size: 1.2rem;"></i> LIHAT E-TICKET
+                                <i class="ph ph-qr-code" style="font-size: 1.2rem;"></i> SHOW E-TICKET
                             </button>
                         </div>
 
                         <div class="ticket-footer">
-                            <div><i class="ph ph-info"></i> Harap datang 30 menit sebelum jam tayang</div>
+                            <div><i class="ph ph-info"></i> Please arrive 30 minutes before showtime</div>
                         </div>
                     </div>
                 <?php endforeach; ?>
