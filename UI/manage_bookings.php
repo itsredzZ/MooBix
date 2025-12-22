@@ -137,7 +137,9 @@ function getStatusBg($status)
     <title>Manage Bookings - Admin Panel | MOOBIX THEATER</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Oswald:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dancing+Script:wght@700&family=Oswald:wght@300;400;500;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <link rel="stylesheet" href="ui_style.css">
     <script src="ui_script.js"></script>
@@ -506,7 +508,7 @@ function getStatusBg($status)
     <div class="admin-container">
         <div class="section-header">
             <span>👥 Admin Control Center</span>
-            <h2>USER MANAGEMENT PANEL</h2>    
+            <h2>BOOKING MANAGEMENT PANEL</h2>    
         </div>
 
         <div class="stats-grid">

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Dec 20, 2025 at 06:41 AM
+-- Generation Time: Dec 22, 2025 at 11:04 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -71,7 +71,15 @@ INSERT INTO `booked_seats` (`id`, `transaction_id`, `movie_id`, `show_date`, `sh
 (49, 30, 7, '2025-12-20', '10:00', 'D6'),
 (50, 31, 14, '2025-12-20', '10:00', 'A1'),
 (51, 32, 14, '2025-12-20', '10:00', 'A2'),
-(61, 41, 13, '2025-12-20', '14:00', 'A1');
+(61, 41, 13, '2025-12-20', '14:00', 'A1'),
+(66, 45, 14, '2025-12-21', '10:00', 'C1'),
+(67, 45, 14, '2025-12-21', '10:00', 'C2'),
+(68, 46, 13, '2025-12-22', '10:00', 'C2'),
+(69, 46, 13, '2025-12-22', '10:00', 'C3'),
+(70, 47, 13, '2025-12-22', '10:00', 'D1'),
+(71, 48, 9, '2025-12-22', '10:00', 'D2'),
+(72, 48, 9, '2025-12-22', '10:00', 'D3'),
+(73, 48, 9, '2025-12-22', '10:00', 'D4');
 
 -- --------------------------------------------------------
 
@@ -145,7 +153,11 @@ INSERT INTO `transactions` (`id`, `user_id`, `movie_id`, `booking_code`, `transa
 (30, 13, 7, 'BKG-9DF36B67', '2025-12-19 22:23:56', '2025-12-20', '10:00', 100000, 'paid'),
 (31, 13, 14, 'BKG-1D1BBF47', '2025-12-19 22:25:13', '2025-12-20', '10:00', 50000, 'paid'),
 (32, 13, 14, 'BKG-76547544', '2025-12-19 22:29:07', '2025-12-20', '10:00', 50000, 'paid'),
-(41, 13, 13, 'BKG-9BE609EA', '2025-12-20 11:53:15', '2025-12-20', '14:00', 50000, 'paid');
+(41, 13, 13, 'BKG-9BE609EA', '2025-12-20 11:53:15', '2025-12-20', '14:00', 50000, 'paid'),
+(45, 26, 14, 'BKG-88C74ED9', '2025-12-20 23:27:33', '2025-12-21', '10:00', 100000, 'paid'),
+(46, 29, 13, 'BKG-1B245DB7', '2025-12-22 03:53:27', '2025-12-22', '10:00', 100000, 'paid'),
+(47, 15, 13, 'BKG-A4528374', '2025-12-22 05:25:15', '2025-12-22', '10:00', 50000, 'paid'),
+(48, 14, 9, 'BKG-7EC4CE0F', '2025-12-22 05:25:43', '2025-12-22', '10:00', 150000, 'paid');
 
 -- --------------------------------------------------------
 
@@ -170,11 +182,11 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`, `last_login`, `status`) VALUES
 (9, 'Valencia', 'valen@gmail.com', '$2y$10$IOe6XLf6iwqfq7pwLf9W1uPy9Mvm/ICbRffA6LINnk/E5GlleSgdS', 'user', '2025-12-18 10:30:47', '2025-12-18 03:30:47', 'active'),
-(10, 'Admin', 'admin@moobix.com', '$2y$10$f4o/C0yWz2.5x1d9WW9Sju0cejPJ/9wRJpixomJ.701tGlOoKIfNm', 'admin', '2025-12-18 10:30:47', '2025-12-18 03:30:47', 'active'),
+(10, 'Admin', 'admin@moobix.com', '$2y$10$f4o/C0yWz2.5x1d9WW9Sju0cejPJ/9wRJpixomJ.701tGlOoKIfNm', 'admin', '2025-12-18 10:30:47', '2025-12-22 08:53:02', 'active'),
 (12, 'Queen', 'queen@gmail.com', '$2y$10$GdV/JZBi4XMpC6kLeXvhoOxDejSQHXBUpJNjwuXm57yaUL5NV.KTq', 'user', '2025-12-19 20:02:16', '2025-12-19 13:02:16', 'active'),
 (13, 'dummy', 'dummy@gmail.com', '$2y$10$0a/Rp2Xc8jprII0VT7zGVOxlO9crtmmMYBZAHGxYF84nx4KMe1nXq', 'user', '2025-12-19 21:18:46', '2025-12-19 14:18:46', 'active'),
-(14, 'Budi', 'budi@gmail.com', '$2y$10$IOe6XLf6iwqfq7pwLf9W1uPy9Mvm/ICbRffA6LINnk/E5GlleSgdS', 'user', '2025-12-19 21:32:25', '2025-12-19 14:32:25', 'active'),
-(15, 'Sarah', 'sarah@gmail.com', '$2y$10$IOe6XLf6iwqfq7pwLf9W1uPy9Mvm/ICbRffA6LINnk/E5GlleSgdS', 'user', '2025-12-19 21:32:25', '2025-12-19 14:32:25', 'active'),
+(14, 'Budi', 'budi@gmail.com', '$2y$10$IOe6XLf6iwqfq7pwLf9W1uPy9Mvm/ICbRffA6LINnk/E5GlleSgdS', 'user', '2025-12-19 21:32:25', '2025-12-22 08:49:27', 'active'),
+(15, 'Sarah', 'sarah@gmail.com', '$2y$10$IOe6XLf6iwqfq7pwLf9W1uPy9Mvm/ICbRffA6LINnk/E5GlleSgdS', 'user', '2025-12-19 21:32:25', '2025-12-21 22:25:08', 'active'),
 (16, 'Andi', 'andi@gmail.com', '$2y$10$IOe6XLf6iwqfq7pwLf9W1uPy9Mvm/ICbRffA6LINnk/E5GlleSgdS', 'user', '2025-12-19 21:32:25', '2025-12-19 14:32:25', 'active'),
 (17, 'Dewi', 'dewi@gmail.com', '$2y$10$IOe6XLf6iwqfq7pwLf9W1uPy9Mvm/ICbRffA6LINnk/E5GlleSgdS', 'user', '2025-12-19 21:32:25', '2025-12-19 14:32:25', 'active'),
 (18, 'Eko', 'eko@gmail.com', '$2y$10$IOe6XLf6iwqfq7pwLf9W1uPy9Mvm/ICbRffA6LINnk/E5GlleSgdS', 'user', '2025-12-19 21:32:25', '2025-12-19 14:32:25', 'active'),
@@ -187,7 +199,9 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`, `l
 (25, 'Lutfi', 'lutfi@gmail.com', '$2y$10$IOe6XLf6iwqfq7pwLf9W1uPy9Mvm/ICbRffA6LINnk/E5GlleSgdS', 'user', '2025-12-19 21:32:25', '2025-12-19 14:32:25', 'active'),
 (26, 'Maya', 'maya@gmail.com', '$2y$10$IOe6XLf6iwqfq7pwLf9W1uPy9Mvm/ICbRffA6LINnk/E5GlleSgdS', 'user', '2025-12-19 21:32:25', '2025-12-19 14:32:25', 'active'),
 (27, 'Nanda', 'nanda@gmail.com', '$2y$10$IOe6XLf6iwqfq7pwLf9W1uPy9Mvm/ICbRffA6LINnk/E5GlleSgdS', 'user', '2025-12-19 21:32:25', '2025-12-19 14:32:25', 'active'),
-(28, 'Oscar', 'oscar@gmail.com', '$2y$10$IOe6XLf6iwqfq7pwLf9W1uPy9Mvm/ICbRffA6LINnk/E5GlleSgdS', 'user', '2025-12-19 21:32:25', '2025-12-19 14:32:25', 'active');
+(28, 'Oscar', 'oscar@gmail.com', '$2y$10$IOe6XLf6iwqfq7pwLf9W1uPy9Mvm/ICbRffA6LINnk/E5GlleSgdS', 'user', '2025-12-19 21:32:25', '2025-12-19 14:32:25', 'active'),
+(29, 'Parker Smith', 'parkersmith@gmail.com', '$2y$10$b/c/Wn8l4/RKoTXt7QLcoulwYSOz1EVaKD8F0jQEW1bjZTEsVTzwm', 'user', '2025-12-22 03:52:59', '2025-12-21 22:24:52', 'active'),
+(30, 'Justin Berg', 'justinberg@gmail.com', '$2y$10$DG59xA7XGT1FkAkgM7v//eP3TngjDl4RN943QcDJ.e5ki2QIsWvyi', 'user', '2025-12-22 04:10:12', '2025-12-21 21:17:24', 'active');
 
 --
 -- Indexes for dumped tables
@@ -230,7 +244,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `booked_seats`
 --
 ALTER TABLE `booked_seats`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=64;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
 
 --
 -- AUTO_INCREMENT for table `movies`
@@ -242,13 +256,13 @@ ALTER TABLE `movies`
 -- AUTO_INCREMENT for table `transactions`
 --
 ALTER TABLE `transactions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=44;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- Constraints for dumped tables
