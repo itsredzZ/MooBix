@@ -106,23 +106,23 @@ $isLoggedIn = isset($_SESSION['user_name']);
             <div class="history-stats">
                 <div class="history-stat-card">
                     <div class="history-stat-number"><?php echo $total_tickets; ?></div>
-                    <div class="history-stat-label">Total Tiket Ditonton</div>
+                    <div class="history-stat-label">Total Tickets Watched</div>
                 </div>
                 <div class="history-stat-card">
                     <div class="history-stat-number">Rp <?php echo number_format($total_spent, 0, ',', '.'); ?></div>
-                    <div class="history-stat-label">Total Pengeluaran</div>
+                    <div class="history-stat-label">Total Expense</div>
                 </div>
                 <div class="history-stat-card">
                     <div class="history-stat-number"><?php echo $total_movies; ?></div>
-                    <div class="history-stat-label">Film Berbeda</div>
+                    <div class="history-stat-label">Different films Movie</div>
                 </div>
             </div>
 
             <div class="filter-controls">
-                <button class="filter-btn active" onclick="filterTransactions('all')">Semua</button>
-                <button class="filter-btn" onclick="filterTransactions('this_month')">Bulan Ini</button>
-                <button class="filter-btn" onclick="filterTransactions('last_month')">Bulan Lalu</button>
-                <button class="filter-btn" onclick="filterTransactions('this_year')">Tahun Ini</button>
+                <button class="filter-btn active" onclick="filterTransactions('all')">All</button>
+                <button class="filter-btn" onclick="filterTransactions('this_month')"> This Month</button>
+                <button class="filter-btn" onclick="filterTransactions('last_month')">Last Month</button>
+                <button class="filter-btn" onclick="filterTransactions('this_year')">This Year</button>
             </div>
 
             <div class="history-list">
@@ -172,7 +172,7 @@ $isLoggedIn = isset($_SESSION['user_name']);
                 ?>
                     <div class="history-item" data-show-date="<?php echo $ticket['show_date']; ?>" data-status="<?php echo $ticket['payment_status']; ?>">
                         <div class="watched-badge">
-                            <i class="ph ph-check-circle"></i> Sudah Ditonton
+                            <i class="ph ph-check-circle"></i> Viewed
                         </div>
 
                         <div class="history-item-header">
@@ -222,30 +222,30 @@ $isLoggedIn = isset($_SESSION['user_name']);
 
                                 <div class="history-timeline">
                                     <div class="timeline-item">
-                                        <span class="timeline-label"><i class="ph ph-calendar-blank"></i> Tanggal Nonton</span>
+                                        <span class="timeline-label"><i class="ph ph-calendar-blank"></i> Show Date</span>
                                         <span class="timeline-value"><?php echo "$hari_show, $tanggal_show $bulan_show $tahun_show"; ?></span>
                                         <span class="time-difference"><?php echo $time_ago; ?></span>
                                     </div>
 
                                     <div class="timeline-item">
-                                        <span class="timeline-label"><i class="ph ph-clock"></i> Jam Tayang</span>
+                                        <span class="timeline-label"><i class="ph ph-clock"></i> Showtime</span>
                                         <span class="timeline-value"><?php echo htmlspecialchars($ticket['show_time']); ?> WIB</span>
                                     </div>
 
                                     <div class="timeline-item">
-                                        <span class="timeline-label"><i class="ph ph-shopping-cart"></i> Tanggal Beli</span>
+                                        <span class="timeline-label"><i class="ph ph-shopping-cart"></i> Purchase Date</span>
                                         <span class="timeline-value"><?php echo "$hari_trans, $tanggal_trans $bulan_trans $tahun_trans"; ?></span>
                                     </div>
 
                                     <div class="timeline-item">
-                                        <span class="timeline-label"><i class="ph ph-currency-circle-dollar"></i> Total Bayar</span>
+                                        <span class="timeline-label"><i class="ph ph-currency-circle-dollar"></i> Total Payment</span>
                                         <span class="timeline-value" style="color: var(--accent-salmon);">Rp <?php echo $total_price; ?></span>
                                     </div>
                                 </div>
 
                                 <?php if (!empty($ticket['synopsis'])): ?>
                                     <div class="timeline-item" style="grid-column: 1 / -1; margin-top: 15px;">
-                                        <span class="timeline-label"><i class="ph ph-file-text"></i> Sinopsis</span>
+                                        <span class="timeline-label"><i class="ph ph-file-text"></i> Synopsis</span>
                                         <span class="timeline-value" style="font-size: 0.95rem; line-height: 1.6; font-family: var(--font-body);">
                                             <?php echo htmlspecialchars(substr($ticket['synopsis'], 0, 200)) . '...'; ?>
                                         </span>
@@ -256,7 +256,7 @@ $isLoggedIn = isset($_SESSION['user_name']);
 
                         <div class="history-actions">
                             <button class="history-btn btn-review" onclick="writeReview('<?php echo $ticket['id']; ?>', '<?php echo htmlspecialchars($ticket['title']); ?>')">
-                                <i class="ph ph-pencil-line"></i> Tulis Review
+                                <i class="ph ph-pencil-line"></i> Write a Review
                             </button>
                         </div>
                     </div>

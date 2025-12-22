@@ -366,9 +366,9 @@ $isLoggedIn = isset($_SESSION['user_name']);
         <?php else: ?>
             <div class="no-tickets">
                 <div class="no-tickets-icon"><i class="ph ph-ticket"></i></div>
-                <h3>Belum Ada Tiket Aktif</h3>
-                <p>Anda belum memiliki tiket yang sedang aktif. Silakan kembali ke halaman utama.</p>
-                <a href="ui_index.php" class="btn-browse"><i class="ph ph-house"></i> Kembali ke Beranda</a>
+                <h3>There are no active tickets yet</h3>
+                <p>You don't have any active tickets yet. Please return to the main page.</p>
+                <a href="ui_index.php" class="btn-browse"><i class="ph ph-house"></i> Return to Home</a>
             </div>
         <?php endif; ?>
     </div>
@@ -381,7 +381,7 @@ $isLoggedIn = isset($_SESSION['user_name']);
                     <span>MOOBIX</span>
                 </div>
                 <div class="ticket-body-modal">
-                    <h2 id="modal-movie-title">JUDUL FILM</h2>
+                    <h2 id="modal-movie-title">MOVIE TITLE</h2>
                     <div class="info-grid-modal">
                         <div class="info-item-modal"><label>DATE</label><span id="modal-date">-</span></div>
                         <div class="info-item-modal"><label>TIME</label><span id="modal-time">-</span></div>
