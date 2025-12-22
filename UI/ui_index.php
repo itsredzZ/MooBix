@@ -463,7 +463,7 @@ $userEmail = $_SESSION['user_email'] ?? '';
 
     <div class="modal-overlay" id="bookingModal">
         <div class="ticket-modal booking-modal-wide">
-            <span class="close-modal" onclick="toggleModal('bookingModal', false)">&times;</span>
+            <span class="close-modal" id="closeBookingBtn" onclick="closeBookingModal()">&times;</span>
             <div id="step-info" class="booking-step">
                 <div class="movie-info-layout">
                     <div class="info-poster">
@@ -663,15 +663,6 @@ $userEmail = $_SESSION['user_email'] ?? '';
                     }
                 });
             }
-
-            const modals = document.querySelectorAll('.modal-overlay');
-            modals.forEach(modal => {
-                modal.addEventListener('click', function(e) {
-                    if (e.target === this) {
-                        hideModal(this.id);
-                    }
-                });
-            });
 
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {

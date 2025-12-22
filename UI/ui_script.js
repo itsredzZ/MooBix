@@ -57,8 +57,11 @@ function resetBookingSteps() {
   toggleDisplay("step-info", true);
   toggleDisplay("step-schedule", false);
   toggleDisplay("step-confirm", false);
-  toggleDisplay("timeSlots", false);
-  toggleDisplay("seatMapArea", false);
+  
+  toggleDisplay("timeSlots", false);   
+  toggleDisplay("seatMapArea", false); 
+
+  toggleCloseButton(true);
 
   selectedDate = null;
   selectedTime = null;
@@ -85,7 +88,7 @@ function proceedToSchedule() {
 function backToSeats() {
     if (confirm("Batalkan pesanan ini dan pilih kursi ulang?")) {
         document.querySelectorAll(".seat").forEach(s => s.classList.remove("selected", "occupied"));
-        
+        toggleCloseButton(true);
         cancelCurrentBooking().then((data) => {
             if (data && data.success) {
                 toggleDisplay("step-confirm", false);
@@ -317,6 +320,8 @@ function showConfirmation() {
   const seatNames = seatNumbers.join(", ");
   const totalText = document.getElementById("totalPrice").innerText;
 
+   toggleCloseButton(false);
+
   document.getElementById("confMovie").innerText = currentMovie.title;
   document.getElementById("confDate").innerText = formattedDate;
   document.getElementById("confTime").innerText = selectedTime;
@@ -414,6 +419,17 @@ function cancelCurrentBooking() {
         }
         return data; 
     });
+}
+
+function toggleCloseButton(show) {
+    const btn = document.getElementById("closeBookingBtn");
+    if (btn) {
+        if (show) {
+            btn.style.setProperty("display", "block", "important");
+        } else {
+            btn.style.setProperty("display", "none", "important");
+        }
+    }
 }
 
 function processPayment() {
@@ -565,20 +581,15 @@ function formatRupiah(amount) {
 
 window.onclick = function (event) {
   if (event.target.classList.contains("modal-overlay")) {
-    event.target.style.display = "none";
-    document.body.style.overflow = "auto";
+    if (event.target.id === 'bookingModal') {
+        const closeBtn = document.getElementById("closeBookingBtn");
+        closeBookingModal(); 
+    } else {
+        event.target.style.display = "none";
+        document.body.style.overflow = "auto";
+    }
   }
 };
-
-document.querySelectorAll(".close-modal").forEach((btn) => {
-  btn.addEventListener("click", function () {
-    const modal = this.closest(".modal-overlay");
-    if (modal) {
-      modal.style.display = "none";
-      document.body.style.overflow = "auto";
-    }
-  });
-});
 
 const searchInput = document.getElementById("searchInput");
 if (searchInput) {
@@ -892,6 +903,16 @@ function setupSearch() {
       });
     });
   }
+}
+
+function closeBookingModal() {
+    cancelCurrentBooking().then(() => {
+        const modal = document.getElementById('bookingModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    });
 }
 
 document.addEventListener("DOMContentLoaded", function () {
